@@ -55,4 +55,18 @@ class UserController extends Controller
         return response($res)->withCookie($this->CreateVMSCookie($chk["u_data"]));
     }
 
+    public function TestJWT(Request $request)
+    {
+        $u_data = [
+            "test" => "good"
+        ];
+        $u_data["iss"] = "WarpVMS";
+        $u_data["exp"] = Carbon::now()->addHours(1)->timestamp;
+
+        $factory = JWTFactory::customClaims($u_data);
+        $token = JWTAuth::encode($factory->make());
+
+        return $token;
+    }
+
 }

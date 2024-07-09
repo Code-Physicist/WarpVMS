@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\DepartmentController;
 
 /*
@@ -19,3 +20,5 @@ Route::get('/', function () {
 });
 
 Route::get('/departments', [DepartmentController::class, 'GetTest']);
+
+Route::get('/test_jwt', [UserController::class, 'TestJWT']);
