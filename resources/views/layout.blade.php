@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="api-base-url" content="{{ url('') }}" />
+
+    <title>@yield('title')</title>
+
+    <link rel="shortcut icon" href="{{ asset('images/favicon.svg') }}" />
+
+    <!-- Icomoon Font Icons css -->
+    <link rel="stylesheet" href="{{ asset('fonts/icomoon/style.css') }}" />
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="{{ asset('css/main.min.css') }}" />
+
+    
+  </head>
+
+  <body>
+    <!-- Page wrapper start -->
+    <div class="page-wrapper">
+
+      <!-- Main container start -->
+      <div class="main-container">
+
+        <!-- Sidebar wrapper start -->
+        <nav id="sidebar" class="sidebar-wrapper">
+
+          <!-- App brand starts -->
+          <div class="app-brand px-3 py-2 d-flex align-items-center">
+            <a href="index.html">
+              <img src="{{ asset('images/logo.svg') }}" class="logo" alt="Bootstrap Gallery" />
+            </a>
+          </div>
+          <!-- App brand ends -->
+
+          <!-- Sidebar menu starts -->
+          <div class="sidebarMenuScroll">
+            <ul class="sidebar-menu">
+              <li>
+                <a href="/invitations">
+                  <i class="icon-padding"></i>
+                  <span class="menu-text">Invitations</span>
+                </a>
+              </li>
+              <li>
+                <a href="/departments">
+                  <i class="icon-import_export"></i>
+                  <span class="menu-text">Departments</span>
+                </a>
+              </li>
+              <li>
+                <a href="/tenants">
+                  <i class="icon-emoji_transportation"></i>
+                  <span class="menu-text">Tenants</span>
+                </a>
+              </li>
+              <li>
+                <a href="/operators">
+                  <i class="icon-user"></i>
+                  <span class="menu-text">Operators</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+          <!-- Sidebar menu ends -->
+
+        </nav>
+        <!-- Sidebar wrapper end -->
+
+        <!-- App container starts -->
+        <div class="app-container">
+
+          <!-- App header starts -->
+          <div class="app-header d-flex align-items-center">
+
+            <!-- Toggle buttons start -->
+            <div class="d-flex">
+              <button class="btn btn-outline-success toggle-sidebar" id="toggle-sidebar">
+                <i class="icon-menu"></i>
+              </button>
+              <button class="btn btn-outline-danger pin-sidebar" id="pin-sidebar">
+                <i class="icon-menu"></i>
+              </button>
+            </div>
+            <!-- Toggle buttons end -->
+
+            <!-- App brand sm start -->
+            <div class="app-brand-sm d-md-none d-sm-block">
+              <a href="index.html">
+                <img src="{{ asset('images/logo-sm.svg') }}" class="logo" alt="Bootstrap Gallery">
+              </a>
+            </div>
+            <!-- App brand sm end -->
+
+            <!-- App header actions start -->
+            <div class="header-actions">
+
+              <div class="dropdown ms-3">
+                <a class="dropdown-toggle d-flex align-items-center" href="#!" role="button" data-bs-toggle="dropdown"
+                  aria-expanded="false">
+                  <img src="{{ asset('images/user.png') }}" class="img-3x m-2 ms-0 rounded-5" alt="Admin Templates" />
+                  <div class="d-md-flex d-none flex-column">
+                    <span>ชนินทร์ โพธิสุข</span>
+                    <small>Admin</small>
+                  </div>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end dropdown-menu-sm shadow-sm gap-3">
+                  <a class="dropdown-item d-flex align-items-center py-2" href="profile.html"><i
+                      class="icon-gitlab fs-4 me-3"></i>User Profile</a>
+                  <a class="dropdown-item d-flex align-items-center py-2" href="/logout"><i
+                      class="icon-log-out fs-4 me-3"></i>Logout</a>
+                </div>
+              </div>
+            </div>
+            <!-- App header actions end -->
+
+          </div>
+          <!-- App header ends -->
+
+          <!-- App body starts -->
+          <div class="app-body">
+
+            <!-- Container starts -->
+            <div class="container-fluid">
+
+              <!-- Row start -->
+              <div class="row">
+                <div class="col-12 col-xl-12">
+                  <h2 class="mb-2">@yield('header')</h2>
+                  <h6 class="mb-4 fw-light">
+                  @yield('sub_header')
+                  </h6>
+                </div>
+              </div>
+              <!-- Row end -->
+
+              @yield('content')
+
+            </div>
+            <!-- Container ends -->
+
+          </div>
+          <!-- App body ends -->
+
+          <!-- App footer start -->
+          <div class="app-footer">
+            <span>© Bootstrap Gallery 2024</span>
+          </div>
+          <!-- App footer end -->
+
+        </div>
+        <!-- App container ends -->
+
+      </div>
+      <!-- Main container end -->
+
+    </div>
+    <!-- Page wrapper end -->
+
+    <!-- *************
+			************ JavaScript Files *************
+		************* -->
+    <script src="{{ asset('js/jquery.min.js') }}"></script>
+    
+    <!-- Custom JS files -->
+    <script src="{{ asset('js/custom.js') }}"></script>
+    <script src="{{ asset('js/vue.global.prod.js') }}"></script>
+    <script src="{{ asset('js/utils.js') }}"></script>
+    @yield('script')
+  </body>
+
+</html>
