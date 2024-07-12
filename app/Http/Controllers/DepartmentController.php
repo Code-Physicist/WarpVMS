@@ -10,7 +10,7 @@ use Carbon\Carbon;
 use DB;
 use Exception;
 
-class DepartmentController extends UserController
+class DepartmentController extends AppController
 {
     public function Get(Request $request)
     {

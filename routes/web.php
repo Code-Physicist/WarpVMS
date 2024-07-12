@@ -16,7 +16,7 @@ use App\Http\Controllers\DepartmentController;
 */
 
 Route::get('/', function () {
-    return view('department');
+    return view('login');
 });
 
 Route::get('/departments', [DepartmentController::class, 'GetTest']);

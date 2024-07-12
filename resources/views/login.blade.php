@@ -14,52 +14,166 @@
 
     <!-- Main CSS -->
     <link rel="stylesheet" href="{{ mix('css/main.min.css') }}" />
-    <style>
-    .flex-grow-55 {
-      flex: 0 0 55%;
-    }
-    .flex-grow-45 {
-      flex: 0 0 45%;
-    }
-  </style>
+
+    <link rel="stylesheet" href="{{ mix('css/app.css') }}" />
   </head>
 
   <body style="background-color:#EEEBE8;">
     <div class="d-flex vh-100">
       <div class="flex-grow-55 vh-100">
+        <div class="xx-bts-logo">
+          <img src="{{ mix('images/BTSVISION_Logo_DarkBlue.svg') }}" alt="">
+        </div>
       </div>
-      <div class="flex-grow-45 vh-100 p-4" style="background-color:#1a2752">
-          <form class="bg-white" action="index.html">
-            <div class="rounded-3 p-4">
-              <div class="login-form">
-                <h4 class="my-4">Login</h4>
-                <div class="mb-3">
-                  <label class="form-label" for="name">Your Email <span class="text-danger">*</span></label>
-                  <input type="text" class="form-control" id="name" autocomplete="autocomplete"
+      <div class="d-flex flex-grow-45 vh-100" style="background-color:#1a2752">
+          <div id="app" class="bg-white x-login-form">
+            <form v-show="active_ui === 1">
+              <div class="rounded-3 p-4">
+                <div class="login-form">
+                  <h4 class="my-4">Login</h4>
+                  <div class="mb-3">
+                    <label class="form-label" for="name">Your Email <span class="text-danger">*</span></label>
+                    <input type="text" v-model.trim="user.email" class="form-control" id="name" autocomplete="autocomplete"
                     placeholder="Enter your email" />
-                </div>
-                <div class="mb-3">
-                  <label class="form-label" for="pwd">Your Password <span class="text-danger">*</span></label>
-                  <input type="password" class="form-control" id="pwd" placeholder="Enter password" />
-                </div>
-                <div class="d-flex align-items-center justify-content-between">
-                  <div class="form-check m-0">
-                    <input class="form-check-input" type="checkbox" value="" id="rememberPassword" />
-                    <label class="form-check-label" for="rememberPassword">Remember</label>
+                    <div v-if="email_msg !== ''" class="ms-1 mt-1 text-danger">{email_msg}</div>
                   </div>
-                  <a href="forgot-password.html" class="text-primary text-decoration-underline">Lost password?</a>
-                </div>
-                <div class="d-grid py-3 mt-3">
-                  <button type="submit" class="btn btn-lg btn-primary">
-                    LOGIN
-                  </button>
+                  <div class="mb-3">
+                    <label class="form-label" for="pwd">Your Password <span class="text-danger">*</span></label>
+                    <input type="password" v-model.trim="user.password" class="form-control" id="pwd" placeholder="Enter password" />
+                    <div v-if="password_msg !== ''" class="ms-1 mt-1 text-danger">{password_msg}</div>
+                  </div>
+                  <div class="d-flex align-items-center justify-content-end">
+                    <a @click="change_ui(2)" class="text-primary text-decoration-underline cursor-pointer">Lost password?</a>
+                  </div>
+                  <div class="d-grid py-3 mt-3">
+                    <button type="button" @click="submit_login" class="btn btn-lg btn-primary">
+                      LOGIN
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </form>
+            </form>
+            <form v-show="active_ui === 2">
+              <div class="rounded-3 p-4">
+                <div class="login-form">
+                  <h4 class="my-4">Reset Password</h4>
+                  <div class="mb-3">
+                    <label class="form-label" for="name">Your Email <span class="text-danger">*</span></label>
+                    <input type="text" v-model.trim="user.email" class="form-control" id="name" autocomplete="autocomplete"
+                    placeholder="Enter your email" />
+                    <div v-if="email_msg !== ''" class="ms-1 mt-1 text-danger">{email_msg}</div>
+                  </div>
+                  <div class="d-flex align-items-center justify-content-end">
+                    <a @click="change_ui(1)" class="text-primary text-decoration-underline cursor-pointer">To Login</a>
+                  </div>
+                  <div class="d-grid py-3 mt-3">
+                    <button type="button" @click="submit_reset" class="btn btn-lg btn-primary">
+                      SEND
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div> 
       </div>
     </div>
     <!-- Container end -->
-  </body>
+    <script src="{{ asset('js/vue.global.prod.js') }}"></script>
+    <script src="{{ asset('js/validator.min.js') }}"></script>
+    <script>
+      const { createApp } = Vue;
 
+      // Create Vue App
+      const app = createApp({
+          components: {},
+          data() {
+            return {
+              active_ui: 1, //1 => login, 2 => forgot password
+              loadingDialog: false,
+              user: {
+                email: "",
+                password: "",
+              },
+              email_msg: "",
+              password_msg: ""
+            };
+          },
+          methods: {
+            async submit_login() {
+              this.email_msg = "";
+              this.password_msg = "";
+
+              let is_valid = true;
+              if (this.user.email === "") {
+                this.email_msg = "Email is blank";
+                is_valid = false;
+              }
+              else if (!validator.isEmail(this.user.email)) {
+                this.email_msg = "Incorrect Email format";
+                is_valid = false;
+              }
+              if (this.user.password === "") {
+                this.password_msg = "Password is blank";
+                is_valid = false;
+              }
+
+              if(!is_valid) return;
+
+              try {
+                const response = await axios.post(url, "/user/login");
+                if(response.data.status == "T") {
+                }
+                else {
+                  console.log(response.data.err_message);
+                }
+              }
+              catch(error) {
+                console.log(error);
+              }
+
+            },
+            async submit_reset() {
+              this.email_msg = "";
+
+              let is_valid = true;
+              if (this.user.email === "") {
+                this.email_msg = "Email is blank";
+                is_valid = false;
+              }
+              else if (!validator.isEmail(this.user.email)) {
+                this.email_msg = "Incorrect Email format";
+                is_valid = false;
+              }
+
+              if(!is_valid) return;
+
+              try {
+                const response = await axios.post(url, "/user/reset");
+                if(response.data.status == "T") {
+                }
+                else {
+                  console.log(response.data.err_message);
+                }
+              }
+              catch(error) {
+                console.log(error);
+              }
+            },
+            change_ui(ui) {
+              this.active_ui = ui;
+              this.user.email = "";
+              this.user.password = "";
+              this.email_msg = "";
+              this.password_msg = "";
+            },
+            refresh() {
+              window.location.href = axios.defaults.baseURL + "/admin";
+            },
+          },
+          delimiters: ["{","}"]
+      });
+
+      app.mount("#app");
+    </script>
+  </body>
 </html>

@@ -34,11 +34,16 @@
         margin: 0;
         list-style-type: none;
       }
-      .select-search li {
+      .select-search .li-st {
         padding: 5px;
         cursor: pointer;
       }
-      .select-search li:hover {
+      .select-search .li-opt {
+        padding: 5px;
+        cursor: pointer;
+      }
+      .select-search .li-opt:hover {
+        padding: 5px;
         background: #eee;
       }
     </style>
@@ -309,13 +314,13 @@
                         <div class="col-sm-3 col-12">
                           <div class="mb-3">
                             <label class="form-label" for="abc">Select 1</label>
-                            <select-search :options="options1" @select="handleSelect1"></select-search>
+                            <select-search ref="opt1" :options="options1" @clickx="select_click" @select="handleSelect1"></select-search>
                           </div>
                         </div>
                         <div class="col-sm-3 col-12">
                           <div class="mb-3">
                             <label class="form-label" for="abc">Select 2</label>
-                            <select-search :options="options2" @select="handleSelect2"></select-search>
+                            <select-search ref="opt2" :options="options2" @clickx="select_click" @select="handleSelect2"></select-search>
                           </div>
                         </div>
                       </div>
@@ -325,7 +330,7 @@
                               <button type="button" class="btn btn-outline-secondary">
                                 ยกเลิก
                               </button>
-                              <button type="button" class="btn btn-primary">
+                              <button type="button" class="btn btn-primary" @click="submit">
                                 บันทึกข้อมูล
                               </button>
                           </div>
@@ -380,19 +385,50 @@
         },
         data() {
             return {
-              options1: ["Apple", "Banana", "Cherry", "Date", "Grape"],
-              options2: ["Kiwi", "Lemon", "Mango", "Orange", "Pineapple"],
+              option1: {"id": 0, "name": "เลือก"},
+              option2: {"id": 0, "name": "เลือก"},
+              options1: [
+                {"id": 0, "name": "เลือก"},
+                {"id": 1, "name":"Apple"}, 
+                {"id": 2, "name":"Banana"}, 
+                {"id": 3, "name":"Cherry"}, 
+                {"id": 4, "name":"Date"}, 
+                {"id": 5, "name":"Grape"}
+              ],
+              options2: [
+                {"id": 0, "name": "เลือก"},
+                {"id": 1, "name":"Kiwi"}, 
+                {"id": 2, "name":"Lemon"}, 
+                {"id": 3, "name":"Mango"}, 
+                {"id": 4, "name":"Orange"}, 
+                {"id": 5, "name":"Pineapple"}
+              ],
+              ss_list:["opt1", "opt2"]
             };
         },
         methods: {
           handleSelect1(option) {
-            console.log("Selected from first select search:", option);
+            this.option1 = option;
           },
           handleSelect2(option) {
-            console.log("Selected from second select search:", option);
+            this.option2 = option;
           },
+          select_click(select_obj) {
+            for(let i = 0; i < this.ss_list.length; i++)
+            {
+              if(this.$refs[this.ss_list[i]] === select_obj)
+                continue;
+
+              this.$refs[this.ss_list[i]].hideList();
+            }
+          },
+          submit() {
+            console.log(this.option1);
+            console.log(this.option2);
+          }
         },
-});
+        delimiters: ["{","}"]
+      });
 
 app.mount("#app");
     </script>

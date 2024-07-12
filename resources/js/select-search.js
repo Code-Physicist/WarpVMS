@@ -2,12 +2,17 @@
 const SelectSearch = {
     template: `
       <div class="select-search">
-        <span class="d-flex justify-content-between form-control" @click="containerClick"><span>{{value}}</span><span><i :class="{ 'icon-chevron-down': !showList, 'icon-chevron-up': showList }"></i></span></span>
+        <span class="d-flex justify-content-between form-control" @click="containerClick"><span>{{s_option.name}}</span><span><i :class="{ 'icon-chevron-down': !showList, 'icon-chevron-up': showList }"></i></span></span>
         <div class="px-2 pt-2" v-show="showList" ref="listDiv">
             <input type="text" v-model="search" class="form-control mb-1" @input="filterOptions">
             <ul v-if="filteredOptions.length">
-                <li v-for="option in filteredOptions" :key="option" @click="selectOption(option)">
-                    {{ option }}
+                <li class="li-opt" v-for="option in filteredOptions" :key="option.id" @click="selectOption(option)">
+                    {{ option.name }}
+                </li>
+            </ul>
+            <ul v-else>
+                <li class="li-st">
+                    No Result
                 </li>
             </ul>
         </div>
@@ -17,7 +22,7 @@ const SelectSearch = {
     data() {
         return {
             search: "",
-            value: "",
+            s_option: this.options[0],
             filteredOptions: this.options,
             showList: false,
         };
@@ -31,16 +36,14 @@ const SelectSearch = {
         filterOptions() {
             const searchLower = this.search.toLowerCase();
             let filterOptions = this.options.filter((option) =>
-                option.toLowerCase().includes(searchLower)
+                option.name.toLowerCase().includes(searchLower)
             );
 
-            if (filterOptions.length > 0) this.filteredOptions = filterOptions;
-            else this.filteredOptions = ["No results"];
+            this.filteredOptions = filterOptions;
         },
         selectOption(option) {
             this.showList = false;
-            this.value = option;
-            //this.filteredOptions = [];
+            this.s_option = option;
             this.$emit("select", option);
         },
         containerClick() {
@@ -54,6 +57,10 @@ const SelectSearch = {
                     this.$refs.listDiv.scrollTop = 0;
                 });
             }
+            this.$emit("clickx", this);
+        },
+        hideList() {
+            this.showList = false;
         },
     },
 };
