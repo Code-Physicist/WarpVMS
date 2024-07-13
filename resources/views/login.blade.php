@@ -4,6 +4,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="api-base-url" content="{{ url('') }}" />
     <title>BTS Visionary Park</title>
 
     <!-- *************
@@ -32,15 +34,15 @@
                 <div class="login-form">
                   <h4 class="my-4">Login</h4>
                   <div class="mb-3">
-                    <label class="form-label" for="name">Your Email <span class="text-danger">*</span></label>
-                    <input type="text" v-model.trim="user.email" class="form-control" id="name" autocomplete="autocomplete"
+                    <label class="form-label">Your Email <span class="text-danger">*</span></label>
+                    <input type="text" v-model.trim="user.email" class="form-control" autocomplete="autocomplete"
                     placeholder="Enter your email" />
                     <div v-if="email_msg !== ''" class="ms-1 mt-1 text-danger">{email_msg}</div>
                   </div>
                   <div class="mb-3">
-                    <label class="form-label" for="pwd">Your Password <span class="text-danger">*</span></label>
-                    <input type="password" v-model.trim="user.password" class="form-control" id="pwd" placeholder="Enter password" />
-                    <div v-if="password_msg !== ''" class="ms-1 mt-1 text-danger">{password_msg}</div>
+                    <label class="form-label">Your Password <span class="text-danger">*</span></label>
+                    <input type="password" v-model.trim="user.pass" class="form-control" placeholder="Enter password" />
+                    <div v-if="password_msg !== ''" class="ms-1 mt-1 text-danger">{pass_msg}</div>
                   </div>
                   <div class="d-flex align-items-center justify-content-end">
                     <a @click="change_ui(2)" class="text-primary text-decoration-underline cursor-pointer">Lost password?</a>
@@ -58,8 +60,8 @@
                 <div class="login-form">
                   <h4 class="my-4">Reset Password</h4>
                   <div class="mb-3">
-                    <label class="form-label" for="name">Your Email <span class="text-danger">*</span></label>
-                    <input type="text" v-model.trim="user.email" class="form-control" id="name" autocomplete="autocomplete"
+                    <label class="form-label">Your Email <span class="text-danger">*</span></label>
+                    <input type="text" v-model.trim="user.email" class="form-control" autocomplete="autocomplete"
                     placeholder="Enter your email" />
                     <div v-if="email_msg !== ''" class="ms-1 mt-1 text-danger">{email_msg}</div>
                   </div>
@@ -78,8 +80,9 @@
       </div>
     </div>
     <!-- Container end -->
-    <script src="{{ asset('js/vue.global.prod.js') }}"></script>
+    <script src="{{ asset('js/app.js') }}"></script>
     <script src="{{ asset('js/validator.min.js') }}"></script>
+    <script src="{{ asset('js/vue.global.prod.js') }}"></script>
     <script>
       const { createApp } = Vue;
 
@@ -92,16 +95,16 @@
               loadingDialog: false,
               user: {
                 email: "",
-                password: "",
+                pass: "",
               },
               email_msg: "",
-              password_msg: ""
+              pass_msg: ""
             };
           },
           methods: {
             async submit_login() {
               this.email_msg = "";
-              this.password_msg = "";
+              this.pass_msg = "";
 
               let is_valid = true;
               if (this.user.email === "") {
@@ -112,19 +115,20 @@
                 this.email_msg = "Incorrect Email format";
                 is_valid = false;
               }
-              if (this.user.password === "") {
-                this.password_msg = "Password is blank";
+              if (this.user.pass === "") {
+                this.pass_msg = "Password is blank";
                 is_valid = false;
               }
 
               if(!is_valid) return;
 
               try {
-                const response = await axios.post(url, "/user/login");
+                const response = await axios.post("/admin/login", this.user);
                 if(response.data.status == "T") {
+                  window.location.href = "/admin/dashboard";
                 }
                 else {
-                  console.log(response.data.err_message);
+                  console.log(response.data);
                 }
               }
               catch(error) {

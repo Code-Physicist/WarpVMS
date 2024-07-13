@@ -1,7 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
 
 /*
@@ -15,10 +16,9 @@ use App\Http\Controllers\DepartmentController;
 |
 */
 
-Route::get('/', function () {
-    return view('login');
-});
+Route::get('/admin/login', [AuthController::class, 'LoginPage']);
+Route::get('/admin/dashboard', [DashboardController::class, 'DashboardPage']);
+Route::get('/admin/departments', [DepartmentController::class, 'DepartmentPage']);
 
-Route::get('/departments', [DepartmentController::class, 'GetTest']);
-
-Route::get('/test_jwt', [UserController::class, 'TestJWT']);
+Route::post('/admin/login', [AuthController::class, 'Login']);
+Route::get('/admin/logout', [AuthController::class, 'Logout']);

@@ -21,32 +21,31 @@ class AppController extends Controller
 
         $factory = JWTFactory::customClaims($u_data);
         $token = JWTAuth::encode($factory->make());
-        return Cookie($this->TokenName, $token, "60");
+        return Cookie($this->TokenName, $token);
     }
 
-    public function CheckVMSCookie($request)
+    public function CheckAdmin($request)
     {
         try {
+            //Set token and check
             JWTAuth::setToken($request->cookie($this->TokenName));
             $payload = JWTAuth::getPayload();
 
-            if ($payload["exp"] > Carbon::now()->timestamp) {
-                $data = [
-                    "admin_id" => $payload["admin_id"],
-                    "admin_level_id" => $payload["admin_level_id"],
-                    "admin_name" => $payload["admin_name"],
-                    "dept_id" => $payload["dept_id"],
-                    "dept_level" => $payload["dept_level"],
-                    "sup_dept_id" => $payload["sup_dept_id"],
-                    "dept_name" => $payload["dept_name"],
-                    "pw_change" => $payload["pw_change"]
-                ];
-                return ["is_ok" => true, "u_data" => $data];
-            }
+            $u_data = [
+                "admin_id" => $payload["admin_id"],
+                "admin_level_id" => $payload["admin_level_id"],
+                "admin_name" => $payload["admin_name"],
+                "dept_id" => $payload["dept_id"],
+                "dept_level" => $payload["dept_level"],
+                "sup_dept_id" => $payload["sup_dept_id"],
+                "dept_name" => $payload["dept_name"],
+                "pw_change" => $payload["pw_change"]
+            ];
 
-            throw new Exception("Token is invalid");
+            return ["is_ok" => true, "u_data" => $u_data];
+
         } catch (Exception $e) {
-            return $info = ["is_ok" => false, "error" => $e->getMessage()];
+            return ["is_ok" => false, "error" => $e->getMessage()];
         }
     }
 

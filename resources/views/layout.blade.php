@@ -112,7 +112,7 @@
                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-sm shadow-sm gap-3">
                   <a class="dropdown-item d-flex align-items-center py-2" href="profile.html"><i
                       class="icon-gitlab fs-4 me-3"></i>User Profile</a>
-                  <a class="dropdown-item d-flex align-items-center py-2" href="/logout"><i
+                  <a class="dropdown-item d-flex align-items-center py-2" href="/admin/logout"><i
                       class="icon-log-out fs-4 me-3"></i>Logout</a>
                 </div>
               </div>

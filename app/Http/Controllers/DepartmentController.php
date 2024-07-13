@@ -12,7 +12,7 @@ use Exception;
 
 class DepartmentController extends AppController
 {
-    public function Get(Request $request)
+    public function DepartmentPage(Request $request)
     {
         $result = $this->CheckVMSCookie($request);
         if(!$result["is_ok"]) {
@@ -25,6 +25,47 @@ class DepartmentController extends AppController
         //Renew cookie
         $cookie = $this->CreateVMSCookie($result["u_data"]);
         return response()->view("vms.department", $result["u_data"])->withCookie($cookie);
+    }
+
+    public function CreateDepartment(Request $request)
+    {
+        try {
+            $max_dept_id = DB::table('PkDepartments')->max("DeptID");
+
+            $dept = [
+                "DeptID" => $max_dept_id + 1,
+                "SupDepID" => "0",
+                "Fullname" => $request->Fullname,
+                "DeptName" => $request->DeptName,
+                "Zdesc" => $request->DeptName,
+                "Floor" => $request->Floor,
+                "Tel1" => $request->Tel1,
+                "Tel2" => $request->Tel2,
+                "Level1" => "1",
+                "IsActive" => "1",
+            ];
+
+            DB::table('PkDepartments')->insert($dept);
+            return ["success" => true];
+        } catch (Exception $e) {
+            return ["success" => false, "message" => $e->getMessage()];
+        }
+
+    }
+
+    public function UpdateDepartment(Request $request)
+    {
+        $state = $request->state;
+        $dept_id = $request->dept_id;
+
+        if($state === 2) {
+            $set_status = $request->set_status;
+            DB::table('PkDepartments')->where("DeptID", $dept_id)->update(["IsActive" => $set_status]);
+            return ["result" => "T"];
+        } else {
+            return ["result" => "F"];
+        }
+
     }
 
     public function GetDepartments(Request $request)
@@ -116,52 +157,6 @@ class DepartmentController extends AppController
         } catch (Exception $e) {
             return ["result" => "F", "message" => $e->getMessage()];
         }
-    }
-
-    public function CreateDepartment(Request $request)
-    {
-        try {
-            $max_dept_id = DB::table('PkDepartments')->max("DeptID");
-
-            $dept = [
-                "DeptID" => $max_dept_id + 1,
-                "SupDepID" => "0",
-                "Fullname" => $request->Fullname,
-                "DeptName" => $request->DeptName,
-                "Zdesc" => $request->DeptName,
-                "Floor" => $request->Floor,
-                "Tel1" => $request->Tel1,
-                "Tel2" => $request->Tel2,
-                "Level1" => "1",
-                "IsActive" => "1",
-            ];
-
-            DB::table('PkDepartments')->insert($dept);
-            return ["success" => true];
-        } catch (Exception $e) {
-            return ["success" => false, "message" => $e->getMessage()];
-        }
-
-    }
-
-    public function EditDepartment(Request $request)
-    {
-        $state = $request->state;
-        $dept_id = $request->dept_id;
-
-        if($state === 2) {
-            $set_status = $request->set_status;
-            DB::table('PkDepartments')->where("DeptID", $dept_id)->update(["IsActive" => $set_status]);
-            return ["result" => "T"];
-        } else {
-            return ["result" => "F"];
-        }
-
-    }
-
-    public function GetTest(Request $request)
-    {
-        return "Yo";
     }
 
 }
