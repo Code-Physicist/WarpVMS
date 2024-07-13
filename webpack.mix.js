@@ -26,9 +26,22 @@ mix.copy("resources/js/custom.js", "public/js/custom.js");
 mix.copy("resources/js/validator.min.js", "public/js/validator.min.js");
 mix.copy("resources/js/utils.js", "public/js/utils.js");
 mix.copy("resources/js/select-search.js", "public/js/select-search.js");
+mix.copy("resources/js/full-calendar.min.js", "public/js/full-calendar.min.js");
+mix.copy(
+    "resources/js/selectable-calendar.js",
+    "public/js/selectable-calendar.js"
+);
 
 //Copy CSS files
 mix.copy("resources/css/main.min.css", "public/css/main.min.css");
+mix.copy(
+    "resources/css/full-calendar.min.css",
+    "public/css/full-calendar.min.css"
+);
+mix.copy(
+    "resources/css/full-calendar.custom.css",
+    "public/css/full-calendar.custom.css"
+);
 
 //Copy font files
 mix.copyDirectory("resources/fonts", "public/fonts");

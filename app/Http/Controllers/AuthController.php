@@ -18,7 +18,7 @@ class AuthController extends AppController
         if(!$check["is_ok"]) {
             return response()->view("login");
         }
-        if($result["u_data"]["pw_change"]) {
+        if($check["u_data"]["pw_change"]) {
             return redirect("/admin/pass_reset");
         }
 

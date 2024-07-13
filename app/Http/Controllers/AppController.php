@@ -54,4 +54,11 @@ class AppController extends Controller
         return response($res)->withCookie($this->CreateVMSCookie($chk["u_data"]));
     }
 
+    public function GetDeptByID($dept_id)
+    {
+        return DB::table('PkDepartments')
+                ->where('DeptID', '=', $dept_id)
+                ->first();
+    }
+
 }

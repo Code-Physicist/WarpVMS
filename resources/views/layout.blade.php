@@ -17,6 +17,7 @@
     <!-- Main CSS -->
     <link rel="stylesheet" href="{{ asset('css/main.min.css') }}" />
 
+    @yield('style')
     
   </head>
 
@@ -41,26 +42,52 @@
           <!-- Sidebar menu starts -->
           <div class="sidebarMenuScroll">
             <ul class="sidebar-menu">
+              @if(Request::is('admin/dashboard'))
+              <li class="active current-page">
+              @else
               <li>
-                <a href="/invitations">
+              @endif
+                <a href="/admin/dashboard">
+                  <i class="icon-padding"></i>
+                  <span class="menu-text">Dashboard</span>
+                </a>
+              </li>
+              @if(Request::is('admin/invitations'))
+              <li class="active current-page">
+              @else
+              <li>
+              @endif
+                <a href="/admin/invitations">
                   <i class="icon-padding"></i>
                   <span class="menu-text">Invitations</span>
                 </a>
               </li>
+              @if(Request::is('admin/departments'))
+              <li class="active current-page">
+              @else
               <li>
-                <a href="/departments">
+              @endif
+                <a href="/admin/departments">
                   <i class="icon-import_export"></i>
                   <span class="menu-text">Departments</span>
                 </a>
               </li>
+              @if(Request::is('admin/tenants'))
+              <li class="active current-page">
+              @else
               <li>
-                <a href="/tenants">
+              @endif
+                <a href="/admin/tenants">
                   <i class="icon-emoji_transportation"></i>
                   <span class="menu-text">Tenants</span>
                 </a>
               </li>
+              @if(Request::is('admin/operators'))
+              <li class="active current-page">
+              @else
               <li>
-                <a href="/operators">
+              @endif
+                <a href="/admin/operators">
                   <i class="icon-user"></i>
                   <span class="menu-text">Operators</span>
                 </a>
@@ -170,7 +197,6 @@
     <!-- Custom JS files -->
     <script src="{{ asset('js/custom.js') }}"></script>
     <script src="{{ asset('js/vue.global.prod.js') }}"></script>
-    <script src="{{ asset('js/utils.js') }}"></script>
     @yield('script')
   </body>
 

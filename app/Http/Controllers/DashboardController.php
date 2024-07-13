@@ -24,7 +24,7 @@ class DashboardController extends AppController
 
         //Refresh VMS cookie
         $cookie = $this->CreateVMSCookie($check["u_data"]);
-        return response()->view("department", $check["u_data"])->withCookie($cookie);
+        return response()->view("dashboard", $check["u_data"])->withCookie($cookie);
     }
 
 

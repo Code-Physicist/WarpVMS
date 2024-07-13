@@ -14,17 +14,17 @@ class DepartmentController extends AppController
 {
     public function DepartmentPage(Request $request)
     {
-        $result = $this->CheckVMSCookie($request);
-        if(!$result["is_ok"]) {
-            return redirect("/admin");
+        $check = $this->CheckAdmin($request);
+        if(!$check["is_ok"]) {
+            return response()->view("login");
         }
-        if($result["u_data"]["pw_change"]) {
+        if($check["u_data"]["pw_change"]) {
             return redirect("/admin/pass_change");
         }
 
-        //Renew cookie
-        $cookie = $this->CreateVMSCookie($result["u_data"]);
-        return response()->view("vms.department", $result["u_data"])->withCookie($cookie);
+        //Refresh cookie
+        $cookie = $this->CreateVMSCookie($check["u_data"]);
+        return response()->view("department", $check["u_data"])->withCookie($cookie);
     }
 
     public function CreateDepartment(Request $request)
