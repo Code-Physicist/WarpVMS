@@ -17,13 +17,25 @@ Create/Edit Departments
   <div v-show="active_ui === 1" class="row">
     <div class="col-12">
       <div class="card mb-4">
-        <div class="card-header d-flex align-items-center justify-content-start">
-            <div class="card-title">Available Departments</div>
-            <button @click="show_create" class="btn btn-danger btn-sm mx-2"><span class="icon-add"></span> Create&nbsp;</button>
-        </div>
         <div class="card-body">
-            <div class="table-responsive">
-              <table class="table table-striped" id="dept-table">
+          <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center justify-content-start">
+              <div class="card-title">Total {depts.length} Departments</div>
+              <button @click="show_create" class="btn btn-danger btn-sm mx-2"><span class="icon-add"></span> Create&nbsp;</button>
+            </div>
+            <div class="d-flex align-items-center justify-content-end">
+              <div class="card-title text-nowrap">Status</div>
+              <div>&nbsp;&nbsp;</div>
+              <select @change="change_filter" v-model="filter.status" class="form-select">
+                      <option value="2">All</option>
+                      <option value="1">Active</option>
+                      <option value="0">Disabled</option>
+              </select>
+            </div>
+          </div>
+          <hr/>
+          <div class="table-responsive">
+              <table class="table table-striped" id="data-table">
                 <thead>
                   <tr>
                     <th>#</th>
@@ -162,6 +174,9 @@ createApp({
       return {
         active_ui: 1,
         sup_depts: [],
+        filter: {
+          status: 2
+        },
         depts:[],
         dept:{
             dept_name: "",
@@ -189,9 +204,6 @@ createApp({
       show_edit(dept) {
         this.active_ui = 2;
         console.log(dept);
-        /*$('#dept-table').DataTable().destroy();
-        this.depts = [];
-        this.get_depts();*/
       },
       async get_sup_depts() {
         try {
@@ -204,15 +216,20 @@ createApp({
       },
       async get_depts() {
         try {
-          const response = await axios.post("/admin/get_depts", {"status": "1"});
+          $('#data-table').DataTable().destroy();
+          this.depts = [];
+          const response = await axios.post("/admin/get_departments", this.filter);
           this.depts = response.data.data_list;
           Vue.nextTick(() => {
-              $('#dept-table').DataTable();
+              $('#data-table').DataTable();
           });
         }
         catch(error) {
           console.log(error);
         }
+      },
+      change_filter() {
+        this.get_depts();
       }
     },
     delimiters: ["{","}"]

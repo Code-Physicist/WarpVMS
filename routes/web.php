@@ -30,4 +30,8 @@ Route::post('/admin/login', [AuthController::class, 'Login']);
 Route::get('/admin/logout', [AuthController::class, 'Logout']);
 
 Route::post('/admin/get_sup_depts', [DepartmentController::class, 'GetSupDepts']);
-Route::post('/admin/get_depts', [DepartmentController::class, 'GetDepts']);
+Route::post('/admin/get_departments', [DepartmentController::class, 'GetDepartments']);
+
+Route::post('/admin/get_lv1_depts', [TenantController::class, 'GetLv1Depts']);
+Route::post('/admin/get_tenants', [TenantController::class, 'GetTenants']);
+Route::post('/admin/create_tenant', [TenantController::class, 'CreateTenant']);

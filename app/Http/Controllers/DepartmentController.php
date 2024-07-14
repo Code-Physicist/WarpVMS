@@ -68,15 +68,15 @@ class DepartmentController extends AppController
 
     }
 
-    public function GetDepts(Request $request)
+    public function GetDepartments(Request $request)
     {
-        $check = $this->CheckAdmin($request);
-        if(!$check["is_ok"]) {
+        $chk = $this->CheckAdmin($request);
+        if(!$chk["is_ok"]) {
             return ["status" => "I"];
         }
 
-        $admin_level_id = $check["u_data"]["admin_level_id"];
-        $dept_id = $check["u_data"]["dept_id"];
+        $admin_level_id = $chk["u_data"]["admin_level_id"];
+        $dept_id = $chk["u_data"]["dept_id"];
 
         //0 = disable, 1 = enable, 2 = all
         $status = $request->status;
@@ -111,7 +111,7 @@ class DepartmentController extends AppController
         $depts = $query->get();
 
         //Return response and refresh cookie
-        return $this->MakeResponse(["status" => "T", "data_list" => $depts], $check);
+        return $this->MakeResponse(["status" => "T", "data_list" => $depts], $chk);
     }
 
     //Get parent departments
