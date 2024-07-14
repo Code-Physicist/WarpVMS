@@ -35,3 +35,7 @@ Route::post('/admin/get_departments', [DepartmentController::class, 'GetDepartme
 Route::post('/admin/get_lv1_depts', [TenantController::class, 'GetLv1Depts']);
 Route::post('/admin/get_tenants', [TenantController::class, 'GetTenants']);
 Route::post('/admin/create_tenant', [TenantController::class, 'CreateTenant']);
+
+Route::post('/admin/get_operator_depts', [OperatorController::class, 'GetOperatorDepts']);
+Route::post('/admin/get_operators', [OperatorController::class, 'GetOperators']);
+Route::post('/admin/create_operator', [OperatorController::class, 'CreateOperator']);

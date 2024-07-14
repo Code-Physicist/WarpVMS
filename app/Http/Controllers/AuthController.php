@@ -65,6 +65,7 @@ class AuthController extends AppController
 
             //Get dept
             $dept = $this->GetDeptByID($admin->Ternsubcode);
+            $admin_level = $this->GetAdminLevelByID($admin->admin_level_id);
 
             //Get password reset status
             $pw_change = false;
@@ -75,7 +76,9 @@ class AuthController extends AppController
             $cookie = $this->CreateVMSCookie([
                 "admin_id" => $admin->admin_ID,
                 "admin_level_id" => $admin->admin_level_id,
+                "admin_level_name" => $admin_level->Zdesc,
                 "admin_name" => $admin->adminname,
+                "name" => $admin->name,
                 "dept_id" => $dept->DeptID,
                 "sup_dept_id" => $dept->SupDepID,
                 "dept_name" => $dept->DeptName,

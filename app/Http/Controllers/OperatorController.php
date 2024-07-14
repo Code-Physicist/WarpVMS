@@ -40,26 +40,28 @@ class OperatorController extends AppController
         //0 = disable, 1 = enable, 2 = all
         $status = $request->status;
 
-        $query = DB::table("PkAdminweb");
+        $query = DB::table("PkAdminweb as a");
 
         switch($admin_level_id) {
             case "2":
-                $query->where('PkAdminweb.admin_level_id', '=', "3");
+                $query->where('a.admin_level_id', '=', "3");
                 break;
             case "4":
-                $query->where('PkAdminweb.admin_level_id', '=', "5");
+                $query->where('a.admin_level_id', '=', "5");
                 break;
             default:
                 return ["status" => "F", "message" => "Invalid admin_level_id"];
         }
 
         if($status != 2) { //0 => disable, 1 => enable, 2 => all
-            $query->where('PkAdminweb.active', '=', $status);
+            $query->where('a.active', '=', $status);
         }
+        $query->leftJoin('PkDepartments as d', 'd.DeptID', '=', 'a.Ternsubcode')
+            ->select('a.adminname as email', 'a.name as name', 'd.DeptID as dept_id', 'd.Fullname as full_name');
         $operators = $query->get();
 
         //Return response and refresh cookie
-        return $this->MakeResponse(["status" => "T", "operators" => $operators], $chk);
+        return $this->MakeResponse(["status" => "T", "data_list" => $operators], $chk);
 
     }
 
@@ -70,13 +72,12 @@ class OperatorController extends AppController
             return ["status" => "I"];
         }
 
-        $admin_level_id = $chk["u_data"]["admin_level_id"];
-        $dept_id = $chk["u_data"]["dept_id"];
+        $dept_id = $request->dept_id;
 
         //6 digit random number
         $pass = strval(random_int(100000, 999999));
 
-        if($result["u_data"]["dept_id"] == 0) {
+        if($chk["u_data"]["dept_id"] == 0) {
             $dept_id = 0;
         }
 
@@ -84,8 +85,8 @@ class OperatorController extends AppController
             "adminname" => $request->email,
             "name" => $request->name,
             "Ternsubcode" => $dept_id,
-            "admin_level_id" => $admin_level_id,
-            "password1" => strtoupper(md5($pass0)),
+            "admin_level_id" => $request->admin_level_id,
+            "password1" => strtoupper(md5($pass)),
             "xtimeflag" => 0,
             "ChangeFlag" => 0,
             "xtime" => Carbon::now(),
@@ -95,6 +96,28 @@ class OperatorController extends AppController
 
         DB::table('PkAdminweb')->insert($operator);
         return ["result" => "T", "data_list" => $operator, "pass" => $pass];
+    }
+
+    public function GetOperatorDepts(Request $request)
+    {
+        $chk = $this->CheckAdmin($request);
+        if(!$chk["is_ok"]) {
+            return ["status" => "I"];
+        }
+
+        $dept_id = $chk["u_data"]["dept_id"];
+        $depts = DB::table("PkDepartments as d")
+            ->where('IsActive', 1)
+            ->where('DeptID', '<>', 0)
+            ->where(function ($q) use ($dept_id) {
+                $q->where('DeptID', $dept_id);
+                $q->orWhere('SupDepID', $dept_id);
+            })
+            ->orderBy('DeptID')
+            ->select('d.DeptID as dept_id', 'd.Fullname as full_name')
+            ->get();
+
+        return ["status" => "T", "data_list" => $depts];
     }
 
 }

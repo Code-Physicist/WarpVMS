@@ -70,7 +70,7 @@ Create and edit tenants
                     <td>{index+1}.</td>
                     <td>{tenant.email}</td>
                     <td>{tenant.name}</td>
-                    <td>{lv1_dept_dict[tenant.dept_id]}</td>
+                    <td>{tenant.full_name}</td>
                     <td>
                       <a @click="show_edit(tenant)" class="btn btn-primary"><span class="icon-edit"></span></a>
                     </td>
@@ -136,7 +136,6 @@ createApp({
       return {
         active_ui: 1,
         lv1_depts: [],
-        lv1_dept_dict:{},
         filter: {
           status: 2
         },
@@ -182,10 +181,6 @@ createApp({
         this.tenants = [];
         const response = await axios.post("/admin/get_tenants", this.filter);
         this.tenants = response.data.data_list;
-        for(let i = 0; i < this.tenants.length; i++)
-        {
-          this.lv1_dept_dict[this.tenants[i].dept_id] = this.tenants[i].full_name;
-        }
         Vue.nextTick(() => {
           $('#data-table').DataTable();
         });

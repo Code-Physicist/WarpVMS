@@ -134,8 +134,8 @@
                   aria-expanded="false">
                   <img src="{{ asset('images/user.png') }}" class="img-3x m-2 ms-0 rounded-5" alt="Admin Templates" />
                   <div class="d-md-flex d-none flex-column">
-                    <span>ชนินทร์ โพธิสุข</span>
-                    <small>Admin</small>
+                    <span>{{$name}}</span>
+                    <small>{{$admin_level_name}}</small>
                   </div>
                 </a>
                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-sm shadow-sm gap-3">

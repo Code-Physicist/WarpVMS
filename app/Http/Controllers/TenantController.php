@@ -72,7 +72,7 @@ class TenantController extends AppController
             "name" => $request->name,
             "Ternsubcode" => $request->dept_id,
             "admin_level_id" => 4, //Tenant
-            "password1" => md5($pass),
+            "password1" => strtoupper(md5($pass)),
             "xtimeflag" => 0,
             "ChangeFlag" => 0,
             "xtime" => Carbon::now(),

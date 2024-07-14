@@ -34,7 +34,9 @@ class AppController extends Controller
             $u_data = [
                 "admin_id" => $payload["admin_id"],
                 "admin_level_id" => $payload["admin_level_id"],
+                "admin_level_name" => $payload["admin_level_name"],
                 "admin_name" => $payload["admin_name"],
+                "name" => $payload["name"],
                 "dept_id" => $payload["dept_id"],
                 "dept_level" => $payload["dept_level"],
                 "sup_dept_id" => $payload["sup_dept_id"],
@@ -58,6 +60,13 @@ class AppController extends Controller
     {
         return DB::table('PkDepartments')
                 ->where('DeptID', '=', $dept_id)
+                ->first();
+    }
+
+    public function GetAdminLevelByID($admin_level_id)
+    {
+        return DB::table('PKadminweb_level')
+                ->where('admin_level_id', '=', $admin_level_id)
                 ->first();
     }
 
