@@ -62,16 +62,18 @@
                   <span class="menu-text">Invitations</span>
                 </a>
               </li>
-              @if(Request::is('admin/departments'))
-              <li class="active current-page">
-              @else
-              <li>
+              @if( $dept_level < 2)
+                @if(Request::is('admin/departments'))
+                  <li class="active current-page">
+                @else
+                  <li>
+                @endif
+                    <a href="/admin/departments">
+                      <i class="icon-import_export"></i>
+                      <span class="menu-text">Departments</span>
+                    </a>
+                  </li>
               @endif
-                <a href="/admin/departments">
-                  <i class="icon-import_export"></i>
-                  <span class="menu-text">Departments</span>
-                </a>
-              </li>
               @if(Request::is('admin/tenants'))
               <li class="active current-page">
               @else
@@ -195,6 +197,7 @@
     <script src="{{ asset('js/jquery.min.js') }}"></script>
     
     <!-- Custom JS files -->
+    <script src="{{ asset('js/app.js') }}"></script>
     <script src="{{ asset('js/custom.js') }}"></script>
     <script src="{{ asset('js/vue.global.prod.js') }}"></script>
     @yield('script')

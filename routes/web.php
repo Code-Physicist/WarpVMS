@@ -28,3 +28,6 @@ Route::get('/admin/operators', [OperatorController::class, 'OperatorPage']);
 
 Route::post('/admin/login', [AuthController::class, 'Login']);
 Route::get('/admin/logout', [AuthController::class, 'Logout']);
+
+Route::post('/admin/get_sup_depts', [DepartmentController::class, 'GetSupDepts']);
+Route::post('/admin/get_depts', [DepartmentController::class, 'GetDepts']);

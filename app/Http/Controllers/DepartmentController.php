@@ -16,7 +16,7 @@ class DepartmentController extends AppController
     {
         $check = $this->CheckAdmin($request);
         if(!$check["is_ok"]) {
-            return response()->view("login");
+            return redirect("/admin/login");
         }
         if($check["u_data"]["pw_change"]) {
             return redirect("/admin/pass_change");
@@ -68,95 +68,73 @@ class DepartmentController extends AppController
 
     }
 
-    public function GetDepartments(Request $request)
+    public function GetDepts(Request $request)
     {
-        try {
-            $admin_level_id = $request->admin_level_id;
-            $dept_id = $request->dept_id;
-            //0 => disable, 1 => enable, 2 => all
-            $status = $request->status;
-
-            $query = DB::table("PkDepartments As d1");
-            if($status != "2") {
-                $query->where('d1.IsActive', '=', $status);
-            }
-
-            if($dept_id == "0") {
-                $query->where('d1.DeptID', '<>', 0);
-            } else {
-                $query->where(function ($q) use ($dept_id) {
-                    $q->where('d1.DeptID', $dept_id);
-                    $q->orWhere('d1.SupDepID', $dept_id);
-                });
-            }
-            $query->leftJoin('PkDepartments as d2', 'd2.DeptID', '=', 'd1.SupDepID')
-            ->select('d1.*', 'd2.DeptName as SupDepName')
-            ->orderByDesc('d1.DeptID');
-
-            $depts = $query->get();
-            return ["is_valid" => true, "depts" => $depts];
-        } catch (Exception $e) {
-            return ["is_valid" => false, "message" => $e->getMessage()];
+        $check = $this->CheckAdmin($request);
+        if(!$check["is_ok"]) {
+            return ["status" => "I"];
         }
+
+        $admin_level_id = $check["u_data"]["admin_level_id"];
+        $dept_id = $check["u_data"]["dept_id"];
+
+        //0 = disable, 1 = enable, 2 = all
+        $status = $request->status;
+
+        $query = DB::table("PkDepartments As d1");
+        if($status != "2") {
+            $query->where('d1.IsActive', '=', $status);
+        }
+
+        if($dept_id == "0") {
+            $query->where('d1.DeptID', '<>', 0);
+        } else {
+            $query->where(function ($q) use ($dept_id) {
+                $q->where('d1.DeptID', $dept_id);
+                $q->orWhere('d1.SupDepID', $dept_id);
+            });
+        }
+
+        $query->leftJoin('PkDepartments as d2', 'd2.DeptID', '=', 'd1.SupDepID')
+        ->select(
+            'd1.DeptID as dept_id',
+            'd1.DeptName as short_name',
+            'd1.Fullname as full_name',
+            'd1.Floor as floor',
+            'd1.Tel1 as phone1',
+            'd1.Tel2 as phone2',
+            'd2.DeptID as sup_dept_id',
+            'd2.DeptName as sup_dept_name'
+        )
+        ->orderByDesc('d1.DeptID');
+
+        $depts = $query->get();
+
+        //Return response and refresh cookie
+        return $this->MakeResponse(["status" => "T", "data_list" => $depts], $check);
     }
 
-    public function GetTenantDepts(Request $request)
+    //Get parent departments
+    //This function is for Tenants and Tenant Operators
+    //No need for guarding conditions
+    public function GetSupDepts(Request $request)
     {
-        $result = $this->CheckVMSCookie($request);
-        if(!$result["is_ok"]) {
-            return ["result" => "I"];
+        $check = $this->CheckAdmin($request);
+        if(!$check["is_ok"]) {
+            return ["status" => "I"];
         }
 
-        $admin_level_id = $result["u_data"]["admin_level_id"];
-        $dept_id = $result["u_data"]["dept_id"];
+        $admin_level_id = $check["u_data"]["admin_level_id"];
+        $dept_id = $check["u_data"]["dept_id"];
 
-        try {
-            $query = DB::table("PkDepartments")->where('DeptID', '<>', 0);
+        $depts = DB::table("PkDepartments")
+            ->where('Level1', '=', 1)
+            ->where('DeptID', $dept_id)
+            ->select('DeptID', 'Fullname')
+            ->orderBy('DeptID')
+            ->get();
 
-            //For building admin/operator levels
-            if($admin_level_id === '2' ||  $admin_level_id === '3') {
-                $query->where('Level1', 1);
-            } else {
-                $query->where(function ($q) use ($dept_id) {
-                    $q->where('DeptID', $dept_id);
-                    $q->orWhere('SupDepID', $dept_id);
-                });
-            }
-
-            $query->select('DeptID', 'Fullname')->orderBy('Fullname');
-
-            $depts = $query->get();
-
-            return ["result" => "T", "depts" => $depts];
-        } catch (Exception $e) {
-            return ["result" => "F", "message" => $e->getMessage()];
-        }
-    }
-
-    public function GetOperatorDepts(Request $request)
-    {
-        $result = $this->CheckVMSCookie($request);
-        if(!$result["is_ok"]) {
-            return ["result" => "I"];
-        }
-
-        $dept_id = $result["u_data"]["dept_id"];
-
-        try {
-            $depts = DB::table("PkDepartments")
-                    ->where('IsActive', 1)
-                    ->where('DeptID', '<>', 0)
-                    ->where(function ($q) use ($dept_id) {
-                        $q->where('DeptID', $dept_id);
-                        $q->orWhere('SupDepID', $dept_id);
-                    })
-                    ->orderBy('DeptID')
-                    ->get();
-
-            return ["result" => "T", "depts" => $depts];
-        } catch (Exception $e) {
-            return ["result" => "F", "message" => $e->getMessage()];
-        }
+        return ["status" => "T", "data_list" => $depts];
     }
 
 }

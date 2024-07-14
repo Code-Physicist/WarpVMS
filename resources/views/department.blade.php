@@ -8,26 +8,29 @@ Departments
 @section('sub_header')
 Create/Edit Departments
 @stop
+@section('style')
+<link rel="stylesheet" href="{{ asset('css/dataTables.bs5.css') }}" />
+<link rel="stylesheet" href="{{ asset('css/dataTables.bs5-custom.css') }}" />
+@stop
 @section('content')
 <div id="app">
   <div v-show="active_ui === 1" class="row">
     <div class="col-12">
       <div class="card mb-4">
+        <div class="card-header d-flex align-items-center justify-content-start">
+            <div class="card-title">Available Departments</div>
+            <button @click="show_create" class="btn btn-danger btn-sm mx-2"><span class="icon-add"></span> Create&nbsp;</button>
+        </div>
         <div class="card-body">
-          <div class="mb-2 d-flex align-items-end justify-content-between">
-            <h5 class="card-title">Departments</h5>
-            <button @click="show_create" class="btn btn-danger"><span class="icon-add"></span> New&nbsp;</button>
-          </div>
-          <div class="table-outer">
             <div class="table-responsive">
-              <table class="table table-striped table-bordered align-middle m-0">
+              <table class="table table-striped" id="dept-table">
                 <thead>
                   <tr>
                     <th>#</th>
                     <th>
                       <div class="d-flex align-items-center">
                         <span class="icon-add_task me-2 fs-4"></span>
-                        Name
+                        Short Name
                       </div>
                     </th>
                     <th>
@@ -39,13 +42,13 @@ Create/Edit Departments
                     <th>
                       <div class="d-flex align-items-center">
                         <span class="icon-published_with_changes me-2 fs-4"></span>
-                        Parent
+                        Parent Department
                       </div>
                     </th>
                     <th>
                       <div class="d-flex align-items-center">
                         <span class="icon-calendar me-2 fs-4"></span>
-                        Floor
+                        Floors
                       </div>
                     </th>
                     <th>
@@ -71,10 +74,12 @@ Create/Edit Departments
                 <tbody>
                   <tr v-for="(dept, index) in depts">
                     <td>{index+1}.</td>
-                    <td>{dept.DeptName}</td>
-                    <td>{dept.Fullname}</td>
-                    <td>{dept.Tel1}</td>
-                    <td>{dept.Tel2}</td>
+                    <td>{dept.short_name}</td>
+                    <td>{dept.full_name}</td>
+                    <td>{dept.sup_dept_name}</td>
+                    <td>{dept.floor}</td>
+                    <td>{dept.phone1}</td>
+                    <td>{dept.phone2}</td>
                     <td>
                       <a @click="show_edit(dept)" class="btn btn-primary"><span class="icon-edit"></span></a>
                     </td>
@@ -82,7 +87,6 @@ Create/Edit Departments
                 </tbody>
               </table>
             </div>
-          </div>
         </div>
       </div>
     </div>
@@ -94,24 +98,52 @@ Create/Edit Departments
           <h5 class="card-title">Create Department</h5>
         </div>
         <div class="card-body">
-          <div class="row mb-4">
-            <div class="col-sm-6">
+          <div class="d-flex justify-content-center">
+            <div class="w-50">
+              @if($admin_level_id != '2' and $admin_level_id != '3')
               <div class="row">
                 <div class="mb-3">
-                  <label class="form-label">Name</label>
-                  <input type="text" class="form-control" v-model.trim="dept.DeptName"/>
+                  <label class="form-label">Parent Department *</label>
+                  <input type="text" class="form-control" v-model.trim="dept.sup_dept_id"/>
+                </div>
+              </div>
+              @endif
+              <div class="row">
+                <div class="mb-3">
+                  <label class="form-label">Full Name *</label>
+                  <input type="text" class="form-control" v-model.trim="dept.full_name"/>
                 </div>
               </div>
               <div class="row">
                 <div class="mb-3">
-                  <label class="form-label">Full Name</label>
-                  <input type="text" class="form-control" v-model.trim="dept.Fullname"/>
+                  <label class="form-label">Short Name *</label>
+                  <input type="text" class="form-control" v-model.trim="dept.dept_name"/>
                 </div>
+              </div>
+              <div class="row">
+                <div class="mb-3">
+                  <label class="form-label">Floor</label>
+                  <input type="text" class="form-control" v-model.trim="dept.floor"/>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-6">
+                  <div class="mb-3">
+                    <label class="form-label">Phone No. 1 *</label>
+                    <input type="text" class="form-control" v-model.trim="dept.phone1"/>
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="mb-3">
+                    <label class="form-label">Phone No. 2</label>
+                    <input type="text" class="form-control" v-model.trim="dept.phone2"/>
+                  </div>
+                </div>
+              </div>
+              <div class="my-3 d-flex align-items-end justify-content-center">
+                <button type="button" @click="active_ui = 1" class="btn btn-outline-secondary mx-2">Cancel</button> <button type="button" @click="submit" class="btn btn-danger mx-2">Submit</button>
               </div>
             </div>
-          </div>
-          <div class="my-3 d-flex align-items-end justify-content-center">
-            <button @click="active_ui = 1" class="btn btn-outline-secondary mx-2">Cancel</button> <button @click="submit" class="btn btn-danger mx-2">Submit</button>
           </div>
         </div>
       </div>
@@ -120,25 +152,68 @@ Create/Edit Departments
 </div>
 @stop
 @section('script')
+<script src="{{ asset('js/dataTables.min.js') }}"></script>
+<script src="{{ asset('js/dataTables.bootstrap.min.js') }}"></script>
+<script src="{{ asset('js/utils.js') }}"></script>
 <script>
 const { createApp } = Vue;
 createApp({
     data() {
       return {
         active_ui: 1,
+        sup_depts: [],
         depts:[],
         dept:{
-            DeptName: "",
-            Fullname: ""
-        }
+            dept_name: "",
+            full_name: "",
+            sup_dept_id: 0,
+            floor: "",
+            phone1: "",
+            phone2: ""
+        },
+        dept0: null,
       }
     },
     mounted() {
+@if($admin_level_id != '2' and $admin_level_id != '3')
+      this.get_sup_depts();
+@endif
+      this.dept0 = { ...this.dept };
+      this.get_depts();
     },
     methods: {
-        show_edit(dept) {
-
+      show_create() {
+        this.active_ui = 2;
+        MyApp.copy_vals(this.dept0, this.dept);
+      },
+      show_edit(dept) {
+        this.active_ui = 2;
+        console.log(dept);
+        /*$('#dept-table').DataTable().destroy();
+        this.depts = [];
+        this.get_depts();*/
+      },
+      async get_sup_depts() {
+        try {
+          const response = await axios.post("/admin/get_sup_depts");
+          this.sup_depts = response.data.data_list;
         }
+        catch(error) {
+          console.log(error);
+        }
+      },
+      async get_depts() {
+        try {
+          const response = await axios.post("/admin/get_depts", {"status": "1"});
+          this.depts = response.data.data_list;
+          Vue.nextTick(() => {
+              $('#dept-table').DataTable();
+          });
+        }
+        catch(error) {
+          console.log(error);
+        }
+      }
     },
     delimiters: ["{","}"]
 }).mount('#app');

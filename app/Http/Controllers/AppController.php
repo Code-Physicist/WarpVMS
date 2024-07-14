@@ -49,7 +49,7 @@ class AppController extends Controller
         }
     }
 
-    public function Response($res, $chk)
+    public function MakeResponse($res, $chk)
     {
         return response($res)->withCookie($this->CreateVMSCookie($chk["u_data"]));
     }

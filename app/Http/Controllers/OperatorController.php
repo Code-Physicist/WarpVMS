@@ -16,7 +16,7 @@ class OperatorController extends AppController
     {
         $check = $this->CheckAdmin($request);
         if(!$check["is_ok"]) {
-            return response()->view("login");
+            return redirect("/admin/login");
         }
         if($check["u_data"]["pw_change"]) {
             return redirect("/admin/pass_change");
