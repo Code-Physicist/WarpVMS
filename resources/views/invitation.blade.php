@@ -6,41 +6,22 @@ Dashboard
 Invitations
 @stop
 @section('sub_header')
-Click on calendar to invite visitors
+Invite visitors, update schedules and resend invitation emails
 @stop
 @section('style')
+<link rel="stylesheet" href="{{ asset('css/daterange.css') }}" />
 <link rel="stylesheet" href="{{ asset('css/full-calendar.min.css') }}" />
 <link rel="stylesheet" href="{{ asset('css/full-calendar.custom.css') }}" />
 @stop
 @section('content')
 <div id="app">
-    <div v-show="active_ui === 1" class="row">
+    <div class="row">
         <div class="col-12">
             <div class="card mb-4">
                 <div class="card-body">
-                    <div class="mb-2 d-flex align-items-center justify-content-between">
-                        <h5 class="card-title">Day/Month/Year</h5>
-                        <button @click="show_create" class="btn btn-danger"><span class="icon-add"></span> Invite&nbsp;</button>
-                    </div>
                     <div>
                         <div ref="my_calendar"></div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div v-show="active_ui === 2" class="row">
-        <div class="col-12">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title">Invite visitors</h5>
-                </div>
-                <div class="card-body d-flex justify-content-center">
-                    <div>
-                        <div class="d-flex justify-content-center my-3">
-                            <button type="button" @click="active_ui = 1" class="btn btn-outline-secondary mx-2">Cancel</button> <button type="button" @click="submit" class="btn btn-danger mx-2">Submit</button>
-                        </div>
-                    </div>    
                 </div>
             </div>
         </div>
@@ -51,17 +32,63 @@ Click on calendar to invite visitors
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="staticBackdropLabel">
-                        Modal title
+                        Invite Visitors
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">...</div>
+                <div class="modal-body">
+					<div class="row">
+                		<div class="mb-3">
+                  			<label class="form-label">Department *</label>
+                  			<select v-model="invitation.dept_id" class="form-select">
+                      			<option value="0">Please select</option>
+                      			<option v-for="d in depts" :value="d.dept_id">
+                        			{d.full_name}
+                      			</option>
+                 			 </select>
+                		</div>
+              		</div>
+					<div class="row">
+						<div class="col-sm-6">
+							<div class="mb-3">
+								<label class="form-label" for="abc">Start Date</label>
+                        		<input type="text" class="form-control" id="start_date">
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="mb-3">
+								<label class="form-label" for="abc">End Date</label>
+                        		<input type="text" class="form-control" id="end_date">
+							</div>
+						</div>
+                    </div>
+					<div class="row">
+						<div class="col">
+							
+								<label class="form-label">Interval for each day</label>
+								<div class="row">
+									<div class="col-sm-6">
+										<div class="mb-3">
+											<input type="text" class="form-control" id="interval">
+										</div>
+									</div>
+									<div class="col-sm-6">
+										<div class="form-check mb-3">
+                        					<input class="form-check-input" type="checkbox" value="" id="flexCheckChecked">
+                        					<label class="form-check-label" for="flexCheckChecked">All day</label>
+                      					</div>
+									</div>
+								</div>
+
+						</div>
+                    </div>
+				</div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         Close
                     </button>
-                    <button type="button" class="btn btn-primary">
-                        Understood
+                    <button @click="submit" type="button" class="btn btn-primary">
+                        Submit
                     </button>
                 </div>
             </div>
@@ -71,7 +98,9 @@ Click on calendar to invite visitors
 @stop
 @section('script')
 <!-- For using Modal-->
-<script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script> 
+<script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ asset('js/moment.min.js') }}"></script>
+<script src="{{ asset('js/daterange.js') }}"></script>
 <script src="{{ asset('js/full-calendar.min.js') }}"></script>
 <script>
 //External function
@@ -82,16 +111,54 @@ const { createApp } = Vue;
 createApp({
     data() {
       return {
-        active_ui: 1,
+        m_active_ui: 1,
         calendar: null,
         my_modal: null,
+		depts:[],
         invitation: {
-
+			dept_id: 0,
+			visitors: [],
+			start_date: "",
+			end_date: "",
+			start_time: "",
+			end_time:""
         },
         invitations: [],
       }
     },
     mounted() {
+		this.init_ui();
+
+		$("#start_date").daterangepicker({
+  			singleDatePicker: true,
+  			startDate: moment().startOf("hour"),
+  			endDate: moment().startOf("hour").add(32, "hour"),
+  			locale: {
+    			format: "DD/MM/YYYY",
+  			},
+		});
+
+		$("#end_date").daterangepicker({
+  			singleDatePicker: true,
+  			startDate: moment().startOf("hour"),
+  			endDate: moment().startOf("hour").add(32, "hour"),
+  			locale: {
+    			format: "DD/MM/YYYY",
+  			},
+		});
+
+		$("#interval").daterangepicker({
+    		timePicker: true,
+    		timePicker24Hour: true,
+    		timePickerIncrement: 5,
+    		locale: {
+      			format: "HH:mm",
+    		},
+  		})
+  		.on("show.daterangepicker", function (ev, picker) {
+    		picker.container.find(".calendar-table").hide();
+  		});
+		//Initialize Calendar
         var calendarEl = this.$refs.my_calendar;
         var calendar = new FullCalendar.Calendar(calendarEl, {
 		headerToolbar: {
@@ -99,7 +166,8 @@ createApp({
 			center: "title",
 			right: "dayGridMonth,timeGridWeek,timeGridDay",
 		},
-		initialDate: "2022-10-12",
+		//initialDate: "2022-10-12",
+		initialDate: Date.now(),
 		navLinks: true, // can click day/week names to navigate views
 		selectable: true,
 		selectMirror: true,
@@ -229,13 +297,24 @@ createApp({
     this.calendar = calendar;
     this.calendar.render();
 
+	//Initialize modal
     this.my_modal = new bootstrap.Modal(this.$refs.my_modal, { keyboard: false });
     },
     methods: {
+		async init_ui() {
+            try {
+          	    await this.get_invitation_depts();
+            }
+            catch(error) {
+                console.log(error);
+            }
+        
+        },
         submit() {
-
+			alert("yo");
         },
         show_create(arg) {
+			console.log(arg);
             //this.active_ui = 2;
             /*this.calendar.removeAllEvents();
             this.calendar.addEvent(
@@ -252,6 +331,10 @@ createApp({
             */
             this.calendar.unselect();
             this.my_modal.show();
+        },
+		async get_invitation_depts() {
+          const response = await axios.post("/admin/get_invitation_depts");
+          this.depts = response.data.data_list;
         },
     },
     delimiters: ["{","}"]

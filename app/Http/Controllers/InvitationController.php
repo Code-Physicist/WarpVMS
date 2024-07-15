@@ -27,4 +27,37 @@ class InvitationController extends AppController
         return response()->view("invitation", $check["u_data"])->withCookie($cookie);
     }
 
+    public function GetInvitationDepts(Request $request)
+    {
+        $chk = $this->CheckAdmin($request);
+        if(!$chk["is_ok"]) {
+            return ["status" => "I"];
+        }
+
+        $dept_level = $chk["u_data"]["dept_level"];
+        $dept_id = $chk["u_data"]["dept_id"];
+
+        $query = DB::table("PkDepartments")
+            ->where('IsActive', '=', 1)
+            ->where('DeptID', '<>', 0);
+
+        if($dept_level == "1") {
+            $query->where(function ($q) use ($dept_id) {
+                $q->where('DeptID', $dept_id);
+                $q->orWhere('SupDepID', $dept_id);
+            });
+        } elseif($dept_level == "2") {
+            $query->where('DeptID', $dept_id);
+        } else {
+            //Invalid. Will prevent later
+        }
+
+
+
+        $depts = $query->select('DeptID as dept_id', 'Fullname as full_name')
+            ->orderByDesc('DeptID')
+            ->get();
+
+        return ["status" => "T", "data_list" => $depts];
+    }
 }

@@ -25,6 +25,8 @@ mix.copy("resources/js/vue.global.prod.js", "public/js/vue.global.prod.js");
 mix.copy("resources/js/custom.js", "public/js/custom.js");
 mix.copy("resources/js/validator.min.js", "public/js/validator.min.js");
 mix.copy("resources/js/utils.js", "public/js/utils.js");
+mix.copy("resources/js/moment.min.js", "public/js/moment.min.js");
+mix.copy("resources/js/daterange.js", "public/js/daterange.js");
 mix.copy("resources/js/dataTables.min.js", "public/js/dataTables.min.js");
 mix.copy(
     "resources/js/dataTables.bootstrap.min.js",
@@ -38,6 +40,7 @@ mix.copy(
 
 //Copy CSS files
 mix.copy("resources/css/main.min.css", "public/css/main.min.css");
+mix.copy("resources/css/daterange.css", "public/css/daterange.css");
 mix.copy("resources/css/dataTables.bs5.css", "public/css/dataTables.bs5.css");
 mix.copy(
     "resources/css/dataTables.bs5-custom.css",

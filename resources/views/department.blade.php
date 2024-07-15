@@ -6,7 +6,7 @@ Departments
 Departments
 @stop
 @section('sub_header')
-Create/Edit Departments
+Create and edit departments
 @stop
 @section('style')
 <link rel="stylesheet" href="{{ asset('css/dataTables.bs5.css') }}" />
@@ -89,9 +89,9 @@ Create/Edit Departments
                     <td>{dept.short_name}</td>
                     <td>{dept.full_name}</td>
                     <td>{dept.sup_dept_name}</td>
-                    <td>{dept.floor}</td>
-                    <td>{dept.phone1}</td>
-                    <td>{dept.phone2}</td>
+                    <td>{display_val(dept.floor)}</td>
+                    <td>{display_val(dept.phone1)}</td>
+                    <td>{display_val(dept.phone2)}</td>
                     <td>
                       <a @click="show_edit(dept)" class="btn btn-primary"><span class="icon-edit"></span></a>
                     </td>
@@ -230,7 +230,11 @@ createApp({
       },
       change_filter() {
         this.get_depts();
-      }
+      },
+      display_val(val, d_val = "-") {
+        if (!val) return d_val;
+        else return val;
+      },
     },
     delimiters: ["{","}"]
 }).mount('#app');

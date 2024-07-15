@@ -91,6 +91,7 @@ Create and edit operators
         <div class="card-body">
           <div class="d-flex justify-content-center">
             <div class="w-50">
+@if($admin_level_id != '2')
               <div class="row">
                 <div class="mb-3">
                   <label class="form-label">Department *</label>
@@ -102,6 +103,7 @@ Create and edit operators
                   </select>
                 </div>
               </div>
+@endif
               <div class="row">
                 <div class="mb-3">
                   <label class="form-label">Admin Type *</label>

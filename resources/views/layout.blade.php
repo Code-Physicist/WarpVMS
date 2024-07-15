@@ -48,7 +48,7 @@
               <li>
               @endif
                 <a href="/admin/dashboard">
-                  <i class="icon-padding"></i>
+                  <i class="icon-roofing"></i>
                   <span class="menu-text">Dashboard</span>
                 </a>
               </li>
@@ -58,7 +58,7 @@
               <li>
               @endif
                 <a href="/admin/invitations">
-                  <i class="icon-padding"></i>
+                  <i class="icon-calendar"></i>
                   <span class="menu-text">Invitations</span>
                 </a>
               </li>
@@ -69,7 +69,7 @@
                   <li>
                 @endif
                     <a href="/admin/departments">
-                      <i class="icon-import_export"></i>
+                      <i class="icon-emoji_transportation"></i>
                       <span class="menu-text">Departments</span>
                     </a>
                   </li>
@@ -80,7 +80,7 @@
               <li>
               @endif
                 <a href="/admin/tenants">
-                  <i class="icon-emoji_transportation"></i>
+                  <i class="icon-layers"></i>
                   <span class="menu-text">Tenants</span>
                 </a>
               </li>
