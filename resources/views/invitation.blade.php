@@ -12,6 +12,47 @@ Invite visitors, update schedules and resend invitation emails
 <link rel="stylesheet" href="{{ asset('css/daterange.css') }}" />
 <link rel="stylesheet" href="{{ asset('css/full-calendar.min.css') }}" />
 <link rel="stylesheet" href="{{ asset('css/full-calendar.custom.css') }}" />
+<style>
+.btn-group-xs > .btn, .btn-xs {
+    padding: 1px 5px;
+    font-size: 12px;
+    line-height: 1.5;
+}
+	.bootstrap-tagsinput {
+    width: 100%;
+	min-height: 72px;
+    padding: .375rem .75rem;
+    font-weight: 400;
+    color: #495057;
+    display: flex;
+	gap:8px;
+    align-items: start;
+    flex-wrap: wrap;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+.bootstrap-tagsinput .tag {
+    line-height: 14px;
+    font-size: .7rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.bootstrap-tagsinput .tag-close {
+	margin-left:5px;
+    cursor: pointer;
+    width: 14px;
+    height: 14px;
+    line-height: 14px;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+</style>
 @stop
 @section('content')
 <div id="app">
@@ -32,39 +73,49 @@ Invite visitors, update schedules and resend invitation emails
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="staticBackdropLabel">
-                        Invite Visitors
+					    { modal_titles[m_active_ui] }
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-					<div class="row">
-                		<div class="mb-3">
-                  			<label class="form-label">Department *</label>
-                  			<select v-model="invitation.dept_id" class="form-select">
-                      			<option value="0">Please select</option>
-                      			<option v-for="d in depts" :value="d.dept_id">
-                        			{d.full_name}
-                      			</option>
-                 			 </select>
+					<div v-show="m_active_ui === 1">
+						<div class="row">
+                			<div class="mb-3">
+                  				<label class="form-label">Visitors * <button type="button" @click="show_add_visitor()" class="btn btn-xs btn-outline-success">
+                         	 	<i class="icon-plus"></i>
+                        		</button></label>
+							<div class="bootstrap-tagsinput">
+								<!--span class="badge border border-info bg-info-subtle text-info tag">tonchanin@hotmail.com <span class="tag-close" @click="remove_visitor()"><i class="icon-cancel"></i></span></span-->
+							</div>
                 		</div>
-              		</div>
-					<div class="row">
-						<div class="col-sm-6">
-							<div class="mb-3">
-								<label class="form-label" for="abc">Start Date</label>
-                        		<input type="text" class="form-control" id="start_date">
+              			</div>
+						<div class="row">
+                			<div class="mb-3">
+                  				<label class="form-label">Department *</label>
+                  				<select v-model="invitation.dept_id" class="form-select">
+                      				<option value="0">Please select</option>
+                      				<option v-for="d in depts" :value="d.dept_id">
+                        				{d.full_name}
+                      				</option>
+                 				 </select>
+                			</div>
+              			</div>
+						<div class="row">
+							<div class="col-sm-6">
+								<div class="mb-3">
+									<label class="form-label" for="abc">Start Date</label>
+                        			<input type="text" class="form-control" id="start_date">
+								</div>
 							</div>
-						</div>
-						<div class="col-sm-6">
-							<div class="mb-3">
-								<label class="form-label" for="abc">End Date</label>
-                        		<input type="text" class="form-control" id="end_date">
+							<div class="col-sm-6">
+								<div class="mb-3">
+									<label class="form-label" for="abc">End Date</label>
+                        			<input type="text" class="form-control" id="end_date">
+								</div>
 							</div>
-						</div>
-                    </div>
-					<div class="row">
-						<div class="col">
-							
+                    	</div>
+						<div class="row">
+							<div class="col">
 								<label class="form-label">Interval for each day</label>
 								<div class="row">
 									<div class="col-sm-6">
@@ -79,16 +130,56 @@ Invite visitors, update schedules and resend invitation emails
                       					</div>
 									</div>
 								</div>
-
-						</div>
-                    </div>
+							</div>
+                    	</div>
+					</div>
+					<div v-show="m_active_ui === 2">
+						<div class="row">
+                			<div class="mb-3">
+                  				<label class="form-label">Type Email</label>
+                  				<input type="text" class="form-control">
+                			</div>
+              			</div>
+					</div>
+					<div v-show="m_active_ui === 3">
+						<div class="row">
+                			<div class="mb-3">
+                  				<label class="form-label">Email</label>
+                  				<input type="text" class="form-control">
+                			</div>
+              			</div>
+						<div class="row">
+                			<div class="mb-3">
+                  				<label class="form-label">First Name</label>
+                  				<input type="text" class="form-control">
+                			</div>
+              			</div>
+						<div class="row">
+                			<div class="mb-3">
+                  				<label class="form-label">Last Name</label>
+                  				<input type="text" class="form-control">
+                			</div>
+              			</div>
+						<div class="row">
+                			<div class="mb-3">
+                  				<label class="form-label">Mobile Phone</label>
+                  				<input type="text" class="form-control">
+                			</div>
+              			</div>
+						<div class="row">
+                			<div class="mb-3">
+                  				<label class="form-label">ID Card</label>
+                  				<input type="text" class="form-control">
+                			</div>
+              			</div>
+					</div>
 				</div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        Close
+                    <button @click="modal_cancel" type="button" class="btn btn-secondary">
+						{ modal_cancels[m_active_ui] }
                     </button>
-                    <button @click="submit" type="button" class="btn btn-primary">
-                        Submit
+                    <button @click="modal_ok" type="button" class="btn btn-primary">
+						{ modal_oks[m_active_ui] }
                     </button>
                 </div>
             </div>
@@ -112,6 +203,21 @@ createApp({
     data() {
       return {
         m_active_ui: 1,
+		modal_titles: {
+			1: "Invite Visitors",
+			2: "Search Visitor",
+			3: "Save and Add Visitor"
+		},
+		modal_oks: {
+			1: "Submit",
+			2: "Search",
+			3: "OK"
+		},
+		modal_cancels: {
+			1: "Close",
+			2: "Cancel",
+			3: "Cancel"
+		},
         calendar: null,
         my_modal: null,
 		depts:[],
@@ -128,7 +234,6 @@ createApp({
     },
     mounted() {
 		this.init_ui();
-
 		$("#start_date").daterangepicker({
   			singleDatePicker: true,
   			startDate: moment().startOf("hour"),
@@ -336,6 +441,28 @@ createApp({
           const response = await axios.post("/admin/get_invitation_depts");
           this.depts = response.data.data_list;
         },
+		show_add_visitor() {
+			this.m_active_ui = 2;
+		},
+		remove_visitor() {
+			alert("Yo");
+		},
+		modal_ok() {
+			if(this.m_active_ui === 1)
+				alert(1);
+			else if(this.m_active_ui === 2)
+				this.m_active_ui = 3;
+			else if(this.m_active_ui === 3)
+				this.m_active_ui = 1;
+		},
+		modal_cancel() {
+			if(this.m_active_ui === 1)
+				this.my_modal.hide();
+			else if(this.m_active_ui === 2)
+				this.m_active_ui = 1;
+			else if(this.m_active_ui === 3)
+				this.m_active_ui = 2;
+		}
     },
     delimiters: ["{","}"]
 }).mount('#app');
