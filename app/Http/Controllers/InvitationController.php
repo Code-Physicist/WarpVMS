@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use JWTAuth;
 use JWTFactory;
+use QrCode;
 use Mail;
 use Carbon\Carbon;
 use DB;
@@ -59,5 +60,69 @@ class InvitationController extends AppController
             ->get();
 
         return ["status" => "T", "data_list" => $depts];
+    }
+
+    public function SendInviteEmail(Request $request)
+    {
+        $contacts = $request->contacts;
+        $invite_id = $request->invite_id;
+
+        $hexString = dechex($invite_id);
+        $code = "VMS" . str_pad($hexString, 8, "0", STR_PAD_LEFT);
+        $qr_image = QrCode::format("png")->size(512)->generate($code);
+        $data = array("qr_image" => $qr_image);
+
+        $emails = [];
+        foreach ($contacts as $contact) {
+            array_push($emails, $contact["email"]);
+        }
+
+        Mail::send("emails.invite", $data, function ($message) use ($emails) {
+            $message->to($emails)
+                    ->subject("QR Code Access");
+            $message->from("VMS_Admin@gmail.com", "VMS Admin");
+        });
+        return ["status" => "F"];
+
+    }
+
+    public function TestSendEmail(Request $request)
+    {
+
+        $code = "VMS" . str_pad("1", 8, "0", STR_PAD_LEFT);
+        $qr_image = QrCode::format("png")->size(512)->generate($code);
+        $data = array("qr_image" => $qr_image);
+
+        $emails = ["tonchanin@hotmail.com"];
+
+        Mail::send("emails.invite", $data, function ($message) use ($emails) {
+            $message->to($emails)
+                    ->subject("QR Code Access");
+            $message->from("VMS_Admin@gmail.com", "VMS Admin");
+        });
+        return ["status" => "T"];
+
+    }
+    public function SendAdminEmail(Request $request)
+    {
+        $admin_url = $request->admin_url;
+        $tenant = $request->tenant;
+        $email = $tenant["adminname"];
+        $dept = DB::table('PkDepartments')->where('DeptID', $tenant["Ternsubcode"])->first();
+
+        $data = array(
+            'admin_url' => $admin_url,
+            'admin_name' => $tenant["name"],
+            'admin_dept' => $dept->Fullname,
+            'username' => $tenant["adminname"],
+            'password' => $tenant["pass"],
+        );
+
+        Mail::send("emails.tenant", $data, function ($message) use ($email) {
+            $message->to($email)
+                        ->subject("Your Tenant Account");
+            $message->from("VMS_Admin@gmail.com", "VMS Admin");
+        });
+        return ["status" => "T", "message" => $tenant["adminname"]];
     }
 }
