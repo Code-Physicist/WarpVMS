@@ -53,13 +53,66 @@ class InvitationController extends AppController
             //Invalid. Will prevent later
         }
 
-
-
         $depts = $query->select('DeptID as dept_id', 'Fullname as full_name')
             ->orderByDesc('DeptID')
             ->get();
 
         return ["status" => "T", "data_list" => $depts];
+    }
+
+    public function GetContactByEmail(Request $request)
+    {
+        $chk = $this->CheckAdmin($request);
+        if(!$chk["is_ok"]) {
+            return ["status" => "I"];
+        }
+
+        $email = $request->email;
+        $dept_level = $chk["u_data"]["dept_level"];
+        $sup_dept_id = $chk["u_data"]["sup_dept_id"];
+        $dept_id = $chk["u_data"]["dept_id"];
+
+        if($dept_level > 1) {
+            $dept_id = $sup_dept_id;
+        }
+
+        $contact = DB::table('PkContacts')
+        ->where('email', '=', $email)
+        ->where('dept_id', '=', $dept_id)
+        ->first();
+
+        return ["status" => "T", "contact" => $contact];
+    }
+
+    public function UpdateContact(Request $request)
+    {
+        $chk = $this->CheckAdmin($request);
+        if(!$chk["is_ok"]) {
+            return ["status" => "I"];
+        }
+
+        $id = $request->id;
+        $contact = [
+            "email" => $request->email,
+            "first_name" => $request->first_name,
+            "last_name" => $request->last_name,
+            "id_card" => $request->id_card,
+            "phone" => $request->phone,
+        ];
+
+        if($id === 0) {
+            if($result["u_data"]["dept_level"] > 1) {
+                $contact["dept_id"] = $result["u_data"]["sup_dept_id"];
+            } else {
+                $contact["dept_id"] = $result["u_data"]["dept_id"];
+            }
+
+            DB::table('PkContacts')->insert($contact);
+        } else {
+            DB::table('PkContacts')->where("id", $id)->update($contact);
+        }
+
+        return ["status" => "T", "contact" => $contact];
     }
 
     public function SendInviteEmail(Request $request)

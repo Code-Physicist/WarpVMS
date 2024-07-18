@@ -41,5 +41,7 @@ Route::post('/admin/get_operators', [OperatorController::class, 'GetOperators'])
 Route::post('/admin/create_operator', [OperatorController::class, 'CreateOperator']);
 
 Route::post('/admin/get_invitation_depts', [InvitationController::class, 'GetInvitationDepts']);
+Route::post('/admin/get_contact', [InvitationController::class, 'GetContactByEmail']);
+Route::post('/admin/update_contact', [InvitationController::class, 'UpdateContact']);
 Route::post('/admin/send_invite_email', [InvitationController::class, 'SendInviteEmail']);
 Route::get('/admin/test', [InvitationController::class, 'TestSendEmail']);

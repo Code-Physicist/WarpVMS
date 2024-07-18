@@ -93,7 +93,7 @@ Create and edit departments
                     <td>{display_val(dept.phone1)}</td>
                     <td>{display_val(dept.phone2)}</td>
                     <td>
-                      <a @click="show_edit(dept)" class="btn btn-primary"><span class="icon-edit"></span></a>
+                      <a @click="show_edit(dept)" class="btn btn-primary btn-sm"><span class="icon-edit"></span></a>
                     </td>
                   </tr>
                 </tbody>
@@ -166,7 +166,6 @@ Create and edit departments
 @section('script')
 <script src="{{ asset('js/dataTables.min.js') }}"></script>
 <script src="{{ asset('js/dataTables.bootstrap.min.js') }}"></script>
-<script src="{{ asset('js/utils.js') }}"></script>
 <script>
 const { createApp } = Vue;
 createApp({

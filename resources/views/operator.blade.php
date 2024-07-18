@@ -72,7 +72,7 @@ Create and edit operators
                     <td>{operator.name}</td>
                     <td>{operator.full_name}</td>
                     <td>
-                      <a @click="show_edit(operator)" class="btn btn-primary"><span class="icon-edit"></span></a>
+                      <a @click="show_edit(operator)" class="btn btn-primary btn-sm"><span class="icon-edit"></span></a>
                     </td>
                   </tr>
                 </tbody>

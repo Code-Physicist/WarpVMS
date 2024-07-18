@@ -195,6 +195,7 @@
 			************ JavaScript Files *************
 		************* -->
     <script src="{{ asset('js/jquery.min.js') }}"></script>
+    <script src="{{ asset('js/validator.min.js') }}"></script>
     
     <!-- Custom JS files -->
     <script src="{{ asset('js/app.js') }}"></script>

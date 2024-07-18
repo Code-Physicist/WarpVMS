@@ -72,7 +72,7 @@ Create and edit tenants
                     <td>{tenant.name}</td>
                     <td>{tenant.full_name}</td>
                     <td>
-                      <a @click="show_edit(tenant)" class="btn btn-primary"><span class="icon-edit"></span></a>
+                      <a @click="show_edit(tenant)" class="btn btn-primary btn-sm"><span class="icon-edit"></span></a>
                     </td>
                   </tr>
                 </tbody>

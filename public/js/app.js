@@ -8,6 +8,15 @@
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
 
 __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
+MyApp = {
+  copy_vals: function copy_vals(source, target) {
+    var except_list = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+    for (var k in target) {
+      if (except_list.includes(k)) continue;
+      target[k] = source[k];
+    }
+  }
+};
 
 /***/ }),
 

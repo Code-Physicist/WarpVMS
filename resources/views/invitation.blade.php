@@ -125,8 +125,8 @@ Invite visitors, update schedules and resend invitation emails
 									</div>
 									<div class="col-sm-6">
 										<div class="form-check mb-3">
-                        					<input class="form-check-input" type="checkbox" value="" id="flexCheckChecked">
-                        					<label class="form-check-label" for="flexCheckChecked">All day</label>
+                        					<input class="form-check-input" type="checkbox" @change="check_change" v-model="all_day">
+                        					<label class="form-check-label">All day</label>
                       					</div>
 									</div>
 								</div>
@@ -136,42 +136,49 @@ Invite visitors, update schedules and resend invitation emails
 					<div v-show="m_active_ui === 2">
 						<div class="row">
                 			<div class="mb-3">
-                  				<label class="form-label">Type Email</label>
-                  				<input type="text" class="form-control">
+                  				<label class="form-label">Visitor Email *</label>
+                  				<input type="text" class="form-control" v-model.trim="contact.email">
+								<div v-if="email_msg !== ''" class="ms-1 mt-1 text-danger">{email_msg}</div>
                 			</div>
               			</div>
 					</div>
 					<div v-show="m_active_ui === 3">
 						<div class="row">
                 			<div class="mb-3">
-                  				<label class="form-label">Email</label>
-                  				<input type="text" class="form-control">
+                  				<label class="form-label">Visitor Email *</label>
+                  				<input type="text" class="form-control" v-model.trim="contact.email" disabled>
                 			</div>
               			</div>
 						<div class="row">
                 			<div class="mb-3">
                   				<label class="form-label">First Name</label>
-                  				<input type="text" class="form-control">
+                  				<input type="text" class="form-control" v-model.trim="contact.first_name">
                 			</div>
               			</div>
 						<div class="row">
                 			<div class="mb-3">
                   				<label class="form-label">Last Name</label>
-                  				<input type="text" class="form-control">
+                  				<input type="text" class="form-control" v-model.trim="contact.last_name">
                 			</div>
               			</div>
 						<div class="row">
                 			<div class="mb-3">
                   				<label class="form-label">Mobile Phone</label>
-                  				<input type="text" class="form-control">
+                  				<input type="text" class="form-control" v-model.trim="contact.phone">
                 			</div>
               			</div>
 						<div class="row">
                 			<div class="mb-3">
                   				<label class="form-label">ID Card</label>
-                  				<input type="text" class="form-control">
+                  				<input type="text" class="form-control" v-model.trim="contact.id_card">
                 			</div>
               			</div>
+					</div>
+					<div v-show="invite_modal_message !== ''">
+						<div class="alert alert-primary d-flex align-items-center">
+                        	<i class="icon-layers fs-2 me-2 lh-1"></i>
+                        	{ invite_modal_message }
+                    	</div>
 					</div>
 				</div>
                 <div class="modal-footer">
@@ -205,7 +212,7 @@ createApp({
         m_active_ui: 1,
 		modal_titles: {
 			1: "Invite Visitors",
-			2: "Search Visitor",
+			2: "Add a Visitor",
 			3: "Save and Add Visitor"
 		},
 		modal_oks: {
@@ -220,7 +227,20 @@ createApp({
 		},
         calendar: null,
         my_modal: null,
+		invite_modal_message: "",
 		depts:[],
+		contacts:[],
+		contact: {
+			id: 0,
+			email: "",
+			first_name: "",
+			last_name: "",
+			phone: "",
+			id_card: ""
+		},
+		contact0: null,
+		all_day:false,
+		email_msg: "",
         invitation: {
 			dept_id: 0,
 			visitors: [],
@@ -404,6 +424,8 @@ createApp({
 
 	//Initialize modal
     this.my_modal = new bootstrap.Modal(this.$refs.my_modal, { keyboard: false });
+
+	this.contact0 = { ...this.contact };
     },
     methods: {
 		async init_ui() {
@@ -420,6 +442,12 @@ createApp({
         },
         show_create(arg) {
 			console.log(arg);
+			$("#start_date").data('daterangepicker').setStartDate(arg.start);
+			$("#start_date").data('daterangepicker').setEndDate(arg.start);
+			
+			$("#end_date").data('daterangepicker').setStartDate(arg.start);
+			$("#end_date").data('daterangepicker').setEndDate(arg.start);
+			//$("#start_date").val(arg.startStr);
             //this.active_ui = 2;
             /*this.calendar.removeAllEvents();
             this.calendar.addEvent(
@@ -442,18 +470,49 @@ createApp({
           this.depts = response.data.data_list;
         },
 		show_add_visitor() {
+			MyApp.copy_vals(this.contact0, this.contact);
 			this.m_active_ui = 2;
+		},
+		check_change() {
+			if(this.all_day)
+				$("#interval").prop('disabled', true);
+			else
+				$("#interval").prop('disabled', false);
 		},
 		remove_visitor() {
 			alert("Yo");
 		},
-		modal_ok() {
+		async modal_ok() {
 			if(this.m_active_ui === 1)
-				alert(1);
+			{
+				
+			}
 			else if(this.m_active_ui === 2)
-				this.m_active_ui = 3;
+			{
+				if (this.contact.email === "")
+				{
+					this.email_msg = "Email is blank";
+					return;
+				}
+				if (!validator.isEmail(this.contact.email))
+				{
+					this.email_msg = "Incorrect Email format";
+					return;
+				}
+
+				try{
+					const response = await axios.post("/admin/get_contact", {email:this.contact.email});
+          			this.contact = response.data.contact;
+					this.m_active_ui = 3;
+				}
+				catch(error){
+					this.invite_modal_message = "Server error. Please try again later."
+				}
+			}
 			else if(this.m_active_ui === 3)
+			{
 				this.m_active_ui = 1;
+			}
 		},
 		modal_cancel() {
 			if(this.m_active_ui === 1)
@@ -461,7 +520,7 @@ createApp({
 			else if(this.m_active_ui === 2)
 				this.m_active_ui = 1;
 			else if(this.m_active_ui === 3)
-				this.m_active_ui = 2;
+				this.m_active_ui = 1;
 		}
     },
     delimiters: ["{","}"]
