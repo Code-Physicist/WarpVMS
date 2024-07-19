@@ -29,8 +29,10 @@ Route::get('/admin/operators', [OperatorController::class, 'OperatorPage']);
 Route::post('/admin/login', [AuthController::class, 'Login']);
 Route::get('/admin/logout', [AuthController::class, 'Logout']);
 
-Route::post('/admin/get_sup_depts', [DepartmentController::class, 'GetSupDepts']);
 Route::post('/admin/get_departments', [DepartmentController::class, 'GetDepartments']);
+Route::post('/admin/create_department', [DepartmentController::class, 'CreateDepartment']);
+Route::post('/admin/update_department', [DepartmentController::class, 'UpdateDepartment']);
+Route::post('/admin/update_department2', [DepartmentController::class, 'UpdateDepartment2']);
 
 Route::post('/admin/get_lv1_depts', [TenantController::class, 'GetLv1Depts']);
 Route::post('/admin/get_tenants', [TenantController::class, 'GetTenants']);

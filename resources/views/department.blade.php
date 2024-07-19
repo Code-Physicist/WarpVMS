@@ -42,43 +42,37 @@ Create and edit departments
                     <th>
                       <div class="d-flex align-items-center">
                         <span class="icon-add_task me-2 fs-4"></span>
-                        Short Name
+                        Department
                       </div>
                     </th>
                     <th>
-                      <div class="d-flex align-items-center">
-                        <span class="icon-published_with_changes me-2 fs-4"></span>
-                        Full Name
-                      </div>
-                    </th>
-                    <th>
-                      <div class="d-flex align-items-center">
-                        <span class="icon-published_with_changes me-2 fs-4"></span>
-                        Parent Department
-                      </div>
-                    </th>
-                    <th>
-                      <div class="d-flex align-items-center">
+                      <div class="d-flex justify-content-center align-items-center">
                         <span class="icon-calendar me-2 fs-4"></span>
                         Floors
                       </div>
                     </th>
                     <th>
-                      <div class="d-flex align-items-center">
+                      <div class="d-flex justify-content-center align-items-center">
                         <span class="icon-calendar me-2 fs-4"></span>
-                        Tel 1
+                        Phone No.1
                       </div>
                     </th>
                     <th>
-                      <div class="d-flex align-items-center">
+                      <div class="d-flex justify-content-center align-items-center">
                         <span class="icon-calendar me-2 fs-4"></span>
-                        Tel 2
+                        Phone No.2
                       </div>
                     </th>
                     <th>
-                      <div class="d-flex align-items-center">
+                      <div class="d-flex justify-content-center align-items-center">
                         <span class="icon-settings me-2 fs-4"></span>
-                        Action
+                        Status
+                      </div>
+                    </th>
+                    <th>
+                      <div class="d-flex justify-content-center align-items-center">
+                        <span class="icon-settings me-2 fs-4"></span>
+                        Actions
                       </div>
                     </th>
                   </tr>
@@ -86,14 +80,22 @@ Create and edit departments
                 <tbody>
                   <tr v-for="(dept, index) in depts">
                     <td>{index+1}.</td>
-                    <td>{dept.short_name}</td>
                     <td>{dept.full_name}</td>
-                    <td>{dept.sup_dept_name}</td>
-                    <td>{display_val(dept.floor)}</td>
-                    <td>{display_val(dept.phone1)}</td>
-                    <td>{display_val(dept.phone2)}</td>
+                    <td class="text-center">{display_val(dept.floor)}</td>
+                    <td class="text-center">{display_val(dept.phone1)}</td>
+                    <td class="text-center">{display_val(dept.phone2)}</td>
+                    <td class="text-center">
+                        <span v-if="dept.is_active === '1'" class="badge bg-success">Active</span>
+                        <span v-else class="badge bg-secondary">Disabled</span>
+                    </td>
                     <td>
-                      <a @click="show_edit(dept)" class="btn btn-primary btn-sm"><span class="icon-edit"></span></a>
+                      <div class="d-flex justify-content-center align-items-center">
+                        <a class="cursor-pointer" data-bs-toggle="dropdown"><h5><span class="icon-more-vertical"></span></h5></a>
+                        <ul class="dropdown-menu shadow-sm dropdown-menu-mini">
+                          <li><a class="dropdown-item cursor-pointer" @click="show_edit(dept)"><span class="icon-edit fs-5"></span> Edit</a></li>
+                          <li><a class="dropdown-item cursor-pointer" @click="show_edit(dept)"><span class="icon-x-square fs-5"></span> Disable</a></li>
+                        </ul>
+                      </div>
                     </td>
                   </tr>
                 </tbody>
@@ -110,26 +112,20 @@ Create and edit departments
           <h5 class="card-title">Create Department</h5>
         </div>
         <div class="card-body">
-          <div class="d-flex justify-content-center">
-            <div class="w-50">
-              @if($admin_level_id != '2' and $admin_level_id != '3')
-              <div class="row">
-                <div class="mb-3">
-                  <label class="form-label">Parent Department *</label>
-                  <input type="text" class="form-control" v-model.trim="dept.sup_dept_id"/>
-                </div>
-              </div>
-              @endif
+          <div class="row">
+            <div class="offset-md-3 col-md-6">
               <div class="row">
                 <div class="mb-3">
                   <label class="form-label">Full Name *</label>
                   <input type="text" class="form-control" v-model.trim="dept.full_name"/>
+                  <div v-if="full_name_msg !== ''" class="ms-1 mt-1 text-danger">{full_name_msg}</div>
                 </div>
               </div>
               <div class="row">
                 <div class="mb-3">
                   <label class="form-label">Short Name *</label>
                   <input type="text" class="form-control" v-model.trim="dept.dept_name"/>
+                  <div v-if="dept_name_msg !== ''" class="ms-1 mt-1 text-danger">{dept_name_msg}</div>
                 </div>
               </div>
               <div class="row">
@@ -141,17 +137,24 @@ Create and edit departments
               <div class="row">
                 <div class="col-sm-6">
                   <div class="mb-3">
-                    <label class="form-label">Phone No. 1 *</label>
+                    <label class="form-label">Phone No.1 *</label>
                     <input type="text" class="form-control" v-model.trim="dept.phone1"/>
+                    <div v-if="phone1_msg !== ''" class="ms-1 mt-1 text-danger">{phone1_msg}</div>
                   </div>
                 </div>
                 <div class="col-sm-6">
                   <div class="mb-3">
-                    <label class="form-label">Phone No. 2</label>
+                    <label class="form-label">Phone No.2</label>
                     <input type="text" class="form-control" v-model.trim="dept.phone2"/>
                   </div>
                 </div>
               </div>
+              <div v-show="dept_form_message !== ''">
+						    <div class="alert alert-primary d-flex align-items-center">
+                    <i class="icon-alert-triangle fs-2 me-2 lh-1"></i>
+                    { dept_form_message }
+                </div>
+					    </div>
               <div class="my-3 d-flex align-items-end justify-content-center">
                 <button type="button" @click="active_ui = 1" class="btn btn-outline-secondary mx-2">Cancel</button> <button type="button" @click="submit" class="btn btn-danger mx-2">Submit</button>
               </div>
@@ -164,6 +167,7 @@ Create and edit departments
 </div>
 @stop
 @section('script')
+<script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
 <script src="{{ asset('js/dataTables.min.js') }}"></script>
 <script src="{{ asset('js/dataTables.bootstrap.min.js') }}"></script>
 <script>
@@ -172,46 +176,91 @@ createApp({
     data() {
       return {
         active_ui: 1,
-        sup_depts: [],
         filter: {
           status: 2
         },
         depts:[],
         dept:{
+            id: -1,
             dept_name: "",
             full_name: "",
-            sup_dept_id: 0,
             floor: "",
             phone1: "",
-            phone2: ""
+            phone2: "",
+            sup_dept_id: {{$dept_id}},
         },
+        dept_form_message: "",
+        dept_name_msg: "",
+        full_name_msg: "",
+        phone1_msg: "",
         dept0: null,
       }
     },
     mounted() {
-@if($admin_level_id != '2' and $admin_level_id != '3')
-      this.get_sup_depts();
-@endif
       this.dept0 = { ...this.dept };
       this.get_depts();
     },
     methods: {
       show_create() {
-        this.active_ui = 2;
+        this.dept_name_msg = "";
+        this.full_name_msg = "";
+        this.phone1_msg = "";
+
         MyApp.copy_vals(this.dept0, this.dept);
+        this.active_ui = 2;
       },
       show_edit(dept) {
+        this.dept_name_msg = "";
+        this.full_name_msg = "";
+        this.phone1_msg = "";
+
+        MyApp.copy_vals(dept, this.dept);
         this.active_ui = 2;
-        console.log(dept);
       },
-      async get_sup_depts() {
+      async submit() {
+        this.dept_name_msg = "";
+        this.full_name_msg = "";
+        this.phone1_msg = "";
+
+        let is_valid = true;
+        if (this.dept.dept_name === "") {
+          this.dept_name_msg = "Short Name is blank";
+          is_valid = false;
+        }
+        if (this.dept.full_name === "") {
+          this.full_name_msg = "Full Name is blank";
+          is_valid = false;
+        }
+        if (this.dept.phone1 === "") {
+          this.phone1_msg = "Phone No.1 is blank";
+          is_valid = false;
+        }
+
+        if(!is_valid) return;
+
+        let url = (this.dept.id === -1) ? "/admin/create_department" : "/admin/update_department";
         try {
-          const response = await axios.post("/admin/get_sup_depts");
-          this.sup_depts = response.data.data_list;
+          const response = await axios.post(url, this.dept);
+          if(response.data.status === "T")
+          {
+            this.get_depts();
+            this.active_ui = 1;
+          }
+          else if(response.data.status === "I")
+          {
+            //Force log out
+            window.location.href = "/admin/logout";
+          }
+          else
+          {
+            this.dept_form_message = "Invalid Data Submission";
+          }
         }
         catch(error) {
           console.log(error);
+          this.dept_form_message = "Server error. Please try again later";
         }
+
       },
       async get_depts() {
         try {

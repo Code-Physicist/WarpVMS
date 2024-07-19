@@ -17,6 +17,7 @@
     <!-- Main CSS -->
     <link rel="stylesheet" href="{{ asset('css/main.min.css') }}" />
 
+    <link rel="stylesheet" href="{{ mix('css/app.css') }}" />
     @yield('style')
     
   </head>
@@ -178,7 +179,7 @@
 
           <!-- App footer start -->
           <div class="app-footer">
-            <span>© Bootstrap Gallery 2024</span>
+            <span>© Ymatrix Co. Ltd.</span>
           </div>
           <!-- App footer end -->
 

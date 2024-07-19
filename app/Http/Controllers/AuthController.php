@@ -73,15 +73,21 @@ class AuthController extends AppController
                 $pw_change = true;
             }
 
+            $dept_id = $dept->DeptID;
+            $dept_name = $dept->Fullname;
+            /*if($dept_id == "0") {
+                $dept_name = "BTS Building";
+            }*/
+
             $cookie = $this->CreateVMSCookie([
                 "admin_id" => $admin->admin_ID,
                 "admin_level_id" => $admin->admin_level_id,
                 "admin_level_name" => $admin_level->Zdesc,
                 "admin_name" => $admin->adminname,
                 "name" => $admin->name,
-                "dept_id" => $dept->DeptID,
+                "dept_id" => $dept_id,
                 "sup_dept_id" => $dept->SupDepID,
-                "dept_name" => $dept->DeptName,
+                "dept_name" => $dept_name,
                 "dept_level" => $dept->Level1,
                 "pw_change" => $pw_change,
             ]);
