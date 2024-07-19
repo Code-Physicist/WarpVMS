@@ -5,7 +5,6 @@
     "/js/vue.global.prod.js": "/js/vue.global.prod.js",
     "/js/custom.js": "/js/custom.js",
     "/js/validator.min.js": "/js/validator.min.js",
-    "/js/utils.js": "/js/utils.js",
     "/js/moment.min.js": "/js/moment.min.js",
     "/js/daterange.js": "/js/daterange.js",
     "/js/dataTables.min.js": "/js/dataTables.min.js",

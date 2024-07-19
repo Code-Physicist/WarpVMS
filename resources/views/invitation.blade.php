@@ -85,19 +85,21 @@ Invite visitors, update schedules and resend invitation emails
                          	 	<i class="icon-plus"></i>
                         		</button></label>
 							<div class="bootstrap-tagsinput">
-								<!--span class="badge border border-info bg-info-subtle text-info tag">tonchanin@hotmail.com <span class="tag-close" @click="remove_visitor()"><i class="icon-cancel"></i></span></span-->
+								<span v-for="c in invitation.visitors" class="badge border border-info bg-info-subtle text-info tag">{c.name} ({c.email}) <span class="tag-close" @click="remove_visitor(c.id)"><i class="icon-cancel"></i></span></span>
 							</div>
+							<div v-if="visitor_msg !== ''" class="ms-1 mt-1 text-danger">{visitor_msg}</div>
                 		</div>
               			</div>
 						<div class="row">
                 			<div class="mb-3">
-                  				<label class="form-label">Department *</label>
-                  				<select v-model="invitation.dept_id" class="form-select">
+                  				<label class="form-label">Department</label>
+								<input type="text" class="form-control" value="{{$dept_name}}" disabled>
+                  				<!--select v-model="invitation.dept_id" class="form-select">
                       				<option value="0">Please select</option>
                       				<option v-for="d in depts" :value="d.dept_id">
                         				{d.full_name}
                       				</option>
-                 				 </select>
+                 				 </select-->
                 			</div>
               			</div>
 						<div class="row">
@@ -111,12 +113,13 @@ Invite visitors, update schedules and resend invitation emails
 								<div class="mb-3">
 									<label class="form-label" for="abc">End Date</label>
                         			<input type="text" class="form-control" id="end_date">
+									<div v-if="end_date_msg !== ''" class="ms-1 mt-1 text-danger">{end_date_msg}</div>
 								</div>
 							</div>
                     	</div>
 						<div class="row">
 							<div class="col">
-								<label class="form-label">Interval for each day</label>
+								<label class="form-label">Interval for 1 day</label>
 								<div class="row">
 									<div class="col-sm-6">
 										<div class="mb-3">
@@ -151,14 +154,23 @@ Invite visitors, update schedules and resend invitation emails
               			</div>
 						<div class="row">
                 			<div class="mb-3">
-                  				<label class="form-label">First Name</label>
+                  				<label class="form-label">First Name *</label>
                   				<input type="text" class="form-control" v-model.trim="contact.first_name">
+								<div v-if="first_name_msg !== ''" class="ms-1 mt-1 text-danger">{first_name_msg}</div>
                 			</div>
               			</div>
 						<div class="row">
                 			<div class="mb-3">
-                  				<label class="form-label">Last Name</label>
+                  				<label class="form-label">Last Name *</label>
                   				<input type="text" class="form-control" v-model.trim="contact.last_name">
+								<div v-if="last_name_msg !== ''" class="ms-1 mt-1 text-danger">{last_name_msg}</div>
+                			</div>
+              			</div>
+						<div class="row">
+                			<div class="mb-3">
+                  				<label class="form-label">ID Card *</label>
+                  				<input type="text" class="form-control" v-model.trim="contact.id_card">
+								  <div v-if="id_card_msg !== ''" class="ms-1 mt-1 text-danger">{id_card_msg}</div>
                 			</div>
               			</div>
 						<div class="row">
@@ -167,16 +179,10 @@ Invite visitors, update schedules and resend invitation emails
                   				<input type="text" class="form-control" v-model.trim="contact.phone">
                 			</div>
               			</div>
-						<div class="row">
-                			<div class="mb-3">
-                  				<label class="form-label">ID Card</label>
-                  				<input type="text" class="form-control" v-model.trim="contact.id_card">
-                			</div>
-              			</div>
 					</div>
 					<div v-show="invite_modal_message !== ''">
 						<div class="alert alert-primary d-flex align-items-center">
-                        	<i class="icon-layers fs-2 me-2 lh-1"></i>
+                        	<i class="icon-alert-triangle fs-2 me-2 lh-1"></i>
                         	{ invite_modal_message }
                     	</div>
 					</div>
@@ -229,7 +235,7 @@ createApp({
         my_modal: null,
 		invite_modal_message: "",
 		depts:[],
-		contacts:[],
+		visitors:[],
 		contact: {
 			id: 0,
 			email: "",
@@ -240,9 +246,14 @@ createApp({
 		},
 		contact0: null,
 		all_day:false,
+		visitor_msg: "",
+		end_date_msg: "",
 		email_msg: "",
+		first_name_msg: "",
+		last_name_msg: "",
+		id_card_msg: "",
         invitation: {
-			dept_id: 0,
+			dept_id: {{$dept_id}},
 			visitors: [],
 			start_date: "",
 			end_date: "",
@@ -253,7 +264,7 @@ createApp({
       }
     },
     mounted() {
-		this.init_ui();
+		//this.init_ui();
 		$("#start_date").daterangepicker({
   			singleDatePicker: true,
   			startDate: moment().startOf("hour"),
@@ -305,119 +316,7 @@ createApp({
 		},
 		editable: true,
 		dayMaxEvents: true, // allow "more" link when too many events
-		events: [
-			{
-				title: "All Day Event",
-				start: "2022-10-01",
-				color: "#e6f5e3",
-				borderColor: "#41ab2e",
-				textColor: "#41ab2e",
-			},
-			{
-				title: "Long Event",
-				start: "2022-10-07",
-				end: "2022-10-10",
-				color: "#eaf1ff",
-				borderColor: "#0a50d8",
-				textColor: "#0a50d8",
-			},
-			{
-				groupId: 999,
-				title: "Birthday",
-				start: "2022-10-09T16:00:00",
-				color: "#e2e5ec",
-				borderColor: "#434957",
-				textColor: "#434957",
-			},
-			{
-				groupId: 999,
-				title: "Birthday",
-				start: "2022-10-16T16:00:00",
-				color: "#ffebeb",
-				borderColor: "#ce385b",
-				textColor: "#ce385b",
-			},
-			{
-				title: "Conference",
-				start: "2022-10-11",
-				end: "2022-10-13",
-				color: "#e8f4d6",
-				borderColor: "#53810c",
-				textColor: "#53810c",
-			},
-			{
-				title: "Meeting",
-				start: "2022-10-14T10:30:00",
-				end: "2022-10-14T12:30:00",
-				color: "#e8f4ff",
-				borderColor: "#0b5aa9",
-				textColor: "#0b5aa9",
-			},
-			{
-				title: "Lunch",
-				start: "2022-10-16T12:00:00",
-				color: "#fff5d5",
-				borderColor: "#d49d1c",
-				textColor: "#d49d1c",
-			},
-			{
-				title: "Meeting",
-				start: "2022-10-18T14:30:00",
-				color: "#e2ddff",
-				borderColor: "#7164b5",
-				textColor: "#7164b5",
-			},
-			{
-				title: "Interview",
-				start: "2022-10-21T17:30:00",
-				color: "#ffe6fe",
-				borderColor: "#780974",
-				textColor: "#780974",
-			},
-			{
-				title: "Meeting",
-				start: "2022-10-22T20:00:00",
-				color: "#ffeade",
-				borderColor: "#d45c1c",
-				textColor: "#d45c1c",
-			},
-			{
-				title: "Birthday",
-				start: "2022-10-13T07:00:00",
-				color: "#dde3c9",
-				borderColor: "#93b711",
-				textColor: "#93b711",
-			},
-			{
-				title: "Click for Google",
-				url: "https://bootstrap.gallery/",
-				start: "2022-10-28",
-				color: "#e4e7ed",
-				borderColor: "#294e9d",
-				textColor: "#294e9d",
-			},
-			{
-				title: "Interview",
-				start: "2022-10-20",
-				color: "#ece0d9",
-				borderColor: "#c55513",
-				textColor: "#c55513",
-			},
-			{
-				title: "Product Launch",
-				start: "2022-10-29",
-				color: "#eedee6",
-				borderColor: "#b32268",
-				textColor: "#b32268",
-			},
-			{
-				title: "Leave",
-				start: "2022-10-25",
-				color: "#dfffe1",
-				borderColor: "#1c8b24",
-				textColor: "#1c8b24",
-			},
-		],
+		events: [],
 	});
     this.calendar = calendar;
     this.calendar.render();
@@ -441,13 +340,19 @@ createApp({
 			alert("yo");
         },
         show_create(arg) {
-			console.log(arg);
+			this.m_active_ui = 1;
+			this.visitor_msg = "";
+			this.end_date_msg = "";
+
+
 			$("#start_date").data('daterangepicker').setStartDate(arg.start);
 			$("#start_date").data('daterangepicker').setEndDate(arg.start);
+
+			arg.end.setDate(arg.end.getDate() - 1);
+			$("#end_date").data('daterangepicker').setStartDate(arg.end);
+			$("#end_date").data('daterangepicker').setEndDate(arg.end);
+
 			
-			$("#end_date").data('daterangepicker').setStartDate(arg.start);
-			$("#end_date").data('daterangepicker').setEndDate(arg.start);
-			//$("#start_date").val(arg.startStr);
             //this.active_ui = 2;
             /*this.calendar.removeAllEvents();
             this.calendar.addEvent(
@@ -479,19 +384,44 @@ createApp({
 			else
 				$("#interval").prop('disabled', false);
 		},
-		remove_visitor() {
-			alert("Yo");
+		remove_visitor(id) {
+			for (let i = 0; i < this.invitation.visitors.length; i++) {
+                if (this.invitation.visitors[i].id === id)
+                    this.invitation.visitors.splice(i, 1);
+            }
 		},
 		async modal_ok() {
 			if(this.m_active_ui === 1)
 			{
-				
+				let is_valid = true;
+				this.visitor_msg = "";
+				this.end_date_msg = "";
+				if(this.invitation.visitors.length === 0)
+				{
+					this.visitor_msg = "Please add some visitors";
+					is_valid = false;
+				}
+
+				this.invitation.start_date = $("#start_date").val();
+				this.invitation.end_date = $("#end_date").val();
+
+				let d1 = moment(this.invitation.start_date, "DD/MM/YYYY");
+				let d2 = moment(this.invitation.end_date, "DD/MM/YYYY");
+
+				if (d1 > d2) {
+                	this.end_date_msg = "End Date is greater";
+					is_valid = false;
+            	}
+
+				if(!is_valid)
+					return;
 			}
 			else if(this.m_active_ui === 2)
 			{
+				this.email_msg = "";
 				if (this.contact.email === "")
 				{
-					this.email_msg = "Email is blank";
+					this.email_msg = "Visitor Email is blank";
 					return;
 				}
 				if (!validator.isEmail(this.contact.email))
@@ -502,15 +432,49 @@ createApp({
 
 				try{
 					const response = await axios.post("/admin/get_contact", {email:this.contact.email});
-          			this.contact = response.data.contact;
+					if(response.data.contact)
+          				this.contact = response.data.contact;
+
 					this.m_active_ui = 3;
 				}
 				catch(error){
+					console.log(error);
 					this.invite_modal_message = "Server error. Please try again later."
 				}
 			}
 			else if(this.m_active_ui === 3)
 			{
+				let is_valid = true;
+				if (this.contact.first_name === "")
+				{
+					this.first_name_msg = "First name is blank";
+					is_valid = false;
+				}
+				if (this.contact.last_name === "")
+				{
+					this.last_name_msg = "Last name is blank";
+					is_valid = false;
+				}
+				if (this.contact.id_card === "")
+				{
+					this.id_card_msg = "ID card is blank";
+					is_valid = false;
+				}
+
+				if(!is_valid) return;
+				
+				let duplicated = false;
+                for (let i = 0; i < this.invitation.visitors.length; i++)
+                {
+                    if (this.invitation.visitors[i].email === this.contact.email) 
+					{
+                        duplicated = true;
+                        break;  
+                	}
+				}
+				if (!duplicated)
+					this.invitation.visitors.push({id: this.contact.id, email: this.contact.email, name: `${this.contact.first_name} ${this.contact.last_name}`});
+
 				this.m_active_ui = 1;
 			}
 		},
