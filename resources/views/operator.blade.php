@@ -1,6 +1,6 @@
 @extends('layout')
 @section('title')
-Dashboard
+Manage Operators
 @stop
 @section('header')
 Operators

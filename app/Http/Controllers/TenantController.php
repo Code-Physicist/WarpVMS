@@ -50,7 +50,7 @@ class TenantController extends AppController
 
         $tenants = $query->where("a.admin_level_id", 4)
         ->leftJoin('PkDepartments as d', 'd.DeptID', '=', 'a.Ternsubcode')
-        ->select('a.adminname as email', 'a.name as name', 'd.DeptID as dept_id', 'd.Fullname as full_name')
+        ->select('a.admin_ID as id', 'a.adminname as email', 'a.name as name', 'a.active as is_active', 'd.DeptID as dept_id', 'd.Fullname as full_name')
         ->orderByDesc('d.DeptID')
         ->get();
 
@@ -59,7 +59,7 @@ class TenantController extends AppController
 
     public function CreateTenant(Request $request)
     {
-        $chk = $this->CheckVMSCookie($request);
+        $chk = $this->CheckAdmin($request);
         if(!$chk["is_ok"]) {
             return ["status" => "I"];
         }
@@ -81,8 +81,41 @@ class TenantController extends AppController
         ];
 
         DB::table('PkAdminweb')->insert($tenant);
+        return $this->MakeResponse(["status" => "T", "pass" => $pass], $chk);
+    }
 
-        return $this->MakeResponse(["status" => "T", "data_list" => $tenant, "pass" => $pass], $chk);
+    public function UpdateTenant(Request $request)
+    {
+        $chk = $this->CheckAdmin($request);
+        if(!$chk["is_ok"]) {
+            return ["status" => "I"];
+        }
+
+        $admin_id = $request->id;
+
+        DB::table('PkAdminweb')->where("admin_ID", $admin_id)
+                ->update(
+                    [
+                        "adminname" => $request->email,
+                        "name" => $request->name,
+                        "Ternsubcode" => $request->dept_id,
+                    ]
+                );
+        return ["status" => "T"];
+
+    }
+
+    public function UpdateTenantEDB(Request $request)
+    {
+        $chk = $this->CheckAdmin($request);
+        if(!$chk["is_ok"]) {
+            return ["status" => "I"];
+        }
+
+        $admin_id = $request->id;
+        $status = $request->status;
+        DB::table('PkAdminweb')->where("admin_ID", $admin_id)->update(["active" => $status]);
+        return ["status" => "T"];
 
     }
 

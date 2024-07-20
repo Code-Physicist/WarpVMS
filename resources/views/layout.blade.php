@@ -17,6 +17,7 @@
     <!-- Main CSS -->
     <link rel="stylesheet" href="{{ asset('css/main.min.css') }}" />
 
+    <!-- App CSS -->
     <link rel="stylesheet" href="{{ mix('css/app.css') }}" />
     @yield('style')
     
@@ -202,6 +203,7 @@
     <script src="{{ asset('js/app.js') }}"></script>
     <script src="{{ asset('js/custom.js') }}"></script>
     <script src="{{ asset('js/vue.global.prod.js') }}"></script>
+    <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
     @yield('script')
   </body>
 

@@ -37,6 +37,8 @@ Route::post('/admin/update_department2', [DepartmentController::class, 'UpdateDe
 Route::post('/admin/get_lv1_depts', [TenantController::class, 'GetLv1Depts']);
 Route::post('/admin/get_tenants', [TenantController::class, 'GetTenants']);
 Route::post('/admin/create_tenant', [TenantController::class, 'CreateTenant']);
+Route::post('/admin/update_tenant', [TenantController::class, 'UpdateTenant']);
+Route::post('/admin/update_tenant_edb', [TenantController::class, 'UpdateTenantEDB']);
 
 Route::post('/admin/get_operator_depts', [OperatorController::class, 'GetOperatorDepts']);
 Route::post('/admin/get_operators', [OperatorController::class, 'GetOperators']);

@@ -1,6 +1,6 @@
 @extends('layout')
 @section('title')
-Departments
+Manage Departments
 @stop
 @section('header')
 Departments
@@ -93,7 +93,8 @@ Create and edit departments
                         <a class="cursor-pointer" data-bs-toggle="dropdown"><h5><span class="icon-more-vertical"></span></h5></a>
                         <ul class="dropdown-menu shadow-sm dropdown-menu-mini">
                           <li><a class="dropdown-item cursor-pointer" @click="show_edit(dept)"><span class="icon-edit fs-5"></span> Edit</a></li>
-                          <li><a class="dropdown-item cursor-pointer" @click="show_edit(dept)"><span class="icon-x-square fs-5"></span> Disable</a></li>
+                          <li v-if="dept.is_active === '1'"><a class="dropdown-item cursor-pointer" @click="show_edb(dept, 0)"><span class="icon-x-square fs-5"></span> Disable</a></li>
+                          <li v-else><a class="dropdown-item cursor-pointer" @click="show_edb(dept, 1)"><span class="icon-check-square fs-5"></span> Enable</a></li>
                         </ul>
                       </div>
                     </td>
@@ -164,10 +165,35 @@ Create and edit departments
       </div>
     </div>
   </div>
+  <div class="modal rounded-3 fade" role="dialog" data-bs-backdrop="static" ref="edb_modal">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-body px-4 pt-4 pb-4 text-center">
+            <h5 class="text-primary">{ edb_status === 0 ? 'Disable' : 'Enable' } this department?</h5>
+              <div class="mt-4 mb-2">
+                  {edb_dept_name}
+              </div>
+              <div v-show="edb_modal_message !== ''" class="mb-0">
+						    <div class="alert alert-primary d-flex justify-content-center align-items-center mb-0 p-2">
+                    <i class="icon-alert-triangle fs-2 me-2 lh-1"></i>
+                    { edb_modal_message }
+                </div>
+					    </div>
+          </div>
+          <div class="modal-footer flex-nowrap p-0">
+            <button type="button" @click="submit_edb" class="btn text-primary fs-6 col-6 m-0 border-end">
+              <strong>{ edb_status === 0 ? 'Disable' : 'Enable' }</strong>
+            </button>
+            <button type="button" class="btn  fs-6 col-6 m-0" data-bs-dismiss="modal">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+  </div>
 </div>
 @stop
 @section('script')
-<script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
 <script src="{{ asset('js/dataTables.min.js') }}"></script>
 <script src="{{ asset('js/dataTables.bootstrap.min.js') }}"></script>
 <script>
@@ -189,16 +215,22 @@ createApp({
             phone2: "",
             sup_dept_id: {{$dept_id}},
         },
+        dept0: null,
         dept_form_message: "",
         dept_name_msg: "",
         full_name_msg: "",
         phone1_msg: "",
-        dept0: null,
+        edb_modal: null,
+        edb_dept_id: -1,
+        edb_status: 0, //0 Disable, 1 Enable
+        edb_dept_name: "",
+        edb_modal_message:"",
       }
     },
     mounted() {
       this.dept0 = { ...this.dept };
       this.get_depts();
+      this.edb_modal = new bootstrap.Modal(this.$refs.edb_modal, { keyboard: false });
     },
     methods: {
       show_create() {
@@ -249,7 +281,8 @@ createApp({
           else if(response.data.status === "I")
           {
             //Force log out
-            window.location.href = "/admin/logout";
+            this.dept_form_message = "Token expired. You will be logged out soon...";
+            setTimeout(function() {window.location.href = "/admin/logout";}, 3000);
           }
           else
           {
@@ -261,6 +294,33 @@ createApp({
           this.dept_form_message = "Server error. Please try again later";
         }
 
+      },
+      show_edb(dept, status) {
+        this.edb_dept_id = dept.id;
+        this.edb_dept_name = dept.full_name;
+        this.edb_status = status;
+        this.edb_modal.show();
+      },
+      async submit_edb() {
+        try {
+          const response = await axios.post("/admin/update_department2", {dept_id:this.edb_dept_id, status:this.edb_status});
+          if(response.data.status === "I")
+          {
+            //Force log out
+            this.edb_modal_message = "Token expired. You will be logged out soon...";
+            setTimeout(function() {window.location.href = "/admin/logout";}, 3000);
+          }
+          else
+          {
+            this.edb_modal.hide();
+            this.get_depts();
+            this.active_ui = 1;
+          }
+        }
+        catch(error) {
+          console.log(error);
+          this.edb_modal_message = "Server error. Please try again later.";
+        }
       },
       async get_depts() {
         try {

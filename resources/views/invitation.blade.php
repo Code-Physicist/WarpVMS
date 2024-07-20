@@ -245,7 +245,7 @@ createApp({
 			id_card: ""
 		},
 		contact0: null,
-		all_day:false,
+		all_day: false,
 		visitor_msg: "",
 		end_date_msg: "",
 		email_msg: "",
