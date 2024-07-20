@@ -67,7 +67,7 @@ Invite visitors, update schedules and resend invitation emails
             </div>
         </div>
     </div>
-    <div class="modal fade" ref="my_modal" data-bs-backdrop="static" data-bs-keyboard="false"
+    <div class="modal fade" ref="invite_modal" data-bs-backdrop="static" data-bs-keyboard="false"
                         tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -81,7 +81,7 @@ Invite visitors, update schedules and resend invitation emails
 					<div v-show="m_active_ui === 1">
 						<div class="row">
                 			<div class="mb-3">
-                  				<label class="form-label">Visitors * <button type="button" @click="show_add_visitor()" class="btn btn-xs btn-outline-success">
+                  				<label class="form-label">Visitors * <button type="button" @click="show_add_visitor()" class="btn btn-xs btn-primary">
                          	 	<i class="icon-plus"></i>
                         		</button></label>
 							<div class="bootstrap-tagsinput">
@@ -232,7 +232,7 @@ createApp({
 			3: "Cancel"
 		},
         calendar: null,
-        my_modal: null,
+        invite_modal: null,
 		invite_modal_message: "",
 		depts:[],
 		visitors:[],
@@ -260,7 +260,6 @@ createApp({
 			start_time: "",
 			end_time:""
         },
-        invitations: [],
       }
     },
     mounted() {
@@ -283,6 +282,7 @@ createApp({
   			},
 		});
 
+		$("#interval").val("00:00 - 23:55");
 		$("#interval").daterangepicker({
     		timePicker: true,
     		timePicker24Hour: true,
@@ -294,6 +294,7 @@ createApp({
   		.on("show.daterangepicker", function (ev, picker) {
     		picker.container.find(".calendar-table").hide();
   		});
+
 		//Initialize Calendar
         var calendarEl = this.$refs.my_calendar;
         var calendar = new FullCalendar.Calendar(calendarEl, {
@@ -322,7 +323,7 @@ createApp({
     this.calendar.render();
 
 	//Initialize modal
-    this.my_modal = new bootstrap.Modal(this.$refs.my_modal, { keyboard: false });
+    this.invite_modal = new bootstrap.Modal(this.$refs.invite_modal, { keyboard: false });
 
 	this.contact0 = { ...this.contact };
     },
@@ -336,6 +337,18 @@ createApp({
             }
         
         },
+		clear_invite_modal() {
+			this.invitation.visitors.splice(0, this.invitation.visitors.length);
+			
+			this.all_day = false;
+			$("#interval").val("00:00 - 23:55");
+			$("#interval").prop('disabled', false);
+			var picker = $("#interval").data('daterangepicker');
+			picker.container.find('.hourselect').eq(0).val('0').trigger('change');
+            picker.container.find('.minuteselect').eq(0).val('0').trigger('change');
+            picker.container.find('.hourselect').eq(1).val('23').trigger('change');
+            picker.container.find('.minuteselect').eq(1).val('55').trigger('change');
+		},
         submit() {
 			alert("yo");
         },
@@ -344,6 +357,7 @@ createApp({
 			this.visitor_msg = "";
 			this.end_date_msg = "";
 
+			this.clear_invite_modal();
 
 			$("#start_date").data('daterangepicker').setStartDate(arg.start);
 			$("#start_date").data('daterangepicker').setEndDate(arg.start);
@@ -368,7 +382,7 @@ createApp({
             console.log(this.calendar);
             */
             this.calendar.unselect();
-            this.my_modal.show();
+            this.invite_modal.show();
         },
 		async get_invitation_depts() {
           const response = await axios.post("/admin/get_invitation_depts");
@@ -480,7 +494,7 @@ createApp({
 		},
 		modal_cancel() {
 			if(this.m_active_ui === 1)
-				this.my_modal.hide();
+				this.invite_modal.hide();
 			else if(this.m_active_ui === 2)
 				this.m_active_ui = 1;
 			else if(this.m_active_ui === 3)

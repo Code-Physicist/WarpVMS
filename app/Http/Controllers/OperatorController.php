@@ -44,10 +44,16 @@ class OperatorController extends AppController
 
         switch($admin_level_id) {
             case "2":
-                $query->where('a.admin_level_id', '=', "3");
+                $query->where(function ($q) {
+                    $q->where("a.admin_level_id", "2");
+                    $q->orWhere("a.admin_level_id", "3");
+                });
                 break;
             case "4":
-                $query->where('a.admin_level_id', '=', "5");
+                $query->where(function ($q) {
+                    $q->where("a.admin_level_id", "4");
+                    $q->orWhere("a.admin_level_id", "5");
+                });
                 break;
             default:
                 return ["status" => "F", "message" => "Invalid admin_level_id"];
@@ -57,7 +63,11 @@ class OperatorController extends AppController
             $query->where('a.active', '=', $status);
         }
         $query->leftJoin('PkDepartments as d', 'd.DeptID', '=', 'a.Ternsubcode')
-            ->select('a.adminname as email', 'a.name as name', 'd.DeptID as dept_id', 'd.Fullname as full_name');
+            ->where(function ($q) use ($dept_id) {
+                $q->where('d.DeptID', $dept_id);
+                $q->orWhere('d.SupDepID', $dept_id);
+            })
+            ->select('a.admin_ID as id', 'a.admin_level_id as admin_level_id', 'a.adminname as email', 'a.name as name', 'a.active as is_active', 'd.DeptID as dept_id', 'd.Fullname as full_name');
         $operators = $query->get();
 
         //Return response and refresh cookie
@@ -95,7 +105,42 @@ class OperatorController extends AppController
         ];
 
         DB::table('PkAdminweb')->insert($operator);
-        return ["result" => "T", "data_list" => $operator, "pass" => $pass];
+        return ["status" => "T", "pass" => $pass];
+    }
+
+    public function UpdateOperator(Request $request)
+    {
+        $chk = $this->CheckAdmin($request);
+        if(!$chk["is_ok"]) {
+            return ["status" => "I"];
+        }
+
+        $admin_id = $request->id;
+
+        DB::table('PkAdminweb')->where("admin_ID", $admin_id)
+                ->update(
+                    [
+                        "adminname" => $request->email,
+                        "name" => $request->name,
+                        "Ternsubcode" => $request->dept_id,
+                        "admin_level_id" => $request->admin_level_id,
+                    ]
+                );
+        return ["status" => "T"];
+
+    }
+
+    public function UpdateOperatorEDB(Request $request)
+    {
+        $chk = $this->CheckAdmin($request);
+        if(!$chk["is_ok"]) {
+            return ["status" => "I"];
+        }
+
+        $admin_id = $request->id;
+        $status = $request->status;
+        DB::table('PkAdminweb')->where("admin_ID", $admin_id)->update(["active" => $status]);
+        return ["status" => "T"];
     }
 
     public function GetOperatorDepts(Request $request)

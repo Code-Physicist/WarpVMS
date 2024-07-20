@@ -43,6 +43,8 @@ Route::post('/admin/update_tenant_edb', [TenantController::class, 'UpdateTenantE
 Route::post('/admin/get_operator_depts', [OperatorController::class, 'GetOperatorDepts']);
 Route::post('/admin/get_operators', [OperatorController::class, 'GetOperators']);
 Route::post('/admin/create_operator', [OperatorController::class, 'CreateOperator']);
+Route::post('/admin/update_operator', [OperatorController::class, 'UpdateOperator']);
+Route::post('/admin/update_operator_edb', [OperatorController::class, 'UpdateOperatorEDB']);
 
 Route::post('/admin/get_invitation_depts', [InvitationController::class, 'GetInvitationDepts']);
 Route::post('/admin/get_contact', [InvitationController::class, 'GetContactByEmail']);

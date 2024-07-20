@@ -286,7 +286,7 @@ createApp({
         }
         catch(error) {
           console.log(error);
-          this.dept_form_message = "Server error. Please try again later";
+          this.tenant_form_message = "Server error. Please try again later";
         }
       },
       show_edb(tenant, status) {
