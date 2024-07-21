@@ -23,7 +23,7 @@ class AuthController extends AppController
         }
 
         //No need to refresh the cookie here. Let do it after redirect
-        return redirect("/dashboard");
+        return redirect("/admin/dashboard");
     }
 
     public function Login(Request $request)

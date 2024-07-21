@@ -50,6 +50,7 @@ Route::post('/admin/get_invitation_depts', [InvitationController::class, 'GetInv
 Route::post('/admin/get_contact', [InvitationController::class, 'GetContactByEmail']);
 Route::post('/admin/get_invitations', [InvitationController::class, 'GetInvitations']);
 Route::post('/admin/get_contacts', [InvitationController::class, 'GetContactByInviteId']);
-Route::post('/admin/update_contact', [InvitationController::class, 'UpdateContact']);
+Route::post('/admin/upsert_contact', [InvitationController::class, 'UpsertContact']);
+Route::post('/admin/create_invitation', [InvitationController::class, 'CreateInvitation']);
 Route::post('/admin/send_invite_email', [InvitationController::class, 'SendInviteEmail']);
 Route::get('/admin/test', [InvitationController::class, 'TestSendEmail']);

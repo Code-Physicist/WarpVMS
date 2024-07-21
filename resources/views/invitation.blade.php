@@ -18,7 +18,8 @@ Invite visitors, update schedules and resend invitation emails
     font-size: 12px;
     line-height: 1.5;
 }
-	.bootstrap-tagsinput {
+
+.bootstrap-tagsinput {
     width: 100%;
 	min-height: 72px;
     padding: .375rem .75rem;
@@ -34,6 +35,7 @@ Invite visitors, update schedules and resend invitation emails
     border-radius: 4px;
     transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
 }
+
 .bootstrap-tagsinput .tag {
     line-height: 14px;
     font-size: .7rem;
@@ -41,6 +43,7 @@ Invite visitors, update schedules and resend invitation emails
     align-items: center;
     justify-content: center;
 }
+
 .bootstrap-tagsinput .tag-close {
 	margin-left:5px;
     cursor: pointer;
@@ -51,6 +54,14 @@ Invite visitors, update schedules and resend invitation emails
     display: inline-flex;
     align-items: center;
     justify-content: center;
+}
+
+.fc-daygrid-day-events {
+	cursor: pointer;
+}
+
+.fc-event-main {
+	cursor: pointer;
 }
 </style>
 @stop
@@ -93,13 +104,14 @@ Invite visitors, update schedules and resend invitation emails
 						<div class="row">
                 			<div class="mb-3">
                   				<label class="form-label">Department</label>
-								<input type="text" class="form-control" value="{{$dept_name}}" disabled>
-                  				<!--select v-model="invitation.dept_id" class="form-select">
-                      				<option value="0">Please select</option>
+								<!--input type="text" class="form-control" value="{{$dept_name}}" disabled-->
+                  				<select v-model="invitation.to_dept_id" class="form-select">
+                      				<option value="-1">Please select</option>
                       				<option v-for="d in depts" :value="d.dept_id">
                         				{d.full_name}
                       				</option>
-                 				 </select-->
+                 				 </select>
+								  <div v-if="to_dept_msg !== ''" class="ms-1 mt-1 text-danger">{to_dept_msg}</div>
                 			</div>
               			</div>
 						<div class="row">
@@ -231,7 +243,21 @@ createApp({
 			2: "Cancel",
 			3: "Cancel"
 		},
+		p_start_time: "00:00",
+		p_end_time: "23:55",
         calendar: null,
+		cal_start_date: null,
+		cal_end_date: null,
+		cal_view_type: null,
+		colors: [
+            {color: "#e8f4ff", borderColor: "#0b5aa9", textColor: "#0b5aa9"},
+            {color: "#e8f4d6", borderColor: "#53810c", textColor: "#53810c"},
+            {color: "#ffebeb", borderColor: "#ce385b", textColor: "#ce385b"},
+            {color: "#fff5d5", borderColor: "#d49d1c", textColor: "#d49d1c"},
+            {color: "#e2ddff", borderColor: "#7164b5", textColor: "#7164b5"},
+            {color: "#ffe6fe", borderColor: "#780974", textColor: "#780974"},
+            {color: "#ffeade", borderColor: "#d45c1c", textColor: "#d45c1c"},
+        ],
         invite_modal: null,
 		invite_modal_message: "",
 		depts:[],
@@ -247,13 +273,14 @@ createApp({
 		contact0: null,
 		all_day: false,
 		visitor_msg: "",
+		to_dept_msg: "",
 		end_date_msg: "",
 		email_msg: "",
 		first_name_msg: "",
 		last_name_msg: "",
 		id_card_msg: "",
         invitation: {
-			dept_id: {{$dept_id}},
+			to_dept_id: -1,
 			visitors: [],
 			start_date: "",
 			end_date: "",
@@ -286,8 +313,18 @@ createApp({
 				arg.event.remove();
 			}
 		},
-		editable: true,
+		editable: false,
 		dayMaxEvents: true, // allow "more" link when too many events
+		slotLabelFormat: {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        },
+        eventTimeFormat: {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        },
 		events: [],
 		});
     	this.calendar = calendar;
@@ -326,9 +363,7 @@ createApp({
       				format: "HH:mm",
     			},
   			})
-  			.on("show.daterangepicker", function (ev, picker) {
-    			picker.container.find(".calendar-table").hide();
-  			});
+  			.on("show.daterangepicker", this.show_picker);
 
             try {
           	    await this.get_invitation_depts();
@@ -338,73 +373,158 @@ createApp({
             }
         
         },
+		show_picker(ev, picker) {
+			picker.container.find(".calendar-table").hide();
+
+			let start_time_array = this.p_start_time.split(':');
+			let end_time_array = this.p_end_time.split(':');
+			picker.container.find('.hourselect').eq(0).val(parseInt(start_time_array[0]), 0).trigger('change');
+            picker.container.find('.minuteselect').eq(0).val(parseInt(start_time_array[1]), 0).trigger('change');
+            picker.container.find('.hourselect').eq(1).val(parseInt(end_time_array[0]), 23).trigger('change');
+            picker.container.find('.minuteselect').eq(1).val(parseInt(end_time_array[1]), 55).trigger('change');
+		},
 		clear_invite_modal() {
 			this.invitation.visitors.splice(0, this.invitation.visitors.length);
 			
-			this.all_day = false;
+			/*this.all_day = false;
 			$("#interval").val("00:00 - 23:55");
 			$("#interval").prop('disabled', false);
 			var picker = $("#interval").data('daterangepicker');
 			picker.container.find('.hourselect').eq(0).val('0').trigger('change');
             picker.container.find('.minuteselect').eq(0).val('0').trigger('change');
             picker.container.find('.hourselect').eq(1).val('23').trigger('change');
-            picker.container.find('.minuteselect').eq(1).val('55').trigger('change');
+            picker.container.find('.minuteselect').eq(1).val('55').trigger('change');*/
 		},
-        submit() {
-			alert("yo");
-        },
 		dates_set(info) {
       		// Get the start and end dates of the current view
-      		var startDate = info.start;
-      		var endDate = info.end;
-			this.get_invitations(info.start, info.end);
+      		this.cal_start_date = info.start;
+      		this.cal_end_date = info.end;
+			this.cal_view_type = info.view.type;
+			this.get_invitations();
 
       		/*console.log('View Type: ' + info.view.type);
       		console.log('Start Date: ' + startDate.toISOString());
       		console.log('End Date: ' + endDate.toISOString());*/
 		},
-		async get_invitations(start_date, end_date) {
+		async get_invitations() {
 			try{
+				this.calendar.removeAllEvents();
 				const response = await axios.post("/admin/get_invitations", {
-                    start_date: start_date,
-                    end_date: end_date,
+                    start_date: this.cal_start_date,
+                    end_date: this.cal_end_date,
                 });
           		let invitations = response.data.data_list;
-				console.log(invitations);
+				let c_index = 0;
+				for(let i = 0; i < invitations.length; i++)
+				{
+					let inv = invitations[i];
+					let start_date = this.get_date_obj(invitations[i].start_date);
+					let end_date = this.get_date_obj(invitations[i].end_date);
+
+					for (let d = start_date; d <= end_date; d.setDate(d.getDate() + 1)) {
+						let t_start_time = `T${this.format_time_str(inv.start_time)}`
+						let t_end_time = `T${this.format_time_str(inv.end_time)}`
+						if(t_start_time === "T00:00:00" && t_end_time === "T23:55:00")
+						{
+							t_start_time = "";
+							t_end_time = "";
+						}
+						this.calendar.addEvent(
+                			{
+                    			invite_id: inv.id,
+				    			title: inv.dept_name,
+				    			start: `${this.get_date_str(d)}${t_start_time}`,
+								end: `${this.get_date_str(d)}${t_end_time}`,
+				    			color: this.colors[c_index].color,
+				    			borderColor: this.colors[c_index].borderColor,
+				    			textColor: this.colors[c_index].textColor,
+			    			}
+            			);
+					}
+					if (c_index < this.colors.length - 1) c_index++;
+                    else c_index = 0;
+				}
 			}
 			catch(error) {
 				console.log(error);
 			}
 		},
+		get_date_obj(date_str)
+		{
+			//Date format is "YYYY-MM-DD"
+			const [year, month, day] = date_str.split('-').map(Number);
+			return new Date(year, month - 1, day);
+		},
+		get_date_str(date_obj)
+		{
+			const year = date_obj.getFullYear();
+			const month = String(date_obj.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+			const day = String(date_obj.getDate()).padStart(2, '0');
+			return `${year}-${month}-${day}`;
+		},
+		format_time_str(time_str)
+		{
+			time_array = time_str.split('.');
+			return time_array[0];
+		},
         show_create(arg) {
 			this.m_active_ui = 1;
+			this.to_dept_msg = "";
 			this.visitor_msg = "";
 			this.end_date_msg = "";
 
 			this.clear_invite_modal();
 
-			$("#start_date").data('daterangepicker').setStartDate(arg.start);
-			$("#start_date").data('daterangepicker').setEndDate(arg.start);
+			if(this.cal_view_type === "dayGridMonth")
+			{
+				$("#start_date").data('daterangepicker').setStartDate(arg.start);
+				$("#start_date").data('daterangepicker').setEndDate(arg.start);
 
-			arg.end.setDate(arg.end.getDate() - 1);
-			$("#end_date").data('daterangepicker').setStartDate(arg.end);
-			$("#end_date").data('daterangepicker').setEndDate(arg.end);
+				arg.end.setDate(arg.end.getDate() - 1);
+				$("#end_date").data('daterangepicker').setStartDate(arg.end);
+				$("#end_date").data('daterangepicker').setEndDate(arg.end);
 
-			
-            //this.active_ui = 2;
-            /*this.calendar.removeAllEvents();
-            this.calendar.addEvent(
-                {
-                    id: 10,
-				    title: "Yo",
-				    start: "2022-10-24",
-				    color: "#dfffe1",
-				    borderColor: "#1c8b24",
-				    textColor: "#1c8b24",
-			    },
-            );
-            console.log(this.calendar);
-            */
+				this.all_day = false;
+				this.p_start_time = "00:00";
+				this.p_end_time = "23:55";
+				$("#interval").val(`${this.p_start_time} - ${this.p_end_time}`);
+				$("#interval").prop('disabled', false);
+			}
+			else{
+
+				if (arg.start.getDate() !== arg.end.getDate()) {
+					alert("Horizontal selection is not allowed in week mode");
+					this.calendar.unselect();
+					return;
+				}
+
+				let start_dt_array = arg.startStr.split('T');
+				let end_dt_array = arg.endStr.split('T');
+				$("#start_date").data('daterangepicker').setStartDate(new Date(start_dt_array[0]));
+				$("#start_date").data('daterangepicker').setEndDate(new Date(start_dt_array[0]));
+
+				$("#end_date").data('daterangepicker').setStartDate(new Date(start_dt_array[0]));
+				$("#end_date").data('daterangepicker').setEndDate(new Date(start_dt_array[0]));
+
+				if(arg.allDay)
+				{
+					this.all_day = true;
+					this.p_start_time = "00:00";
+					this.p_end_time = "23:55";
+					$("#interval").val(`${this.p_start_time} - ${this.p_end_time}`);
+					$("#interval").prop('disabled', true);
+				}
+				else {
+					this.all_day = false;
+					let start_time_array = start_dt_array[1].split(':');
+					let end_time_array = end_dt_array[1].split(':');
+					this.p_start_time = `${start_time_array[0]}:${start_time_array[1]}`;
+					this.p_end_time = `${end_time_array[0]}:${end_time_array[1]}`;
+					$("#interval").prop('disabled', false);
+					$("#interval").val(`${this.p_start_time} - ${this.p_end_time}`);
+				}
+			}
+
             this.calendar.unselect();
             this.invite_modal.show();
         },
@@ -432,6 +552,8 @@ createApp({
 			if(this.m_active_ui === 1)
 			{
 				let is_valid = true;
+				this.invite_modal_message = "";
+				this.to_dept_msg = "";
 				this.visitor_msg = "";
 				this.end_date_msg = "";
 				if(this.invitation.visitors.length === 0)
@@ -440,11 +562,14 @@ createApp({
 					is_valid = false;
 				}
 
-				this.invitation.start_date = $("#start_date").val();
-				this.invitation.end_date = $("#end_date").val();
+				if(this.invitation.to_dept_id == "-1")
+				{
+					this.to_dept_msg = "Please select Department";
+					is_valid = false;
+				}
 
-				let d1 = moment(this.invitation.start_date, "DD/MM/YYYY");
-				let d2 = moment(this.invitation.end_date, "DD/MM/YYYY");
+				let d1 = moment( $("#start_date").val(), "DD/MM/YYYY");
+				let d2 = moment($("#end_date").val(), "DD/MM/YYYY");
 
 				if (d1 > d2) {
                 	this.end_date_msg = "End Date is greater";
@@ -453,6 +578,45 @@ createApp({
 
 				if(!is_valid)
 					return;
+
+				this.invitation.start_date = d1.format("YYYY-MM-DD");
+				this.invitation.end_date = d2.format("YYYY-MM-DD");
+
+				if(this.all_day)
+				{
+					this.invitation.start_time = "00:00";
+					this.invitation.end_time = "23:55";
+				}
+				else {
+					let time_array = $("#interval").val().split(" ");
+					this.invitation.start_time = time_array[0];
+					this.invitation.end_time = time_array[2];
+				}
+
+				try{
+					const response = await axios.post("/admin/create_invitation", this.invitation);
+          			if(response.data.status === "I")
+					{
+						//Force log out
+						this.invite_modal_message = "Token expired. You will be logged out soon...";
+            			setTimeout(function() {window.location.href = "/admin/logout";}, 3000);
+						return;
+					}
+					else if(response.data.status === "F")
+					{
+						this.invite_modal_message = "Failed to create the inviation";
+						return;
+					}
+
+					//refresh calendar
+					this.get_invitations();
+					this.invite_modal.hide();
+				}
+				catch(error) {
+					console.log(error);
+					this.invite_modal_message = "Failed to create the inviation";
+				}
+				
 			}
 			else if(this.m_active_ui === 2)
 			{
@@ -485,35 +649,49 @@ createApp({
 				let is_valid = true;
 				if (this.contact.first_name === "")
 				{
-					this.first_name_msg = "First name is blank";
+					this.first_name_msg = "First Name is blank";
 					is_valid = false;
 				}
 				if (this.contact.last_name === "")
 				{
-					this.last_name_msg = "Last name is blank";
+					this.last_name_msg = "Last Name is blank";
 					is_valid = false;
 				}
 				if (this.contact.id_card === "")
 				{
-					this.id_card_msg = "ID card is blank";
+					this.id_card_msg = "ID Name is blank";
 					is_valid = false;
 				}
 
 				if(!is_valid) return;
-				
-				let duplicated = false;
-                for (let i = 0; i < this.invitation.visitors.length; i++)
-                {
-                    if (this.invitation.visitors[i].email === this.contact.email) 
-					{
-                        duplicated = true;
-                        break;  
-                	}
-				}
-				if (!duplicated)
-					this.invitation.visitors.push({id: this.contact.id, email: this.contact.email, name: `${this.contact.first_name} ${this.contact.last_name}`});
 
-				this.m_active_ui = 1;
+				try{
+					const response = await axios.post("/admin/upsert_contact", this.contact);
+					if(response.data.status === "I")
+          			{
+						//Force log out
+						this.invite_modal_message = "Token expired. You will be logged out soon...";
+            			setTimeout(function() {window.location.href = "/admin/logout";}, 3000);
+					}
+
+					let duplicated = false;
+                	for (let i = 0; i < this.invitation.visitors.length; i++)
+                	{
+                    	if (this.invitation.visitors[i].email === this.contact.email) 
+						{
+                        	duplicated = true;
+                        	break;  
+                		}
+					}
+					if (!duplicated)
+						this.invitation.visitors.push({id: this.contact.id, email: this.contact.email, name: `${this.contact.first_name} ${this.contact.last_name}`});
+
+					this.m_active_ui = 1;
+				}
+				catch(error){
+					console.log(error);
+					this.invite_modal_message = "Server error. Please try again later."
+				}
 			}
 		},
 		modal_cancel() {

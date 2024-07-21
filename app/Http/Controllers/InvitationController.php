@@ -35,23 +35,16 @@ class InvitationController extends AppController
             return ["status" => "I"];
         }
 
-        $dept_level = $chk["u_data"]["dept_level"];
         $dept_id = $chk["u_data"]["dept_id"];
 
         $query = DB::table("PkDepartments")
             ->where('IsActive', '=', 1)
             ->where('DeptID', '<>', 0);
 
-        if($dept_level == "1") {
-            $query->where(function ($q) use ($dept_id) {
-                $q->where('DeptID', $dept_id);
-                $q->orWhere('SupDepID', $dept_id);
-            });
-        } elseif($dept_level == "2") {
-            $query->where('DeptID', $dept_id);
-        } else {
-            //Invalid. Will prevent later
-        }
+        $query->where(function ($q) use ($dept_id) {
+            $q->where('DeptID', $dept_id);
+            $q->orWhere('SupDepID', $dept_id);
+        });
 
         $depts = $query->select('DeptID as dept_id', 'Fullname as full_name')
             ->orderByDesc('DeptID')
@@ -84,7 +77,7 @@ class InvitationController extends AppController
         return ["status" => "T", "contact" => $contact];
     }
 
-    public function UpdateContact(Request $request)
+    public function UpsertContact(Request $request)
     {
         $chk = $this->CheckAdmin($request);
         if(!$chk["is_ok"]) {
@@ -100,11 +93,11 @@ class InvitationController extends AppController
             "phone" => $request->phone,
         ];
 
-        if($id === 0) {
-            if($result["u_data"]["dept_level"] > 1) {
-                $contact["dept_id"] = $result["u_data"]["sup_dept_id"];
+        if($id == "0") {
+            if($chk["u_data"]["dept_level"] > 1) {
+                $contact["dept_id"] = $chk["u_data"]["sup_dept_id"];
             } else {
-                $contact["dept_id"] = $result["u_data"]["dept_id"];
+                $contact["dept_id"] = $chk["u_data"]["dept_id"];
             }
 
             DB::table('PkContacts')->insert($contact);
@@ -122,6 +115,8 @@ class InvitationController extends AppController
             return ["status" => "I"];
         }
 
+        $dept_id = $chk["u_data"]["dept_id"];
+
         $start_date = $request->start_date;
         $end_date = $request->end_date;
 
@@ -129,9 +124,48 @@ class InvitationController extends AppController
             ->where('start_date', '<=', $end_date)
             ->where('end_date', '>=', $start_date)
             ->leftJoin('PkDepartments as d', 'd.DeptID', '=', 'i.to_dept_id')
+            ->where(function ($q) use ($dept_id) {
+                $q->where('d.DeptID', $dept_id);
+                $q->orWhere('d.SupDepID', $dept_id);
+            })
             ->select('i.*', 'd.DeptName as dept_name')->get();
 
         return ["status" => "T", "data_list" => $invitations];
+    }
+
+    public function CreateInvitation(Request $request)
+    {
+        $chk = $this->CheckAdmin($request);
+        if(!$chk["is_ok"]) {
+            return ["status" => "I"];
+        }
+
+        $invite = [
+            "to_dept_id" => $request->to_dept_id,
+            "start_date" => $request->start_date,
+            "end_date" => $request->end_date,
+            "start_time" => $request->start_time,
+            "end_time" => $request->end_time,
+            "email_time" => Carbon::now()->addMinutes(5),
+        ];
+
+        $visitors = $request->visitors;
+        DB::beginTransaction();
+        try {
+            $invite_id = DB::table('VC_invite')->insertGetId($invite);
+            foreach ($visitors as $visitor) {
+                DB::table('VC_invite_visitor')->insert([
+                    "invite_id" => $invite_id,
+                    "contact_id" => $visitor["id"],
+                ]);
+            }
+            DB::commit();
+            return ["status" => "T"];
+        } catch (Exception $e) {
+            DB::rollback();
+            return ["status" => "F", "err_message" => $e->getMessage()];
+        }
+
     }
 
     public function GetContactByInviteId(Request $request)

@@ -152,13 +152,13 @@ class OperatorController extends AppController
 
         $dept_id = $chk["u_data"]["dept_id"];
         $depts = DB::table("PkDepartments as d")
-            ->where('IsActive', 1)
-            ->where('DeptID', '<>', 0)
+            ->where('d.IsActive', 1)
+            ->where('d.DeptID', '<>', 0)
             ->where(function ($q) use ($dept_id) {
-                $q->where('DeptID', $dept_id);
-                $q->orWhere('SupDepID', $dept_id);
+                $q->where('d.DeptID', $dept_id);
+                $q->orWhere('d.SupDepID', $dept_id);
             })
-            ->orderBy('DeptID')
+            ->orderBy('d.DeptID')
             ->select('d.DeptID as dept_id', 'd.Fullname as full_name')
             ->get();
 
