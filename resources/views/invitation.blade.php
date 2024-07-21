@@ -1,6 +1,6 @@
 @extends('layout')
 @section('title')
-Dashboard
+Invitations
 @stop
 @section('header')
 Invitations
@@ -263,38 +263,8 @@ createApp({
       }
     },
     mounted() {
-		//this.init_ui();
-		$("#start_date").daterangepicker({
-  			singleDatePicker: true,
-  			startDate: moment().startOf("hour"),
-  			endDate: moment().startOf("hour").add(32, "hour"),
-  			locale: {
-    			format: "DD/MM/YYYY",
-  			},
-		});
-
-		$("#end_date").daterangepicker({
-  			singleDatePicker: true,
-  			startDate: moment().startOf("hour"),
-  			endDate: moment().startOf("hour").add(32, "hour"),
-  			locale: {
-    			format: "DD/MM/YYYY",
-  			},
-		});
-
-		$("#interval").val("00:00 - 23:55");
-		$("#interval").daterangepicker({
-    		timePicker: true,
-    		timePicker24Hour: true,
-    		timePickerIncrement: 5,
-    		locale: {
-      			format: "HH:mm",
-    		},
-  		})
-  		.on("show.daterangepicker", function (ev, picker) {
-    		picker.container.find(".calendar-table").hide();
-  		});
-
+		this.init_ui();
+		
 		//Initialize Calendar
         var calendarEl = this.$refs.my_calendar;
         var calendar = new FullCalendar.Calendar(calendarEl, {
@@ -309,6 +279,7 @@ createApp({
 		selectable: true,
 		selectMirror: true,
 		select: this.show_create,
+		datesSet: this.dates_set,
 		eventClick: function (arg) {
             console.log(arg.event);
 			if (confirm("Are you sure you want to delete this event?")) {
@@ -318,17 +289,47 @@ createApp({
 		editable: true,
 		dayMaxEvents: true, // allow "more" link when too many events
 		events: [],
-	});
-    this.calendar = calendar;
-    this.calendar.render();
+		});
+    	this.calendar = calendar;
+    	this.calendar.render();
 
 	//Initialize modal
     this.invite_modal = new bootstrap.Modal(this.$refs.invite_modal, { keyboard: false });
-
 	this.contact0 = { ...this.contact };
     },
     methods: {
 		async init_ui() {
+			$("#start_date").daterangepicker({
+  				singleDatePicker: true,
+  				startDate: moment().startOf("hour"),
+  				endDate: moment().startOf("hour").add(32, "hour"),
+  				locale: {
+    				format: "DD/MM/YYYY",
+  				},
+			});
+
+			$("#end_date").daterangepicker({
+  				singleDatePicker: true,
+  				startDate: moment().startOf("hour"),
+  				endDate: moment().startOf("hour").add(32, "hour"),
+  				locale: {
+    				format: "DD/MM/YYYY",
+  				},
+			});
+
+			$("#interval").val("00:00 - 23:55");
+			$("#interval").daterangepicker({
+    			timePicker: true,
+    			timePicker24Hour: true,
+    			timePickerIncrement: 5,
+    			locale: {
+      				format: "HH:mm",
+    			},
+  			})
+  			.on("show.daterangepicker", function (ev, picker) {
+    			picker.container.find(".calendar-table").hide();
+  			});
+
             try {
           	    await this.get_invitation_depts();
             }
@@ -352,6 +353,29 @@ createApp({
         submit() {
 			alert("yo");
         },
+		dates_set(info) {
+      		// Get the start and end dates of the current view
+      		var startDate = info.start;
+      		var endDate = info.end;
+			this.get_invitations(info.start, info.end);
+
+      		/*console.log('View Type: ' + info.view.type);
+      		console.log('Start Date: ' + startDate.toISOString());
+      		console.log('End Date: ' + endDate.toISOString());*/
+		},
+		async get_invitations(start_date, end_date) {
+			try{
+				const response = await axios.post("/admin/get_invitations", {
+                    start_date: start_date,
+                    end_date: end_date,
+                });
+          		let invitations = response.data.data_list;
+				console.log(invitations);
+			}
+			catch(error) {
+				console.log(error);
+			}
+		},
         show_create(arg) {
 			this.m_active_ui = 1;
 			this.visitor_msg = "";

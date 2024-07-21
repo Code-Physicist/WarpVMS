@@ -115,6 +115,42 @@ class InvitationController extends AppController
         return ["status" => "T", "contact" => $contact];
     }
 
+    public function GetInvitations(Request $request)
+    {
+        $chk = $this->CheckAdmin($request);
+        if(!$chk["is_ok"]) {
+            return ["status" => "I"];
+        }
+
+        $start_date = $request->start_date;
+        $end_date = $request->end_date;
+
+        $invitations = DB::table("VC_invite as i")
+            ->where('start_date', '<=', $end_date)
+            ->where('end_date', '>=', $start_date)
+            ->leftJoin('PkDepartments as d', 'd.DeptID', '=', 'i.to_dept_id')
+            ->select('i.*', 'd.DeptName as dept_name')->get();
+
+        return ["status" => "T", "data_list" => $invitations];
+    }
+
+    public function GetContactByInviteId(Request $request)
+    {
+        $chk = $this->CheckAdmin($request);
+        if(!$chk["is_ok"]) {
+            return ["status" => "I"];
+        }
+
+        $invite_id = $request->invite_id;
+
+        $contacts = DB::table("VC_invite_visitor as iv")
+            ->where('iv.invite_id', '=', $invite_id)
+            ->leftJoin('PkContacts as c', 'c.id', '=', 'iv.contact_id')
+            ->select('c.*')->get();
+
+        return ["status" => "T", "data_list" => $contacts];
+    }
+
     public function SendInviteEmail(Request $request)
     {
         $contacts = $request->contacts;
