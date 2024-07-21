@@ -168,7 +168,7 @@ class InvitationController extends AppController
 
     }
 
-    public function GetContactByInviteId(Request $request)
+    public function GetContactsByInviteId(Request $request)
     {
         $chk = $this->CheckAdmin($request);
         if(!$chk["is_ok"]) {

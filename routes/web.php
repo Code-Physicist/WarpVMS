@@ -49,7 +49,7 @@ Route::post('/admin/update_operator_edb', [OperatorController::class, 'UpdateOpe
 Route::post('/admin/get_invitation_depts', [InvitationController::class, 'GetInvitationDepts']);
 Route::post('/admin/get_contact', [InvitationController::class, 'GetContactByEmail']);
 Route::post('/admin/get_invitations', [InvitationController::class, 'GetInvitations']);
-Route::post('/admin/get_contacts', [InvitationController::class, 'GetContactByInviteId']);
+Route::post('/admin/get_contacts', [InvitationController::class, 'GetContactsByInviteId']);
 Route::post('/admin/upsert_contact', [InvitationController::class, 'UpsertContact']);
 Route::post('/admin/create_invitation', [InvitationController::class, 'CreateInvitation']);
 Route::post('/admin/send_invite_email', [InvitationController::class, 'SendInviteEmail']);

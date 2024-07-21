@@ -12,58 +12,6 @@ Invite visitors, update schedules and resend invitation emails
 <link rel="stylesheet" href="{{ asset('css/daterange.css') }}" />
 <link rel="stylesheet" href="{{ asset('css/full-calendar.min.css') }}" />
 <link rel="stylesheet" href="{{ asset('css/full-calendar.custom.css') }}" />
-<style>
-.btn-group-xs > .btn, .btn-xs {
-    padding: 1px 5px;
-    font-size: 12px;
-    line-height: 1.5;
-}
-
-.bootstrap-tagsinput {
-    width: 100%;
-	min-height: 72px;
-    padding: .375rem .75rem;
-    font-weight: 400;
-    color: #495057;
-    display: flex;
-	gap:8px;
-    align-items: start;
-    flex-wrap: wrap;
-    background-color: #fff;
-    background-clip: padding-box;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
-}
-
-.bootstrap-tagsinput .tag {
-    line-height: 14px;
-    font-size: .7rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.bootstrap-tagsinput .tag-close {
-	margin-left:5px;
-    cursor: pointer;
-    width: 14px;
-    height: 14px;
-    line-height: 14px;
-    font-size: 1rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.fc-daygrid-day-events {
-	cursor: pointer;
-}
-
-.fc-event-main {
-	cursor: pointer;
-}
-</style>
 @stop
 @section('content')
 <div id="app">
@@ -210,6 +158,66 @@ Invite visitors, update schedules and resend invitation emails
             </div>
         </div>
     </div>
+	<div class="modal fade" ref="event_modal" data-bs-backdrop="static" data-bs-keyboard="false"
+                        tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">
+					    {event.title}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+					<div class="row mb-2">
+						<div class="col-5 text-end">
+							<strong>Dates:</strong>
+						</div>
+						<div class="col-7 text-start">
+							07/07/2024 - 12/07/2024
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col-5 text-end">
+							<strong>Time Interval:</strong>
+						</div>
+						<div class="col-7 text-start">
+							10:00 - 16:00
+						</div>
+					</div>
+					<div class="table-outer mb-2">
+						<div>
+						<table class="table table-bordered m-0">
+						<thead>
+							<tr>
+								<th>#</th>
+								<th>Visitor</th>
+								<th>Email</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr v-for="(visitor, index) in event.visitors">
+                    			<td>{index+1}.</td>
+								<td>{visitor.first_name} {visitor.last_name}</td>
+                    			<td>{visitor.email}</td>
+							</tr>
+						</tbody>
+					</table>
+						</div>
+					</div>
+					
+				</div>
+                <div class="modal-footer">
+                    <button v-show="admin_level_id > 3" @click="event_modal.hide()" type="button" class="btn btn-secondary">
+						Cancel
+                    </button>
+                    <button @click="resend()" type="button" class="btn btn-primary">
+						{ admin_level_id > 3? 'Resend Email':'Close'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 @stop
 @section('script')
@@ -219,14 +227,11 @@ Invite visitors, update schedules and resend invitation emails
 <script src="{{ asset('js/daterange.js') }}"></script>
 <script src="{{ asset('js/full-calendar.min.js') }}"></script>
 <script>
-//External function
-function test() {
-    alert("Yo");
-}
 const { createApp } = Vue;
 createApp({
     data() {
       return {
+		admin_level_id: {{$admin_level_id}},
         m_active_ui: 1,
 		modal_titles: {
 			1: "Invite Visitors",
@@ -259,6 +264,7 @@ createApp({
             {color: "#ffeade", borderColor: "#d45c1c", textColor: "#d45c1c"},
         ],
         invite_modal: null,
+		event_modal: null,
 		invite_modal_message: "",
 		depts:[],
 		visitors:[],
@@ -287,6 +293,11 @@ createApp({
 			start_time: "",
 			end_time:""
         },
+		event: {
+			invite_id: 0,
+			title: "",
+			visitors: []
+		},
       }
     },
     mounted() {
@@ -307,12 +318,7 @@ createApp({
 		selectMirror: true,
 		select: this.show_create,
 		datesSet: this.dates_set,
-		eventClick: function (arg) {
-            console.log(arg.event);
-			if (confirm("Are you sure you want to delete this event?")) {
-				arg.event.remove();
-			}
-		},
+		eventClick: this.show_event,
 		editable: false,
 		dayMaxEvents: true, // allow "more" link when too many events
 		slotLabelFormat: {
@@ -332,6 +338,7 @@ createApp({
 
 	//Initialize modal
     this.invite_modal = new bootstrap.Modal(this.$refs.invite_modal, { keyboard: false });
+	this.event_modal = new bootstrap.Modal(this.$refs.event_modal, { keyboard: false });
 	this.contact0 = { ...this.contact };
     },
     methods: {
@@ -371,7 +378,6 @@ createApp({
             catch(error) {
                 console.log(error);
             }
-        
         },
 		show_picker(ev, picker) {
 			picker.container.find(".calendar-table").hide();
@@ -385,15 +391,6 @@ createApp({
 		},
 		clear_invite_modal() {
 			this.invitation.visitors.splice(0, this.invitation.visitors.length);
-			
-			/*this.all_day = false;
-			$("#interval").val("00:00 - 23:55");
-			$("#interval").prop('disabled', false);
-			var picker = $("#interval").data('daterangepicker');
-			picker.container.find('.hourselect').eq(0).val('0').trigger('change');
-            picker.container.find('.minuteselect').eq(0).val('0').trigger('change');
-            picker.container.find('.hourselect').eq(1).val('23').trigger('change');
-            picker.container.find('.minuteselect').eq(1).val('55').trigger('change');*/
 		},
 		dates_set(info) {
       		// Get the start and end dates of the current view
@@ -401,10 +398,6 @@ createApp({
       		this.cal_end_date = info.end;
 			this.cal_view_type = info.view.type;
 			this.get_invitations();
-
-      		/*console.log('View Type: ' + info.view.type);
-      		console.log('Start Date: ' + startDate.toISOString());
-      		console.log('End Date: ' + endDate.toISOString());*/
 		},
 		async get_invitations() {
 			try{
@@ -468,6 +461,12 @@ createApp({
 			return time_array[0];
 		},
         show_create(arg) {
+			if(this.admin_level_id == "2" || this.admin_level_id == "3")
+			{	
+				this.calendar.unselect();
+				return;
+			}
+
 			this.m_active_ui = 1;
 			this.to_dept_msg = "";
 			this.visitor_msg = "";
@@ -528,6 +527,27 @@ createApp({
             this.calendar.unselect();
             this.invite_modal.show();
         },
+		async show_event(arg) {
+            this.event.invite_id = arg.event.extendedProps.invite_id;
+			this.event.title = arg.event.title;
+			console.log(arg.event.title);
+
+			try {
+				const response = await axios.post("/admin/get_contacts", {invite_id: this.event.invite_id});
+				this.event.visitors = response.data.data_list;
+				this.event_modal.show();
+			}
+			catch(error) {
+				console.log(error);
+			}
+		},
+		resend() {
+			if(this.admin_level_id <= 3) {
+				this.event_modal.hide();
+				return;
+			}
+
+		},
 		async get_invitation_depts() {
           const response = await axios.post("/admin/get_invitation_depts");
           this.depts = response.data.data_list;
