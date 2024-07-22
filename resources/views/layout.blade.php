@@ -127,10 +127,13 @@
               </a>
             </div>
             <!-- App brand sm end -->
+            <div class="dropdown d-flex align-items-center ms-4 pt-2">
+                      <h4>{{$dept_name}}</h4>
+            </div>
 
             <!-- App header actions start -->
             <div class="header-actions">
-
+            
               <div class="dropdown ms-3">
                 <a class="dropdown-toggle d-flex align-items-center" href="#!" role="button" data-bs-toggle="dropdown"
                   aria-expanded="false">

@@ -84,12 +84,12 @@ class OperatorController extends AppController
 
         $dept_id = $request->dept_id;
 
-        //6 digit random number
-        $pass = strval(random_int(100000, 999999));
-
         if($chk["u_data"]["dept_id"] == 0) {
             $dept_id = 0;
         }
+
+        //6 digit random number
+        $pass = strval(random_int(100000, 999999));
 
         $operator = [
             "adminname" => $request->email,
@@ -103,9 +103,10 @@ class OperatorController extends AppController
             "exptime" => Carbon::now()->addDays(30),
             "active" => 1,
         ];
+        $operator["pass"] = $pass;
 
         DB::table('PkAdminweb')->insert($operator);
-        return ["status" => "T", "pass" => $pass];
+        return ["status" => "T", "admin" => $operator];
     }
 
     public function UpdateOperator(Request $request)

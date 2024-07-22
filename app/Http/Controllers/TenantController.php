@@ -81,7 +81,8 @@ class TenantController extends AppController
         ];
 
         DB::table('PkAdminweb')->insert($tenant);
-        return $this->MakeResponse(["status" => "T", "pass" => $pass], $chk);
+        $tenant["pass"] = $pass;
+        return $this->MakeResponse(["status" => "T", "admin" => $tenant], $chk);
     }
 
     public function UpdateTenant(Request $request)
@@ -119,30 +120,38 @@ class TenantController extends AppController
 
     }
 
-    public function SendTenantEmail(Request $request)
+    public function SendAdminEmail(Request $request)
     {
         try {
+            $step = 1;
             $admin_url = $request->admin_url;
-            $tenant = $request->tenant;
-            $email = $tenant["adminname"];
-            $dept = DB::table('PkDepartments')->where('DeptID', $tenant["Ternsubcode"])->first();
+            $admin = $request->admin;
+            $email = $admin["adminname"];
+            $dept = DB::table('PkDepartments')->where('DeptID', $admin["Ternsubcode"])->first();
 
             $data = array(
                 'admin_url' => $admin_url,
-                'admin_name' => $tenant["name"],
+                'admin_name' => $admin["name"],
                 'admin_dept' => $dept->Fullname,
-                'username' => $tenant["adminname"],
-                'password' => $tenant["pass"],
+                'username' => $admin["adminname"],
+                'password' => $admin["pass"],
             );
 
-            Mail::send("emails.tenant", $data, function ($message) use ($email) {
+            $step = 2;
+            Mail::send("emails.admin", $data, function ($message) use ($email) {
                 $message->to($email)
-                        ->subject("Your Tenant Account");
+                        ->subject("Welcome to WarpVMS system");
                 $message->from("VMS_Admin@gmail.com", "VMS Admin");
             });
-            return ["result" => "T", "message" => $tenant["adminname"]];
+            return ["status" => "T"];
         } catch (Exception $e) {
-            return ["result" => "F", "message" => $e->getMessage()];
+            if($step === 2) {
+                //Email sent error
+                return ["status" => "M"];
+            } else {
+                //DB error
+                return ["status" => "F"];
+            }
         }
     }
 

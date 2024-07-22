@@ -96,6 +96,110 @@ class AuthController extends AppController
         }
     }
 
+    public function Reset(Request $request)
+    {
+        $user = $request->email;
+        $admin = DB::table('PkAdminweb')
+                    ->where('adminname', '=', $user)
+                    ->first();
+
+        if(!$admin) {
+            return ["status" => "I"];
+        }
+
+        $acct = DB::table('VC_reset_account')
+                    ->where('adminname', '=', $user)
+                    ->first();
+
+        if($acct && Carbon::now()->addMinutes(-1) < $acct->create_time) {
+            return ["status" => "W"];
+        }
+
+        DB::table('VC_reset_account')
+            ->where('adminname', '=', $user)
+            ->delete();
+
+        $reset_code = rand(1000000, 9999999);
+
+        DB::table('VC_reset_account')->insert([
+            "adminname" => $user,
+            "reset_code" => $reset_code,
+            "create_time" => Carbon::now(),
+        ]);
+
+        return ["status" => "T", "email" => $user, "reset_code" => $reset_code];
+    }
+
+    public function SendResetEmail(Request $request)
+    {
+        $email = $request->email;
+        $data = array(
+            "reset_url" => $request->reset_url,
+        );
+
+        Mail::send("emails.reset", $data, function ($message) use ($email) {
+            $message->to($email)
+                    ->subject("Reset Password for VMS");
+            $message->from("VMS_Admin@gmail.com", "VMS Admin");
+        });
+    }
+
+    public function ResetPasswordPage(Request $request)
+    {
+        $email = $request->email;
+        $rst_code = $request->rst_code;
+        $acct = DB::table('VC_reset_account')
+                ->where('adminname', '=', $email)
+                ->where('reset_code', '=', $rst_code)
+                ->first();
+
+        if(!$acct) {
+            return "Invalid request";
+        }
+
+        if($acct->create_time < Carbon::now()->addMinutes(-20)) {
+            return "Page Expired";
+        }
+
+        return response()->view("vms.reset_passwrd", ["email" => $email, "rst_code" => $rst_code]);
+    }
+
+    public function ResetPassword(Request $request)
+    {
+        $email = $request->email;
+        $rst_code = $request->rst_code;
+        $pass1 = $request->pass1;
+        $pass2 = $request->pass2;
+
+        if($pass1 === "" || $pass2 === "" || $pass1 !== $pass2) {
+            return ["result" => "M"];
+        }
+
+        $acct = DB::table('VC_reset_account')
+                ->where('adminname', '=', $email)
+                ->where('reset_code', '=', $rst_code)
+                ->first();
+
+        if(!$acct || $acct->create_time < Carbon::now()->addMinutes(-20)) {
+            return ["result" => "I"];
+        }
+
+        $pass1 = strtoupper(md5($pass1));
+
+        DB::table('PkAdminweb')
+            ->where("adminname", $email)
+            ->update(
+                [
+                    "password1" => $pass1,
+                    "xtimeflag" => 0,
+                    "xtime" => Carbon::now()->addMinutes(-10),
+                    "exptime" => Carbon::now()->addDays(90)
+                ]
+            );
+
+        return ["result" => "T"];
+    }
+
     public function Logout(Request $request)
     {
         $cookie = Cookie($this->TokenName, "");

@@ -171,10 +171,10 @@ Invite visitors, update schedules and resend invitation emails
                 <div class="modal-body">
 					<div class="row mb-2">
 						<div class="col-5 text-end">
-							<strong>Start Date:</strong>
+							<strong>Dates:</strong>
 						</div>
 						<div class="col-7 text-start">
-							07/07/2024 - 12/07/2024
+							{event.start_date} - {event.end_date}
 						</div>
 					</div>
 					<div class="row mb-4">
@@ -182,7 +182,7 @@ Invite visitors, update schedules and resend invitation emails
 							<strong>Time Interval:</strong>
 						</div>
 						<div class="col-7 text-start">
-							10:00 - 16:00
+							{event.interval}
 						</div>
 					</div>
 					<div class="table-outer mx-3 mb-3">
@@ -296,6 +296,9 @@ createApp({
 		event: {
 			invite_id: 0,
 			title: "",
+			start_date: "",
+			end_date: "",
+			interval: "",
 			visitors: []
 		},
       }
@@ -414,23 +417,50 @@ createApp({
 					let start_date = this.get_date_obj(invitations[i].start_date);
 					let end_date = this.get_date_obj(invitations[i].end_date);
 
-					for (let d = start_date; d <= end_date; d.setDate(d.getDate() + 1)) {
-						let t_start_time = `T${this.format_time_str(inv.start_time)}`
-						let t_end_time = `T${this.format_time_str(inv.end_time)}`
-						if(t_start_time === "T00:00:00" && t_end_time === "T23:55:00")
-						{
-							t_start_time = "";
-							t_end_time = "";
-						}
+					let start_time = `${this.format_time_str(inv.start_time)}`;
+					let end_time = `${this.format_time_str(inv.end_time)}`;
+					if(start_time === "00:00:00" && end_time === "23:55:00")
+					{
 						this.calendar.addEvent(
                 			{
                     			invite_id: inv.id,
 				    			title: inv.dept_name,
-				    			start: `${this.get_date_str(d)}${t_start_time}`,
-								end: `${this.get_date_str(d)}${t_end_time}`,
+				    			start: `${invitations[i].start_date}`,
+								end: `${invitations[i].end_date}`,
 				    			color: this.colors[c_index].color,
 				    			borderColor: this.colors[c_index].borderColor,
 				    			textColor: this.colors[c_index].textColor,
+
+								start_date: `${invitations[i].start_date}`,
+								end_date: `${invitations[i].end_date}`,
+								start_time: `${start_time}`,
+								end_time: `${end_time}`,
+								all_day: true
+			    			}
+            			);
+
+						if (c_index < this.colors.length - 1) c_index++;
+                   		else c_index = 0;
+						continue;
+					}
+
+					for (let d = start_date; d <= end_date; d.setDate(d.getDate() + 1)) {
+
+						this.calendar.addEvent(
+                			{
+                    			invite_id: inv.id,
+				    			title: inv.dept_name,
+				    			start: `${this.get_date_str(d)}T${start_time}`,
+								end: `${this.get_date_str(d)}T${end_time}`,
+				    			color: this.colors[c_index].color,
+				    			borderColor: this.colors[c_index].borderColor,
+				    			textColor: this.colors[c_index].textColor,
+
+								start_date: `${invitations[i].start_date}`,
+								end_date: `${invitations[i].end_date}`,
+								start_time: `${start_time.slice(0, -3)}`,
+								end_time: `${end_time.slice(0, -3)}`,
+								all_day: false,
 			    			}
             			);
 					}
@@ -454,6 +484,12 @@ createApp({
 			const month = String(date_obj.getMonth() + 1).padStart(2, '0'); // Months are zero-based
 			const day = String(date_obj.getDate()).padStart(2, '0');
 			return `${year}-${month}-${day}`;
+		},
+		format_date_str(date_str)
+		{
+			//Convert YYYY-MM-DD to "DD/MM/YYYY"
+			const [year, month, day] = date_str.split('-');
+			return `${day}/${month}/${year}`;
 		},
 		format_time_str(time_str)
 		{
@@ -530,7 +566,15 @@ createApp({
 		async show_event(arg) {
             this.event.invite_id = arg.event.extendedProps.invite_id;
 			this.event.title = arg.event.title;
-			console.log(arg.event.title);
+			this.event.start_date = this.format_date_str(arg.event.extendedProps.start_date);
+			this.event.end_date = this.format_date_str(arg.event.extendedProps.end_date);
+			if(arg.event.extendedProps.all_day)
+			{
+				this.event.interval = "All day";
+			}
+			else {
+				this.event.interval = `${arg.event.extendedProps.start_time} - ${arg.event.extendedProps.end_time}`;
+			}
 
 			try {
 				const response = await axios.post("/admin/get_contacts", {invite_id: this.event.invite_id});
@@ -546,6 +590,9 @@ createApp({
 				this.event_modal.hide();
 				return;
 			}
+
+			alert("Under construction");
+			return;
 
 		},
 		async get_invitation_depts() {
@@ -627,6 +674,9 @@ createApp({
 						this.invite_modal_message = "Failed to create the inviation";
 						return;
 					}
+
+					//No waiting until email sent
+					axios.post("/admin/send_invite_email", {invite_id: response.data.invite_id, visitors: response.data.visitors});
 
 					//refresh calendar
 					this.get_invitations();

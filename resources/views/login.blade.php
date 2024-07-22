@@ -37,7 +37,7 @@
                     <img src="{{ asset('images/BTSVISION_Logo_DarkBlue.svg') }}" class="img-fluid login-logo" alt="BTS Visionary Park" />
                     <h3 v-show="true" class="h4-login-form my-0 pe-2" style="display:none;">{active_ui === 1? 'Login':'Reset'}</h3>
                   </a>
-                  <div v-show="active_ui === 1">
+                  <div v-show="active_ui === 1" style="display:none;">
                   <div class="mb-3">
                     <label class="form-label">Your Email <span class="text-danger">*</span></label>
                     <input type="text" v-model.trim="user.email" class="form-control" autocomplete="autocomplete"
@@ -49,10 +49,16 @@
                     <input type="password" v-model.trim="user.pass" class="form-control" placeholder="Enter password" />
                     <div v-if="password_msg !== ''" class="ms-1 mt-1 text-danger">{pass_msg}</div>
                   </div>
-                  <div class="d-flex align-items-center justify-content-end">
+                  <div class="d-flex align-items-center justify-content-end mb-4">
                     <a @click="change_ui(2)" class="text-primary text-decoration-underline cursor-pointer">Lost password?</a>
                   </div>
-                  <div class="d-grid py-3 mt-3">
+                  <div v-show="login_form_message !== ''">
+						        <div class="alert alert-primary d-flex align-items-center">
+                      <i class="icon-alert-triangle fs-2 me-2 lh-1"></i>
+                      { login_form_message }
+                    </div>
+					        </div>
+                  <div class="d-grid py-3">
                     <button type="button" @click="submit_login" class="btn btn-lg btn-primary">
                       LOGIN
                     </button>
@@ -69,6 +75,12 @@
                   <div class="d-flex align-items-center justify-content-end">
                     <a @click="change_ui(1)" class="text-primary text-decoration-underline cursor-pointer">To Login</a>
                   </div>
+                  <div v-show="login_form_message !== ''" class="mt-4">
+						        <div class="alert alert-primary d-flex align-items-center">
+                      <i class="icon-alert-triangle fs-2 me-2 lh-1"></i>
+                      { login_form_message }
+                    </div>
+					        </div>
                   <div class="d-grid py-3 mt-3">
                     <button type="button" @click="submit_reset" class="btn btn-lg btn-primary">
                       SEND
@@ -101,13 +113,15 @@
                 pass: "",
               },
               email_msg: "",
-              pass_msg: ""
+              pass_msg: "",
+              login_form_message: "",
             };
           },
           methods: {
             async submit_login() {
               this.email_msg = "";
               this.pass_msg = "";
+              this.login_form_message = "";
 
               let is_valid = true;
               if (this.user.email === "") {
@@ -131,7 +145,7 @@
                   window.location.href = "{{url('/admin/dashboard')}}";
                 }
                 else {
-                  console.log(response.data);
+                  this.login_form_message = "Invalid Username or Password";
                 }
               }
               catch(error) {
@@ -140,6 +154,9 @@
 
             },
             async submit_reset() {
+              alert("Under Construction");
+              return;
+              
               this.email_msg = "";
 
               let is_valid = true;
@@ -155,7 +172,7 @@
               if(!is_valid) return;
 
               try {
-                const response = await axios.post(url, "/user/reset");
+                const response = await axios.post(url, "/admin/reset");
                 if(response.data.status == "T") {
                 }
                 else {

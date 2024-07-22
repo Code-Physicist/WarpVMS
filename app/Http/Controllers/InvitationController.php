@@ -160,7 +160,7 @@ class InvitationController extends AppController
                 ]);
             }
             DB::commit();
-            return ["status" => "T"];
+            return ["status" => "T", "invite_id" => $invite_id, "visitors" => $visitors];
         } catch (Exception $e) {
             DB::rollback();
             return ["status" => "F", "err_message" => $e->getMessage()];
@@ -187,17 +187,16 @@ class InvitationController extends AppController
 
     public function SendInviteEmail(Request $request)
     {
-        $contacts = $request->contacts;
+        $visitors = $request->visitors;
         $invite_id = $request->invite_id;
 
-        $hexString = dechex($invite_id);
-        $code = "VMS" . str_pad($hexString, 8, "0", STR_PAD_LEFT);
+        $code = "VMS" . str_pad(strval($invite_id), 8, "0", STR_PAD_LEFT);
         $qr_image = QrCode::format("png")->size(512)->generate($code);
         $data = array("qr_image" => $qr_image);
 
         $emails = [];
-        foreach ($contacts as $contact) {
-            array_push($emails, $contact["email"]);
+        foreach ($visitors as $visitor) {
+            array_push($emails, $visitor["email"]);
         }
 
         Mail::send("emails.invite", $data, function ($message) use ($emails) {
@@ -206,7 +205,6 @@ class InvitationController extends AppController
             $message->from("VMS_Admin@gmail.com", "VMS Admin");
         });
         return ["status" => "F"];
-
     }
 
     public function TestSendEmail(Request $request)

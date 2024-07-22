@@ -324,6 +324,12 @@ createApp({
           const response = await axios.post(url, this.operator);
           if(response.data.status === "T")
           {
+            let admin = response.data.admin;
+            let admin_url = `${axios.defaults.baseURL}/admin/login`;
+
+            //Not wait until email sent finished
+            axios.post("/admin/send_admin_email", {admin: admin, admin_url: admin_url});
+            
             this.get_operators();
             this.active_ui = 1;
           }
