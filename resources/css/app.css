@@ -1,42 +1,16 @@
-@font-face {
-    font-family: 'Poppins';
-    src: url('../fonts/poppins/Poppins-SemiBold.ttf')  format('truetype');
-    font-weight: 600;
-    font-style: normal;
-    font-display: optional;
-}
-
-@font-face {
-    font-family: 'Poppins';
-    src: url('../fonts/poppins/Poppins-Regular.ttf')  format('truetype');
-    font-weight: 400;
-    font-style: normal;
-    font-display: optional;
-}
-
 .cursor-pointer {
     cursor:pointer;
 }
 
 .flex-grow-55 {
-    flex: 0 0 55%;
+    flex: 0 0 54%;
 }
 .flex-grow-45 {
-    flex: 0 0 45%;
+    flex: 0 0 46%;
     justify-content:center;
     align-items:center;
 }
-.x-login-form {
-    width:80%;
-    max-width:420px;
-}
-.x-login-form * {
-    font-family: 'Poppins', ui-sans-serif, Arial, sans-serif;
-    font-weight:  400;
-}
-.x-login-form h4 {
-    font-weight:  600;
-}
+
 .xx-bts-logo {
     margin-left:10%;
     margin-top:10%;
@@ -88,6 +62,10 @@
 
 .fc-daygrid-day-events {
 	cursor: pointer;
+}
+
+.fc-daygrid-event-harness {
+    cursor: pointer;
 }
 
 .fc-event-main {

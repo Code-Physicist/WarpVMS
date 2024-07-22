@@ -14,7 +14,7 @@ Create and edit tenants
 @stop
 @section('content')
 <div id="app">
-  <div v-show="active_ui === 1" class="row">
+  <div v-show="active_ui === 1" class="row" style="display:none;">
     <div class="col-12">
       <div class="card mb-3">
         <div class="card-body">
@@ -99,7 +99,7 @@ Create and edit tenants
       </div>
     </div>
   </div>
-  <div v-show="active_ui === 2" class="row">
+  <div v-show="active_ui === 2" class="row" style="display:none;">
     <div class="col-12">
       <div class="card mb-4">
         <div class="card-header">
@@ -277,7 +277,7 @@ createApp({
           {
             //Force log out
             this.tenant_form_message = "Token expired. You will be logged out soon...";
-            setTimeout(function() {window.location.href = "/admin/logout";}, 3000);
+            setTimeout(function() {window.location.href = "{{url('/admin/logout')}}";}, 3000);
           }
           else
           {
@@ -302,7 +302,7 @@ createApp({
           {
             //Force log out
             this.edb_modal_message = "Token expired. You will be logged out soon...";
-            setTimeout(function() {window.location.href = "/admin/logout";}, 3000);
+            setTimeout(function() {window.location.href = "{{url('/admin/logout')}}";}, 3000);
           }
           else
           {

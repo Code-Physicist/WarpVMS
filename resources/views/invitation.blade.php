@@ -171,13 +171,13 @@ Invite visitors, update schedules and resend invitation emails
                 <div class="modal-body">
 					<div class="row mb-2">
 						<div class="col-5 text-end">
-							<strong>Dates:</strong>
+							<strong>Start Date:</strong>
 						</div>
 						<div class="col-7 text-start">
 							07/07/2024 - 12/07/2024
 						</div>
 					</div>
-					<div class="row mb-3">
+					<div class="row mb-4">
 						<div class="col-5 text-end">
 							<strong>Time Interval:</strong>
 						</div>
@@ -185,14 +185,14 @@ Invite visitors, update schedules and resend invitation emails
 							10:00 - 16:00
 						</div>
 					</div>
-					<div class="table-outer mb-2">
+					<div class="table-outer mx-3 mb-3">
 						<div>
 						<table class="table table-bordered m-0">
 						<thead>
 							<tr>
 								<th>#</th>
-								<th>Visitor</th>
-								<th>Email</th>
+								<th>Visitor Name</th>
+								<th>Email Address</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -207,7 +207,7 @@ Invite visitors, update schedules and resend invitation emails
 					</div>
 					
 				</div>
-                <div class="modal-footer">
+                <div class="modal-footer pe-4">
                     <button v-show="admin_level_id > 3" @click="event_modal.hide()" type="button" class="btn btn-secondary">
 						Cancel
                     </button>
@@ -619,7 +619,7 @@ createApp({
 					{
 						//Force log out
 						this.invite_modal_message = "Token expired. You will be logged out soon...";
-            			setTimeout(function() {window.location.href = "/admin/logout";}, 3000);
+            			setTimeout(function() {window.location.href = "{{url('/admin/logout')}}";}, 3000);
 						return;
 					}
 					else if(response.data.status === "F")
@@ -691,7 +691,7 @@ createApp({
           			{
 						//Force log out
 						this.invite_modal_message = "Token expired. You will be logged out soon...";
-            			setTimeout(function() {window.location.href = "/admin/logout";}, 3000);
+            			setTimeout(function() {window.location.href = "{{url('/admin/logout')}}";}, 3000);
 					}
 
 					let duplicated = false;

@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="{{ asset('css/main.min.css') }}" />
 
     <!-- App CSS -->
-    <link rel="stylesheet" href="{{ mix('css/app.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}" />
     @yield('style')
     
   </head>
@@ -36,7 +36,7 @@
           <!-- App brand starts -->
           <div class="app-brand px-3 py-2 d-flex align-items-center">
             <a href="index.html">
-              <img src="{{ asset('images/logo.svg') }}" class="logo" alt="Bootstrap Gallery" />
+              <img src="{{ asset('images/BTSVISION_Combined_White.svg') }}" class="logo" alt="Bootstrap Gallery" />
             </a>
           </div>
           <!-- App brand ends -->
@@ -49,7 +49,7 @@
               @else
               <li>
               @endif
-                <a href="/admin/dashboard">
+                <a href="{{url('/admin/dashboard')}}">
                   <i class="icon-roofing"></i>
                   <span class="menu-text">Dashboard</span>
                 </a>
@@ -59,7 +59,7 @@
               @else
               <li>
               @endif
-                <a href="/admin/invitations">
+                <a href="{{url('/admin/invitations')}}">
                   <i class="icon-calendar"></i>
                   <span class="menu-text">Invitations</span>
                 </a>
@@ -70,7 +70,7 @@
                 @else
                   <li>
                 @endif
-                    <a href="/admin/departments">
+                    <a href="{{url('/admin/departments')}}">
                       <i class="icon-emoji_transportation"></i>
                       <span class="menu-text">Departments</span>
                     </a>
@@ -81,7 +81,7 @@
               @else
               <li>
               @endif
-                <a href="/admin/tenants">
+                <a href="{{url('/admin/tenants')}}">
                   <i class="icon-layers"></i>
                   <span class="menu-text">Tenants</span>
                 </a>
@@ -91,7 +91,7 @@
               @else
               <li>
               @endif
-                <a href="/admin/operators">
+                <a href="{{url('/admin/operators')}}">
                   <i class="icon-user"></i>
                   <span class="menu-text">Operators</span>
                 </a>
@@ -143,7 +143,7 @@
                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-sm shadow-sm gap-3">
                   <a class="dropdown-item d-flex align-items-center py-2" href="profile.html"><i
                       class="icon-gitlab fs-4 me-3"></i>User Profile</a>
-                  <a class="dropdown-item d-flex align-items-center py-2" href="/admin/logout"><i
+                  <a class="dropdown-item d-flex align-items-center py-2" href="{{url('/admin/logout')}}"><i
                       class="icon-log-out fs-4 me-3"></i>Logout</a>
                 </div>
               </div>

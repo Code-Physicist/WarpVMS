@@ -12,27 +12,32 @@
 			************ CSS Files *************
 		************* -->
     <!-- Icomoon Font Icons css -->
-    <link rel="stylesheet" href="{{ mix('fonts/icomoon/style.css') }}" />
+    <link rel="stylesheet" href="{{ asset('fonts/icomoon/style.css') }}" />
+
+    <!-- Aldrich -->
+    <link rel="stylesheet" href="{{ asset('fonts/aldrich/style.css') }}" />
+
+    <!-- Poppins -->
+    <link rel="stylesheet" href="{{ asset('fonts/poppins/style.css') }}" />
 
     <!-- Main CSS -->
-    <link rel="stylesheet" href="{{ mix('css/main.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/main.min.css') }}" />
 
-    <link rel="stylesheet" href="{{ mix('css/app.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}" />
   </head>
 
-  <body style="background-color:#EEEBE8;">
-    <div class="d-flex vh-100">
-      <div class="flex-grow-55 vh-100">
-        <div class="xx-bts-logo">
-          <img src="{{ mix('images/BTSVISION_Logo_DarkBlue.svg') }}" alt="">
-        </div>
-      </div>
-      <div class="d-flex flex-grow-45 vh-100" style="background-color:#1a2752">
-          <div id="app" class="bg-white x-login-form">
-            <form v-show="active_ui === 1">
-              <div class="rounded-3 p-4">
-                <div class="login-form">
-                  <h4 class="my-4">Login</h4>
+  <body style="background-color:#1a2752;">
+  <div id="app" class="container">
+      <div class="row justify-content-center">
+        <div class="col-xl-4 col-lg-5 col-sm-6 col-12">
+        <form class="my-5">
+              <div class="bg-white rounded-3 p-4">
+                <div class="login-form x-login-form">
+                  <a class="mb-4 d-flex align-items-center justify-content-between">
+                    <img src="{{ asset('images/BTSVISION_Logo_DarkBlue.svg') }}" class="img-fluid login-logo" alt="BTS Visionary Park" />
+                    <h3 v-show="true" class="h4-login-form my-0 pe-2" style="display:none;">{active_ui === 1? 'Login':'Reset'}</h3>
+                  </a>
+                  <div v-show="active_ui === 1">
                   <div class="mb-3">
                     <label class="form-label">Your Email <span class="text-danger">*</span></label>
                     <input type="text" v-model.trim="user.email" class="form-control" autocomplete="autocomplete"
@@ -52,13 +57,9 @@
                       LOGIN
                     </button>
                   </div>
-                </div>
-              </div>
-            </form>
-            <form v-show="active_ui === 2">
-              <div class="rounded-3 p-4">
-                <div class="login-form">
-                  <h4 class="my-4">Reset Password</h4>
+                  </div>
+
+                  <div v-show="active_ui === 2" style="display:none;">
                   <div class="mb-3">
                     <label class="form-label">Your Email <span class="text-danger">*</span></label>
                     <input type="text" v-model.trim="user.email" class="form-control" autocomplete="autocomplete"
@@ -73,10 +74,12 @@
                       SEND
                     </button>
                   </div>
+                  </div>
+                  
                 </div>
               </div>
             </form>
-          </div> 
+        </div>
       </div>
     </div>
     <!-- Container end -->
@@ -125,7 +128,7 @@
               try {
                 const response = await axios.post("/admin/login", this.user);
                 if(response.data.status == "T") {
-                  window.location.href = "/admin/dashboard";
+                  window.location.href = "{{url('/admin/dashboard')}}";
                 }
                 else {
                   console.log(response.data);

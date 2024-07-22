@@ -1,0 +1,23 @@
+@font-face {
+    font-family: 'Poppins';
+    src: url('Poppins-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: optional;
+}
+
+@font-face {
+    font-family: 'Poppins';
+    src: url('Poppins-SemiBold.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
+    font-display: optional;
+}
+
+.x-login-form * {
+    font-family: 'Poppins', ui-sans-serif, Arial, sans-serif;
+    font-weight:  400;
+}
+.x-login-form h4 {
+    font-weight:  600;
+}
