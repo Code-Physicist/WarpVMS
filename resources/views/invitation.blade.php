@@ -222,7 +222,6 @@ Invite visitors, update schedules and resend invitation emails
 @stop
 @section('script')
 <!-- For using Modal-->
-<script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
 <script src="{{ asset('js/moment.min.js') }}"></script>
 <script src="{{ asset('js/daterange.js') }}"></script>
 <script src="{{ asset('js/full-calendar.min.js') }}"></script>
