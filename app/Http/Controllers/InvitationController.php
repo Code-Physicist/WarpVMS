@@ -100,12 +100,12 @@ class InvitationController extends AppController
                 $contact["dept_id"] = $chk["u_data"]["dept_id"];
             }
 
-            DB::table('PkContacts')->insert($contact);
+            $id = DB::table('PkContacts')->insertGetId($contact);
         } else {
             DB::table('PkContacts')->where("id", $id)->update($contact);
         }
 
-        return ["status" => "T", "contact" => $contact];
+        return ["status" => "T", "contact_id" => $id];
     }
 
     public function GetInvitations(Request $request)

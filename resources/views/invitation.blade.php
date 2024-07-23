@@ -304,6 +304,7 @@ createApp({
       }
     },
     mounted() {
+		this.contact0 = { ...this.contact };
 		this.init_ui();
 		
 		//Initialize Calendar
@@ -342,7 +343,6 @@ createApp({
 	//Initialize modal
     this.invite_modal = new bootstrap.Modal(this.$refs.invite_modal, { keyboard: false });
 	this.event_modal = new bootstrap.Modal(this.$refs.event_modal, { keyboard: false });
-	this.contact0 = { ...this.contact };
     },
     methods: {
 		async init_ui() {
@@ -421,12 +421,16 @@ createApp({
 					let end_time = `${this.format_time_str(inv.end_time)}`;
 					if(start_time === "00:00:00" && end_time === "23:55:00")
 					{
+						//Need to add one day for end date to display correctly
+						let end_date2 = this.get_date_obj(invitations[i].end_date);
+						end_date2.setDate(end_date2.getDate() + 1);
+
 						this.calendar.addEvent(
                 			{
                     			invite_id: inv.id,
 				    			title: inv.dept_name,
 				    			start: `${invitations[i].start_date}`,
-								end: `${invitations[i].end_date}`,
+								end: `${this.get_date_str(end_date2)}`,
 				    			color: this.colors[c_index].color,
 				    			borderColor: this.colors[c_index].borderColor,
 				    			textColor: this.colors[c_index].textColor,
@@ -672,6 +676,7 @@ createApp({
 					else if(response.data.status === "F")
 					{
 						this.invite_modal_message = "Failed to create the inviation";
+						console.log(response.data.err_message);
 						return;
 					}
 
@@ -743,6 +748,8 @@ createApp({
 						this.invite_modal_message = "Token expired. You will be logged out soon...";
             			setTimeout(function() {window.location.href = "{{url('/admin/logout')}}";}, 3000);
 					}
+
+					this.contact.id = response.data.contact_id;
 
 					let duplicated = false;
                 	for (let i = 0; i < this.invitation.visitors.length; i++)

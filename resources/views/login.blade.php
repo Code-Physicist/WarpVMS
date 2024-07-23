@@ -47,7 +47,7 @@
                   <div class="mb-3">
                     <label class="form-label">Your Password <span class="text-danger">*</span></label>
                     <input type="password" v-model.trim="user.pass" class="form-control" placeholder="Enter password" />
-                    <div v-if="password_msg !== ''" class="ms-1 mt-1 text-danger">{pass_msg}</div>
+                    <div v-if="pass_msg !== ''" class="ms-1 mt-1 text-danger">{pass_msg}</div>
                   </div>
                   <div class="d-flex align-items-center justify-content-end mb-4">
                     <a @click="change_ui(2)" class="text-primary text-decoration-underline cursor-pointer">Lost password?</a>
@@ -188,7 +188,8 @@
               this.user.email = "";
               this.user.password = "";
               this.email_msg = "";
-              this.password_msg = "";
+              this.pass_msg = "";
+              this.login_form_message = "";
             },
             refresh() {
               window.location.href = axios.defaults.baseURL + "/admin";

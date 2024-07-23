@@ -41,31 +41,31 @@ Create and edit operators
                     <th>#</th>
                     <th>
                       <div class="d-flex align-items-center">
-                        <span class="icon-published_with_changes me-2 fs-4"></span>
+                        <span class="icon-user me-2 fs-4"></span>
                         Name
                       </div>
                     </th>
                     <th>
                       <div class="d-flex align-items-center">
-                        <span class="icon-add_task me-2 fs-4"></span>
+                        <span class="icon-mail me-2 fs-4"></span>
                         Email
                       </div>
                     </th>
                     <th>
-                      <div class="d-flex align-items-center">
+                      <div class="d-flex justify-content-center align-items-center">
                         <span class="icon-published_with_changes me-2 fs-4"></span>
                         Type
                       </div>
                     </th>
                     <th>
                       <div class="d-flex align-items-center">
-                        <span class="icon-published_with_changes me-2 fs-4"></span>
+                        <span class="icon-business me-2 fs-4"></span>
                         Department
                       </div>
                     </th>
                     <th>
                       <div class="d-flex justify-content-center align-items-center">
-                        <span class="icon-settings me-2 fs-4"></span>
+                        <span class="icon-lightbulb me-2 fs-4"></span>
                         Status
                       </div>
                     </th>
@@ -82,7 +82,7 @@ Create and edit operators
                     <td>{index+1}.</td>
                     <td>{operator.name}</td>
                     <td>{operator.email}</td>
-                    <td>{admin_type_dict[operator.admin_level_id]}</td>
+                    <td class="text-center">{admin_type_dict[operator.admin_level_id]}</td>
                     <td>{operator.full_name}</td>
                     <td class="text-center">
                         <span v-if="operator.is_active === '1'" class="badge bg-success">Active</span>

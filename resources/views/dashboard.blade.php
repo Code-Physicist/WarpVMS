@@ -16,7 +16,7 @@ Information summary
                     <div class="card-body text-white">
                       <div class="d-flex justify-content-center text-center">
                         <div class="position-absolute top-0 start-0 p-3">
-                          <i class="icon-pie-chart fs-1 lh-1"></i>
+                          <i class="icon-emoji_transportation fs-1 lh-1"></i>
                         </div>
                         <div class="py-3">
                           <h1>100</h1>
@@ -31,7 +31,7 @@ Information summary
                     <div class="card-body text-white">
                       <div class="d-flex justify-content-center text-center">
                         <div class="position-absolute top-0 start-0 p-3">
-                          <i class="icon-shopping-bag fs-1 lh-1"></i>
+                          <i class="icon-business fs-1 lh-1"></i>
                         </div>
                         <div class="py-3">
                           <h1>100</h1>
@@ -46,7 +46,7 @@ Information summary
                     <div class="card-body text-white">
                       <div class="d-flex justify-content-center text-center">
                         <div class="position-absolute top-0 start-0 p-3">
-                          <i class="icon-shopping-cart fs-1 lh-1"></i>
+                          <i class="icon-layers fs-1 lh-1"></i>
                         </div>
                         <div class="py-3">
                           <h1>100</h1>
@@ -61,7 +61,7 @@ Information summary
                     <div class="card-body text-white">
                       <div class="d-flex justify-content-center text-center">
                         <div class="position-absolute top-0 start-0 p-3">
-                          <i class="icon-twitch fs-1 lh-1"></i>
+                          <i class="icon-user fs-1 lh-1"></i>
                         </div>
                         <div class="py-3">
                           <h1>100</h1>

@@ -41,31 +41,31 @@ Create and edit departments
                     <th>#</th>
                     <th>
                       <div class="d-flex align-items-center">
-                        <span class="icon-add_task me-2 fs-4"></span>
+                        <span class="icon-business me-2 fs-4"></span>
                         Department
                       </div>
                     </th>
                     <th>
                       <div class="d-flex justify-content-center align-items-center">
-                        <span class="icon-calendar me-2 fs-4"></span>
+                        <span class="icon-stairs me-2 fs-4"></span>
                         Floors
                       </div>
                     </th>
                     <th>
                       <div class="d-flex justify-content-center align-items-center">
-                        <span class="icon-calendar me-2 fs-4"></span>
+                        <span class="icon-phone me-2 fs-4"></span>
                         Phone No.1
                       </div>
                     </th>
                     <th>
                       <div class="d-flex justify-content-center align-items-center">
-                        <span class="icon-calendar me-2 fs-4"></span>
+                        <span class="icon-phone me-2 fs-4"></span>
                         Phone No.2
                       </div>
                     </th>
                     <th>
                       <div class="d-flex justify-content-center align-items-center">
-                        <span class="icon-settings me-2 fs-4"></span>
+                        <span class="icon-lightbulb me-2 fs-4"></span>
                         Status
                       </div>
                     </th>

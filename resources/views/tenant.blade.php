@@ -41,25 +41,25 @@ Create and edit tenants
                     <th>#</th>
                     <th>
                       <div class="d-flex align-items-center">
-                        <span class="icon-published_with_changes me-2 fs-4"></span>
+                        <span class="icon-user me-2 fs-4"></span>
                         Name
                       </div>
                     </th>
                     <th>
                       <div class="d-flex align-items-center">
-                        <span class="icon-add_task me-2 fs-4"></span>
+                        <span class="icon-mail me-2 fs-4"></span>
                         Email
                       </div>
                     </th>
                     <th>
                       <div class="d-flex align-items-center">
-                        <span class="icon-published_with_changes me-2 fs-4"></span>
+                        <span class="icon-business me-2 fs-4"></span>
                         Department
                       </div>
                     </th>
                     <th>
                       <div class="d-flex justify-content-center align-items-center">
-                        <span class="icon-settings me-2 fs-4"></span>
+                        <span class="icon-lightbulb me-2 fs-4"></span>
                         Status
                       </div>
                     </th>

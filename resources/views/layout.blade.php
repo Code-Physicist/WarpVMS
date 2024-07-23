@@ -71,7 +71,7 @@
                   <li>
                 @endif
                     <a href="{{url('/admin/departments')}}">
-                      <i class="icon-emoji_transportation"></i>
+                      <i class="icon-business"></i>
                       <span class="menu-text">Departments</span>
                     </a>
                   </li>
