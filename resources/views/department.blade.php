@@ -38,67 +38,24 @@ Create and edit departments
               <table class="table table-striped" id="data-table">
                 <thead>
                   <tr>
-                    <th>#</th>
                     <th>
-                      <div class="d-flex align-items-center">
-                        <span class="icon-business me-2 fs-4"></span>
                         Department
-                      </div>
                     </th>
                     <th>
-                      <div class="d-flex justify-content-center align-items-center">
-                        <span class="icon-stairs me-2 fs-4"></span>
                         Floors
-                      </div>
                     </th>
                     <th>
-                      <div class="d-flex justify-content-center align-items-center">
-                        <span class="icon-phone me-2 fs-4"></span>
                         Phone No.1
-                      </div>
                     </th>
                     <th>
-                      <div class="d-flex justify-content-center align-items-center">
-                        <span class="icon-phone me-2 fs-4"></span>
                         Phone No.2
-                      </div>
                     </th>
                     <th>
-                      <div class="d-flex justify-content-center align-items-center">
-                        <span class="icon-lightbulb me-2 fs-4"></span>
                         Status
-                      </div>
-                    </th>
-                    <th>
-                      <div class="d-flex justify-content-center align-items-center">
-                        <span class="icon-settings me-2 fs-4"></span>
-                        Actions
-                      </div>
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(dept, index) in depts">
-                    <td>{index+1}.</td>
-                    <td>{dept.full_name}</td>
-                    <td class="text-center">{display_val(dept.floor)}</td>
-                    <td class="text-center">{display_val(dept.phone1)}</td>
-                    <td class="text-center">{display_val(dept.phone2)}</td>
-                    <td class="text-center">
-                        <span v-if="dept.is_active === '1'" class="badge bg-success">Active</span>
-                        <span v-else class="badge bg-secondary">Disabled</span>
-                    </td>
-                    <td>
-                      <div class="d-flex justify-content-center align-items-center">
-                        <a class="cursor-pointer" data-bs-toggle="dropdown"><h5><span class="icon-more-vertical"></span></h5></a>
-                        <ul class="dropdown-menu shadow-sm dropdown-menu-mini">
-                          <li><a class="dropdown-item cursor-pointer" @click="show_edit(dept)"><span class="icon-edit fs-5"></span> Edit</a></li>
-                          <li v-if="dept.is_active === '1'"><a class="dropdown-item cursor-pointer" @click="show_edb(dept, 0)"><span class="icon-x-square fs-5"></span> Disable</a></li>
-                          <li v-else><a class="dropdown-item cursor-pointer" @click="show_edb(dept, 1)"><span class="icon-check-square fs-5"></span> Enable</a></li>
-                        </ul>
-                      </div>
-                    </td>
-                  </tr>
                 </tbody>
               </table>
             </div>
@@ -229,7 +186,8 @@ createApp({
     },
     mounted() {
       this.dept0 = { ...this.dept };
-      this.get_depts();
+      //this.get_depts();
+      this.init_data_table();
       this.edb_modal = new bootstrap.Modal(this.$refs.edb_modal, { keyboard: false });
     },
     methods: {
@@ -335,6 +293,48 @@ createApp({
         catch(error) {
           console.log(error);
         }
+      },
+      init_data_table () {
+        var csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+        $("#data-table").DataTable({
+          processing: true,
+          serverSide: true,
+          searchDelay: 500,
+          ajax: {
+            url: "/admin/get_departments",
+            type: "POST",
+            "headers": {
+              "X-CSRF-TOKEN": csrfToken
+            },
+            data: function(d) {
+              //d.extra_param1 = $('#input1').val();
+              d.status = 1;
+            },
+            "error": function(xhr, error, thrown) {
+              // Handle errors here
+              console.log('AJAX Error: ', error); // Log error to console
+            
+              // Optional: Handle specific errors
+              if (xhr.status === 404) {
+                alert('Server not found (404).');
+              } else if (xhr.status === 500) {
+                alert('Server error (500).');
+              }
+              // You can add more specific error handling here
+            }
+          },
+          lengthMenu: [[5, 10],[5, 10]],
+          searching: true,
+          sort: false,
+          columns: [
+            { data: "full_name"},
+            { data: "floor"},
+            { data: "phone1"},
+            { data: "phone2"},
+            { data: "is_active"},
+          ]
+        });
       },
       change_filter() {
         this.get_depts();

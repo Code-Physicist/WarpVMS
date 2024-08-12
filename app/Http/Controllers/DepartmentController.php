@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use JWTAuth;
 use JWTFactory;
 use Mail;
@@ -101,6 +102,64 @@ class DepartmentController extends AppController
     }
 
     public function GetDepartments(Request $request)
+    {
+        $chk = $this->CheckAdmin($request);
+        if(!$chk["is_ok"]) {
+            throw ValidationException::withMessages(['I']);
+        }
+
+        $admin_level_id = $chk["u_data"]["admin_level_id"];
+        $dept_id = $chk["u_data"]["dept_id"];
+
+        //0 = disable, 1 = enable, 2 = all
+        $status = $request->status;
+        $draw = $request->draw;
+        $start = $request->start;
+        $length = $request->length;
+        $search = $request->input('search.value');
+
+        $query = DB::table("PkDepartments As d1");
+        if($status != "2") {
+            $query->where('d1.IsActive', '=', $status);
+        }
+        $query->where('d1.SupDepID', '=', $dept_id);
+
+        $count = $query->count();
+        $f_count = $count;
+
+        if($search != "") {
+            $query->where('d1.DeptName', 'like', '%'. $search .'%');
+            $f_count = $query->count();
+        }
+
+        $query->leftJoin('PkDepartments as d2', 'd2.DeptID', '=', 'd1.SupDepID')
+        ->select(
+            'd1.DeptID as id',
+            'd1.DeptName as dept_name',
+            'd1.Fullname as full_name',
+            'd1.Floor as floor',
+            'd1.Tel1 as phone1',
+            'd1.Tel2 as phone2',
+            'd1.IsActive as is_active',
+            'd2.DeptID as sup_dept_id',
+            'd2.DeptName as sup_dept_name'
+        )
+        ->orderByDesc('d1.DeptID');
+
+        $depts = $query->offset($start)->limit($length)->get();
+
+        $response = [
+            "draw" => $draw,
+            "iTotalRecords" => $count,
+            "iTotalDisplayRecords" => $f_count,
+            "aaData" => $depts
+        ];
+
+        //Return response and refresh cookie
+        return $this->MakeResponse($response, $chk);
+    }
+
+    public function GetDepartments_org(Request $request)
     {
         $chk = $this->CheckAdmin($request);
         if(!$chk["is_ok"]) {

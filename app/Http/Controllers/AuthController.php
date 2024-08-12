@@ -111,13 +111,17 @@ class AuthController extends AppController
                     ->where('adminname', '=', $user)
                     ->first();
 
-        if($acct && Carbon::now()->addMinutes(-1) < $acct->create_time) {
-            return ["status" => "W"];
-        }
+        if($acct) {
+            $time_left = 60 - Carbon::now()->diffInSeconds($acct->create_time);
 
-        DB::table('VC_reset_account')
+            if($acct && $time_left > 0) {
+                return ["status" => "W", "time_left" => $time_left];
+            }
+
+            DB::table('VC_reset_account')
             ->where('adminname', '=', $user)
             ->delete();
+        }
 
         $reset_code = rand(1000000, 9999999);
 
@@ -137,11 +141,17 @@ class AuthController extends AppController
             "reset_url" => $request->reset_url,
         );
 
-        Mail::send("emails.reset", $data, function ($message) use ($email) {
-            $message->to($email)
-                    ->subject("Reset Password for VMS");
-            $message->from("VMS_Admin@gmail.com", "VMS Admin");
-        });
+        try {
+            Mail::send("emails.reset", $data, function ($message) use ($email) {
+                $message->to($email)
+                        ->subject("Reset Password for VMS");
+                $message->from("VMS_Admin@gmail.com", "VMS Admin");
+            });
+        } catch (Exception $e) {
+            return ["status" => $e->getMessage()];
+        }
+
+
     }
 
     public function ResetPasswordPage(Request $request)
@@ -161,7 +171,7 @@ class AuthController extends AppController
             return "Page Expired";
         }
 
-        return response()->view("vms.reset_passwrd", ["email" => $email, "rst_code" => $rst_code]);
+        return response()->view("reset", ["email" => $email, "rst_code" => $rst_code]);
     }
 
     public function ResetPassword(Request $request)
@@ -172,7 +182,7 @@ class AuthController extends AppController
         $pass2 = $request->pass2;
 
         if($pass1 === "" || $pass2 === "" || $pass1 !== $pass2) {
-            return ["result" => "M"];
+            return ["status" => "M"];
         }
 
         $acct = DB::table('VC_reset_account')
@@ -181,7 +191,7 @@ class AuthController extends AppController
                 ->first();
 
         if(!$acct || $acct->create_time < Carbon::now()->addMinutes(-20)) {
-            return ["result" => "I"];
+            return ["status" => "I"];
         }
 
         $pass1 = strtoupper(md5($pass1));
@@ -197,7 +207,7 @@ class AuthController extends AppController
                 ]
             );
 
-        return ["result" => "T"];
+        return ["status" => "T"];
     }
 
     public function Logout(Request $request)

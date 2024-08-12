@@ -40,8 +40,7 @@
                   <div v-show="active_ui === 1" style="display:none;">
                   <div class="mb-3">
                     <label class="form-label">Your Email <span class="text-danger">*</span></label>
-                    <input type="text" v-model.trim="user.email" class="form-control" autocomplete="autocomplete"
-                    placeholder="Enter your email" />
+                    <input type="text" v-model.trim="user.email" class="form-control" placeholder="Enter your email" />
                     <div v-if="email_msg !== ''" class="ms-1 mt-1 text-danger">{email_msg}</div>
                   </div>
                   <div class="mb-3">
@@ -66,28 +65,26 @@
                   </div>
 
                   <div v-show="active_ui === 2" style="display:none;">
-                  <div class="mb-3">
-                    <label class="form-label">Your Email <span class="text-danger">*</span></label>
-                    <input type="text" v-model.trim="user.email" class="form-control" autocomplete="autocomplete"
-                    placeholder="Enter your email" />
-                    <div v-if="email_msg !== ''" class="ms-1 mt-1 text-danger">{email_msg}</div>
-                  </div>
-                  <div class="d-flex align-items-center justify-content-end">
-                    <a @click="change_ui(1)" class="text-primary text-decoration-underline cursor-pointer">To Login</a>
-                  </div>
-                  <div v-show="login_form_message !== ''" class="mt-4">
-						        <div class="alert alert-primary d-flex align-items-center">
-                      <i class="icon-alert-triangle fs-2 me-2 lh-1"></i>
-                      { login_form_message }
+                    <div class="mb-3">
+                      <label class="form-label">Your Email <span class="text-danger">*</span></label>
+                      <input type="text" v-model.trim="reset.email" class="form-control" autocomplete="autocomplete" placeholder="Enter your email" />
+                      <div v-if="reset_email_msg !== ''" class="ms-1 mt-1 text-danger">{reset_email_msg}</div>
                     </div>
-					        </div>
-                  <div class="d-grid py-3 mt-3">
-                    <button type="button" @click="submit_reset" class="btn btn-lg btn-primary">
-                      SEND
-                    </button>
+                    <div class="d-flex align-items-center justify-content-end">
+                      <a @click="change_ui(1)" class="text-primary text-decoration-underline cursor-pointer">To Login</a>
+                    </div>
+                    <div v-show="reset_form_message !== ''" class="mt-4">
+						          <div class="alert alert-primary d-flex align-items-center">
+                        <i class="icon-alert-triangle fs-2 me-2 lh-1"></i>
+                        { reset_form_message }
+                        </div>
+					            </div>
+                    <div class="d-grid py-3 mt-3">
+                      <button type="button" @click="submit_reset" class="btn btn-lg btn-primary">
+                        SEND
+                      </button>
+                    </div>
                   </div>
-                  </div>
-                  
                 </div>
               </div>
             </form>
@@ -115,6 +112,12 @@
               email_msg: "",
               pass_msg: "",
               login_form_message: "",
+
+              reset: {
+                email: ""
+              },
+              reset_email_msg: "",
+              reset_form_message: "",
             };
           },
           methods: {
@@ -154,30 +157,39 @@
 
             },
             async submit_reset() {
-              alert("Under Construction");
-              return;
-              
-              this.email_msg = "";
+              this.reset_email_msg = "";
 
               let is_valid = true;
-              if (this.user.email === "") {
-                this.email_msg = "Email is blank";
+              if (this.reset.email === "") {
+                this.reset_email_msg = "Email is blank";
                 is_valid = false;
               }
-              else if (!validator.isEmail(this.user.email)) {
-                this.email_msg = "Incorrect Email format";
+              else if (!validator.isEmail(this.reset.email)) {
+                this.reset_email_msg = "Incorrect Email format";
                 is_valid = false;
               }
 
               if(!is_valid) return;
 
               try {
-                const response = await axios.post(url, "/admin/reset");
-                if(response.data.status == "T") {
-                }
-                else {
-                  console.log(response.data.err_message);
-                }
+                const response = await axios.post("/admin/reset", this.reset);
+                let data = response.data;
+                if (data.status === "I")
+                  this.reset_form_message = "Account does not exist";
+                else if (data.status === "W")
+                  this.reset_form_message = "Please try again in 1 minutes";
+                else if (data.status === "T") {
+                  let reset_url = `${axios.defaults.baseURL}/admin/reset_passwrd?email=${data.email}&rst_code=${data.reset_code}"`;
+                  axios.post("/admin/send_reset_email", { email: data.email, reset_url: reset_url}).then(
+                    (response) => {
+                      console.log(response);
+                    },
+                    (error) => {
+                      console.log(error);
+                    }
+                  );
+                } 
+                else this.reset_form_message = "Server error. Please try again later";
               }
               catch(error) {
                 console.log(error);

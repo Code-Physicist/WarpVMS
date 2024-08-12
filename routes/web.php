@@ -27,6 +27,10 @@ Route::get('/admin/tenants', [TenantController::class, 'TenantPage']);
 Route::get('/admin/operators', [OperatorController::class, 'OperatorPage']);
 
 Route::post('/admin/login', [AuthController::class, 'Login']);
+Route::post('/admin/reset', [AuthController::class, 'Reset']);
+Route::post('/admin/send_reset_email', [AuthController::class, 'SendResetEmail']);
+Route::get('/admin/reset_passwrd', [AuthController::class, 'ResetPasswordPage']);
+Route::post('/admin/reset_passwrd', [AuthController::class, 'ResetPassword']);
 Route::get('/admin/logout', [AuthController::class, 'Logout']);
 
 Route::post('/admin/get_departments', [DepartmentController::class, 'GetDepartments']);
