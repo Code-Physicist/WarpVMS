@@ -28,7 +28,6 @@ createApp({
     data() {
       return {
         active_ui: 1,
-        active_ui: 1,
         visitors:[],
       }
     },
@@ -37,7 +36,7 @@ createApp({
     },
     methods: {
       show_create() {
-        
+
       },
     },
     delimiters: ["{","}"]

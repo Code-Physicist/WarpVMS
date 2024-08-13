@@ -20,8 +20,8 @@ Create and edit departments
         <div class="card-body">
           <div class="d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center justify-content-start">
-              <div class="card-title">Total {depts.length} Departments</div>
-              <button @click="show_create" class="btn btn-danger btn-sm mx-2"><span class="icon-add"></span> Create&nbsp;</button>
+              <button @click="show_create" class="btn btn-danger btn-sm mx-2"><span class="icon-add"></span></button>
+              Department
             </div>
             <div class="d-flex align-items-center justify-content-end">
               <div class="card-title text-nowrap">Status</div>
@@ -35,9 +35,12 @@ Create and edit departments
           </div>
           <hr/>
           <div class="table-responsive">
-              <table class="table table-striped" id="data-table">
+              <table class="table table-striped" style="width:100%" id="data-table">
                 <thead>
                   <tr>
+                    <th>
+                        ID
+                    </th>
                     <th>
                         Department
                     </th>
@@ -52,6 +55,11 @@ Create and edit departments
                     </th>
                     <th>
                         Status
+                    </th>
+                    <th>
+                      <div class="d-flex justify-content-center">
+                        Actions
+                      </div>
                     </th>
                   </tr>
                 </thead>
@@ -154,14 +162,26 @@ Create and edit departments
 <script src="{{ asset('js/dataTables.min.js') }}"></script>
 <script src="{{ asset('js/dataTables.bootstrap.min.js') }}"></script>
 <script>
-const { createApp } = Vue;
-createApp({
+function test() {
+  alert("Yo");
+}
+
+function show_edit(id) {
+  app.show_edit(id);
+}
+
+function show_edb(id, status) {
+  app.show_edb(id, status);
+}
+
+window.app = Vue.createApp({
     data() {
       return {
         active_ui: 1,
         filter: {
           status: 2
         },
+        dept_table: null,
         depts:[],
         dept:{
             id: -1,
@@ -199,7 +219,17 @@ createApp({
         MyApp.copy_vals(this.dept0, this.dept);
         this.active_ui = 2;
       },
-      show_edit(dept) {
+      show_edit(id) {
+        let dept = null;
+        for(let i = 0; i < this.depts.length; i++)
+        {
+          if(this.depts[i].id == id)
+          {
+            dept = this.depts[i];
+            break;
+          }
+        }
+
         this.dept_name_msg = "";
         this.full_name_msg = "";
         this.phone1_msg = "";
@@ -233,7 +263,8 @@ createApp({
           const response = await axios.post(url, this.dept);
           if(response.data.status === "T")
           {
-            this.get_depts();
+            //Make sure not to change datatable configurations
+            this.dept_table.ajax.reload(null, false);
             this.active_ui = 1;
           }
           else if(response.data.status === "I")
@@ -253,7 +284,17 @@ createApp({
         }
 
       },
-      show_edb(dept, status) {
+      show_edb(id, status) {
+        let dept = null;
+        for(let i = 0; i < this.depts.length; i++)
+        {
+          if(this.depts[i].id == id)
+          {
+            dept = this.depts[i];
+            break;
+          }
+        }
+
         this.edb_dept_id = dept.id;
         this.edb_dept_name = dept.full_name;
         this.edb_status = status;
@@ -271,7 +312,8 @@ createApp({
           else
           {
             this.edb_modal.hide();
-            this.get_depts();
+            //Make sure not to change datatable configurations
+            this.dept_table.ajax.reload(null, false);
             this.active_ui = 1;
           }
         }
@@ -297,7 +339,7 @@ createApp({
       init_data_table () {
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
-        $("#data-table").DataTable({
+        this.dept_table = $("#data-table").DataTable({
           processing: true,
           serverSide: true,
           searchDelay: 500,
@@ -307,11 +349,9 @@ createApp({
             "headers": {
               "X-CSRF-TOKEN": csrfToken
             },
-            data: function(d) {
-              //d.extra_param1 = $('#input1').val();
-              d.status = 1;
-            },
-            "error": function(xhr, error, thrown) {
+            data: this.get_status,
+            dataSrc: this.post_process,
+            error: function(xhr, error, thrown) {
               // Handle errors here
               console.log('AJAX Error: ', error); // Log error to console
             
@@ -324,20 +364,58 @@ createApp({
               // You can add more specific error handling here
             }
           },
-          lengthMenu: [[5, 10],[5, 10]],
+          lengthMenu: [[5, 10, 25],[5, 10, 25]],
           searching: true,
-          sort: false,
           columns: [
-            { data: "full_name"},
-            { data: "floor"},
-            { data: "phone1"},
-            { data: "phone2"},
-            { data: "is_active"},
+            { data: "id", orderable: true},
+            { data: "full_name", orderable: true},
+            { data: "floor", orderable: false},
+            { data: "phone1", orderable: false},
+            { data: "phone2", orderable: false},
+            { data: "status", orderable: false},
+            { data: "action", orderable: false},
           ]
         });
+
       },
       change_filter() {
-        this.get_depts();
+        this.dept_table.ajax.reload();
+      },
+      get_status(d) {
+        d.status = this.filter.status;
+      },
+      post_process(json) {
+        // Modify the json data here before DataTable uses it
+        for (var i = 0; i < json.aaData.length; i++) {
+          // Example: add a new field or modify an existing one
+          //json.data[i].new_field = json.data[i].existing_field + " - modified";
+          this.depts = json.aaData;
+          let dept = this.depts[i];
+          if(dept.is_active == 1) dept.status = "<span class='badge bg-success'>Active</span>";
+          else dept.status = "<span class='badge bg-secondary'>Disabled</span>";
+          
+          dept.floor = this.display_val(dept.floor);
+          dept.phone1 = this.display_val(dept.phone1);
+          dept.phone2 = this.display_val(dept.phone2);
+          dept.action = "<div class='d-flex justify-content-center align-items-center'>";
+          dept.action += "<a class='cursor-pointer' data-bs-toggle='dropdown'><h5 class='mb-0'><i class='icon-more-vertical'></i></h5></a>";
+          dept.action += "<ul class='dropdown-menu shadow-sm dropdown-menu-mini'>";
+          dept.action += `<li><a class='dropdown-item cursor-pointer' onclick='show_edit(${dept.id})'><span class='icon-edit fs-5'></span> Edit</a></li>`;
+          if(dept.is_active == 1)
+            dept.action += `<a class="dropdown-item cursor-pointer" onclick="show_edb(${dept.id}, 0)"><span class="icon-x-square fs-5"></span> Disable</a></li>`;
+          else
+            dept.action += `<a class="dropdown-item cursor-pointer" onclick="show_edb(${dept.id}, 1)"><span class="icon-check-square fs-5"></span> Enable</a></li>`;
+
+          dept.action += "</ul>";
+          dept.action += "</div>";
+                        
+          //<ul class='dropdown-menu shadow-sm dropdown-menu-mini'>
+          //  <li><a class='dropdown-item cursor-pointer' @click='show_edit(dept)'><span class='icon-edit fs-5'></span> Edit</a></li>
+          //  <li v-if='dept.is_active === '1'''><a class="dropdown-item cursor-pointer" @click="show_edb(dept, 0)"><span class="icon-x-square fs-5"></span> Disable</a></li>
+          //  <li v-else><a class="dropdown-item cursor-pointer" @click="show_edb(dept, 1)"><span class="icon-check-square fs-5"></span> Enable</a></li>
+          //</ul>
+        }
+        return json.aaData;
       },
       display_val(val, d_val = "-") {
         if (!val) return d_val;

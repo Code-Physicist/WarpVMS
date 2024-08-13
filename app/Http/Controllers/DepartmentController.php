@@ -118,6 +118,12 @@ class DepartmentController extends AppController
         $length = $request->length;
         $search = $request->input('search.value');
 
+        $orderColumnIndex = $request->input('order.0.column'); // Index of the column
+        $orderDirection = $request->input('order.0.dir'); // Direction of sorting
+
+        $columns = $request->input('columns'); // All columns data
+        $orderColumnName = $columns[$orderColumnIndex]['data']; // Get column name from index
+
         $query = DB::table("PkDepartments As d1");
         if($status != "2") {
             $query->where('d1.IsActive', '=', $status);
@@ -143,8 +149,10 @@ class DepartmentController extends AppController
             'd1.IsActive as is_active',
             'd2.DeptID as sup_dept_id',
             'd2.DeptName as sup_dept_name'
-        )
-        ->orderByDesc('d1.DeptID');
+        );
+        //->orderByDesc('d1.DeptID');
+
+        $query->orderBy($orderColumnName, $orderDirection);
 
         $depts = $query->offset($start)->limit($length)->get();
 

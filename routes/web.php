@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PDPAController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\TenantController;
@@ -21,6 +22,7 @@ use App\Http\Controllers\OperatorController;
 
 Route::get('/admin/login', [AuthController::class, 'LoginPage']);
 Route::get('/admin/dashboard', [DashboardController::class, 'DashboardPage']);
+Route::get('/admin/pdpa', [PDPAController::class, 'PDPAPage']);
 Route::get('/admin/invitations', [InvitationController::class, 'InvitationPage']);
 Route::get('/admin/departments', [DepartmentController::class, 'DepartmentPage']);
 Route::get('/admin/tenants', [TenantController::class, 'TenantPage']);
@@ -32,6 +34,11 @@ Route::post('/admin/send_reset_email', [AuthController::class, 'SendResetEmail']
 Route::get('/admin/reset_passwrd', [AuthController::class, 'ResetPasswordPage']);
 Route::post('/admin/reset_passwrd', [AuthController::class, 'ResetPassword']);
 Route::get('/admin/logout', [AuthController::class, 'Logout']);
+
+Route::post('/admin/get_pdpas', [PDPAController::class, 'GetPDPAs']);
+Route::post('/admin/create_pdpa', [PDPAController::class, 'CreatePDPA']);
+Route::post('/admin/update_pdpa', [PDPAController::class, 'UpdatePDPA']);
+Route::post('/admin/activate_pdpa', [PDPAController::class, 'ActivatePDPA']);
 
 Route::post('/admin/get_departments', [DepartmentController::class, 'GetDepartments']);
 Route::post('/admin/create_department', [DepartmentController::class, 'CreateDepartment']);
