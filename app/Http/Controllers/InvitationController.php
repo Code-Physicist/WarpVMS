@@ -72,6 +72,7 @@ class InvitationController extends AppController
         $contact = DB::table('PkContacts')
         ->where('email', '=', $email)
         ->where('dept_id', '=', $dept_id)
+        ->select('id', 'email', 'first_name', 'last_name')
         ->first();
 
         return ["status" => "T", "contact" => $contact];
@@ -142,6 +143,8 @@ class InvitationController extends AppController
 
         $invite = [
             "to_dept_id" => $request->to_dept_id,
+            "title" => $request->title,
+            "agenda" => $request->agenda,
             "start_date" => $request->start_date,
             "end_date" => $request->end_date,
             "start_time" => $request->start_time,
@@ -160,7 +163,7 @@ class InvitationController extends AppController
                 ]);
             }
             DB::commit();
-            return ["status" => "T", "invite_id" => $invite_id, "visitors" => $visitors];
+            return ["status" => "T", "title" => $invite["title"], "agenda" => $invite["agenda"], "invite_id" => $invite_id, "visitors" => $visitors];
         } catch (Exception $e) {
             DB::rollback();
             return ["status" => "F", "err_message" => $e->getMessage()];
@@ -185,7 +188,7 @@ class InvitationController extends AppController
         return ["status" => "T", "data_list" => $contacts];
     }
 
-    public function SendInviteEmail(Request $request)
+    public function SendInviteEmail_org(Request $request)
     {
         $visitors = $request->visitors;
         $invite_id = $request->invite_id;
@@ -202,6 +205,37 @@ class InvitationController extends AppController
         Mail::send("emails.invite", $data, function ($message) use ($emails) {
             $message->to($emails)
                     ->subject("QR Code Access");
+            $message->from("VMS_Admin@gmail.com", "VMS Admin");
+        });
+        return ["status" => "F"];
+    }
+
+    public function SendInviteEmail(Request $request)
+    {
+        $invite_id = $request->invite_id;
+        $title = $request->title;
+        $agenda = $request->agenda;
+        $dept_name = $request->dept_name;
+        $visitors = $request->visitors;
+        $base_url = $request->base_url;
+
+        $url = "$base_url/visitors/invitation/$invite_id";
+
+        $data = array(
+            "dept_name" => $dept_name,
+            "title" => $title,
+            "agenda" => $agenda,
+            "url" => $url
+        );
+
+        $emails = [];
+        foreach ($visitors as $visitor) {
+            array_push($emails, $visitor["email"]);
+        }
+
+        Mail::send("emails.visitor", $data, function ($message) use ($emails) {
+            $message->to($emails)
+                    ->subject("VMS Invitation");
             $message->from("VMS_Admin@gmail.com", "VMS Admin");
         });
         return ["status" => "F"];

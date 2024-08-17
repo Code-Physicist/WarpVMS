@@ -63,6 +63,22 @@ Invite visitors, update schedules and resend invitation emails
                 			</div>
               			</div>
 						<div class="row">
+							<div class="col">
+								<div class="mb-3">
+									<label class="form-label">Title</label>
+                        			<input type="text" class="form-control" v-model.trim="invitation.title">
+								</div>
+							</div>
+                    	</div>
+						<div class="row">
+							<div class="col">
+								<div class="mb-3">
+									<label class="form-label">Agenda</label>
+                        			<textarea class="form-control" rows="4" v-model.trim="invitation.agenda"></textarea>
+								</div>
+							</div>
+                    	</div>
+						<div class="row">
 							<div class="col-sm-6">
 								<div class="mb-3">
 									<label class="form-label" for="abc">Start Date</label>
@@ -124,19 +140,6 @@ Invite visitors, update schedules and resend invitation emails
                   				<label class="form-label">Last Name *</label>
                   				<input type="text" class="form-control" v-model.trim="contact.last_name">
 								<div v-if="last_name_msg !== ''" class="ms-1 mt-1 text-danger">{last_name_msg}</div>
-                			</div>
-              			</div>
-						<div class="row">
-                			<div class="mb-3">
-                  				<label class="form-label">ID Card *</label>
-                  				<input type="text" class="form-control" v-model.trim="contact.id_card">
-								  <div v-if="id_card_msg !== ''" class="ms-1 mt-1 text-danger">{id_card_msg}</div>
-                			</div>
-              			</div>
-						<div class="row">
-                			<div class="mb-3">
-                  				<label class="form-label">Mobile Phone</label>
-                  				<input type="text" class="form-control" v-model.trim="contact.phone">
                 			</div>
               			</div>
 					</div>
@@ -272,8 +275,6 @@ createApp({
 			email: "",
 			first_name: "",
 			last_name: "",
-			phone: "",
-			id_card: ""
 		},
 		contact0: null,
 		all_day: false,
@@ -283,10 +284,11 @@ createApp({
 		email_msg: "",
 		first_name_msg: "",
 		last_name_msg: "",
-		id_card_msg: "",
         invitation: {
 			to_dept_id: -1,
 			visitors: [],
+			title: "",
+			agenda: "",
 			start_date: "",
 			end_date: "",
 			start_time: "",
@@ -392,6 +394,9 @@ createApp({
             picker.container.find('.minuteselect').eq(1).val(parseInt(end_time_array[1]), 55).trigger('change');
 		},
 		clear_invite_modal() {
+			this.invitation.to_dept_id = -1;
+			this.invitation.title = "";
+			this.invitation.agenda = "";
 			this.invitation.visitors.splice(0, this.invitation.visitors.length);
 		},
 		dates_set(info) {
@@ -679,8 +684,25 @@ createApp({
 						return;
 					}
 
+					let dept_name = "";
+					for(let i = 0; i < this.depts.length; i++)
+					{
+						if(this.depts[i].id == this.invitation.to_dept_id)
+						{
+							dept_name = this.depts[i].full_name;
+							break;
+						}
+					}
+
 					//No waiting until email sent
-					axios.post("/admin/send_invite_email", {invite_id: response.data.invite_id, visitors: response.data.visitors});
+					await axios.post("/admin/send_invite_email", {
+						invite_id: response.data.invite_id,
+						dept_name: dept_name,
+						title: response.data.title, 
+						agenda: response.data.agenda, 
+						visitors: response.data.visitors,
+						base_url: axios.defaults.baseURL
+					});
 
 					//refresh calendar
 					this.get_invitations();
@@ -729,11 +751,6 @@ createApp({
 				if (this.contact.last_name === "")
 				{
 					this.last_name_msg = "Last Name is blank";
-					is_valid = false;
-				}
-				if (this.contact.id_card === "")
-				{
-					this.id_card_msg = "ID Name is blank";
 					is_valid = false;
 				}
 
