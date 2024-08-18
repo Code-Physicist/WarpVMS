@@ -64,6 +64,12 @@ class PDPAController extends AppController
         return $this->MakeResponse($response, $chk);
     }
 
+    public function GetPDPAConsent(Request $request)
+    {
+        $pdpa = DB::table("VC_PDPA")->where('is_active', '=', 1)->first();
+        return ["pdpa_consent" => $pdpa->consent];
+    }
+
     public function CreatePDPA(Request $request)
     {
         $chk = $this->CheckAdmin($request);

@@ -134,6 +134,67 @@ class InvitationController extends AppController
         return ["status" => "T", "data_list" => $invitations];
     }
 
+    public function GetInvitationById(Request $request)
+    {
+        $id = $request->id;
+        $invitation = DB::table("VC_invite")
+            ->where('id', '=', $id)
+            ->first();
+
+        $visitors = DB::table("VC_invite_visitor as iv")
+            ->where('iv.invite_id', '=', $id)
+            ->leftJoin('PkContacts as c', 'c.id', '=', 'iv.contact_id')
+            ->select('iv.pdpa_accept', 'c.id', 'c.first_name', 'c.last_name', 'c.email', 'c.id_card', 'c.phone')->get();
+
+        $dept = DB::table("PkDepartments")
+            ->where('DeptID', '=', $invitation->to_dept_id)
+            ->first();
+
+        return ["status" => "T", "invitation" => $invitation, "visitors" => $visitors, "dept" => $dept];
+    }
+
+    public function EditVisitor(Request $request)
+    {
+        $invite_id = $request->invite_id;
+        $contact = $request->contact;
+
+        $invite_visitor = DB::table("VC_invite_visitor")
+            ->where('invite_id', '=', $invite_id)
+            ->where('contact_id', '=', $contact["id"])
+            ->first();
+
+        $send_email = false;
+        if($invite_visitor->pdpa_accept == 0) {
+            $send_email = true;
+        }
+
+        DB::beginTransaction();
+        try {
+            DB::table('PkContacts')
+            ->where("id", $contact["id"])
+            ->update([
+                "first_name" => $contact["first_name"],
+                "last_name" => $contact["last_name"],
+                "phone" => $contact["phone"],
+                "id_card" => $contact["id_card"],
+            ]);
+
+            DB::table('VC_invite_visitor')
+            ->where('invite_id', '=', $invite_id)
+            ->where('contact_id', '=', $contact["id"])
+            ->update([
+                "pdpa_accept" => 1
+            ]);
+
+            DB::commit();
+            return ["status" => "T", "send_email" => $send_email];
+
+        } catch (Exception $e) {
+            DB::rollback();
+            return ["status" => "F", "err_message" => $e->getMessage()];
+        }
+    }
+
     public function CreateInvitation(Request $request)
     {
         $chk = $this->CheckAdmin($request);
@@ -160,6 +221,7 @@ class InvitationController extends AppController
                 DB::table('VC_invite_visitor')->insert([
                     "invite_id" => $invite_id,
                     "contact_id" => $visitor["id"],
+                    "pdpa_accept" => 0
                 ]);
             }
             DB::commit();
@@ -188,19 +250,16 @@ class InvitationController extends AppController
         return ["status" => "T", "data_list" => $contacts];
     }
 
-    public function SendInviteEmail_org(Request $request)
+    public function SendQRCode(Request $request)
     {
-        $visitors = $request->visitors;
+        $email = $request->email;
         $invite_id = $request->invite_id;
 
         $code = "VMS" . str_pad(strval($invite_id), 8, "0", STR_PAD_LEFT);
         $qr_image = QrCode::format("png")->size(512)->generate($code);
         $data = array("qr_image" => $qr_image);
 
-        $emails = [];
-        foreach ($visitors as $visitor) {
-            array_push($emails, $visitor["email"]);
-        }
+        $emails = [$email];
 
         Mail::send("emails.invite", $data, function ($message) use ($emails) {
             $message->to($emails)
@@ -239,6 +298,11 @@ class InvitationController extends AppController
             $message->from("VMS_Admin@gmail.com", "VMS Admin");
         });
         return ["status" => "F"];
+    }
+
+    public function VisitorInvitation(Request $request)
+    {
+        return view("visitor", ["id" => $request->id]);
     }
 
     public function TestSendEmail(Request $request)

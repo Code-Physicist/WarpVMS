@@ -39,6 +39,7 @@ Route::post('/admin/get_pdpas', [PDPAController::class, 'GetPDPAs']);
 Route::post('/admin/create_pdpa', [PDPAController::class, 'CreatePDPA']);
 Route::post('/admin/update_pdpa', [PDPAController::class, 'UpdatePDPA']);
 Route::post('/admin/activate_pdpa', [PDPAController::class, 'ActivatePDPA']);
+Route::post('/visitors/get_pdpa_consent', [PDPAController::class, 'GetPDPAConsent']);
 
 Route::post('/admin/get_departments', [DepartmentController::class, 'GetDepartments']);
 Route::post('/admin/create_department', [DepartmentController::class, 'CreateDepartment']);
@@ -65,4 +66,8 @@ Route::post('/admin/get_contacts', [InvitationController::class, 'GetContactsByI
 Route::post('/admin/upsert_contact', [InvitationController::class, 'UpsertContact']);
 Route::post('/admin/create_invitation', [InvitationController::class, 'CreateInvitation']);
 Route::post('/admin/send_invite_email', [InvitationController::class, 'SendInviteEmail']);
+Route::post('/admin/send_qr_code', [InvitationController::class, 'SendQRCode']);
+Route::get('/visitors/invitation/{id}', [InvitationController::class, 'VisitorInvitation']);
+Route::post('/visitors/get_invitation', [InvitationController::class, 'GetInvitationById']);
+Route::post('/visitors/edit_visitor', [InvitationController::class, 'EditVisitor']);
 Route::get('/admin/test', [InvitationController::class, 'TestSendEmail']);
