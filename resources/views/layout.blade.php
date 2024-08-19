@@ -54,16 +54,18 @@
                   <span class="menu-text">Dashboard</span>
                 </a>
               </li>
-              @if(Request::is('admin/pdpa'))
-              <li class="active current-page">
-              @else
-              <li>
+              @if( $dept_level == 0)
+                @if(Request::is('admin/pdpa'))
+                <li class="active current-page">
+                @else
+                <li>
+                @endif
+                  <a href="{{url('/admin/pdpa')}}">
+                    <i class="icon-file"></i>
+                    <span class="menu-text">PDPA Revisions</span>
+                  </a>
+                </li>
               @endif
-                <a href="{{url('/admin/pdpa')}}">
-                  <i class="icon-file"></i>
-                  <span class="menu-text">PDPA Revisions</span>
-                </a>
-              </li>
               @if(Request::is('admin/invitations'))
               <li class="active current-page">
               @else

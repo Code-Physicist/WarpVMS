@@ -61,6 +61,8 @@ Route::post('/admin/update_operator_edb', [OperatorController::class, 'UpdateOpe
 
 Route::post('/admin/get_invitation_depts', [InvitationController::class, 'GetInvitationDepts']);
 Route::post('/admin/get_contact', [InvitationController::class, 'GetContactByEmail']);
+Route::post('/visitors/get_contact', [InvitationController::class, 'GetVisitorContactByEmail']);
+Route::post('/visitors/add_visitor', [InvitationController::class, 'AddVisitor']);
 Route::post('/admin/get_invitations', [InvitationController::class, 'GetInvitations']);
 Route::post('/admin/get_contacts', [InvitationController::class, 'GetContactsByInviteId']);
 Route::post('/admin/upsert_contact', [InvitationController::class, 'UpsertContact']);

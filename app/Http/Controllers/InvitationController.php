@@ -78,6 +78,63 @@ class InvitationController extends AppController
         return ["status" => "T", "contact" => $contact];
     }
 
+    //For visitor page
+    public function GetVisitorContactByEmail(Request $request)
+    {
+        $v_dept_id = $request->v_dept_id;
+        $email = $request->email;
+
+        $contact = DB::table('PkContacts')
+        ->where('email', '=', $email)
+        ->where('dept_id', '=', $v_dept_id)
+        ->select('id', 'email', 'first_name', 'last_name', 'id_card', 'phone')
+        ->first();
+
+        return ["contact" => $contact];
+    }
+
+    public function AddVisitor(Request $request)
+    {
+        $invite_id = $request->invite_id;
+        $v_dept_id = $request->v_dept_id;
+        $contact = $request->contact;
+
+        $visitor = [
+            "email" => $contact["email"],
+            "first_name" => $contact["first_name"],
+            "last_name" => $contact["last_name"],
+            "id_card" => $contact["id_card"],
+            "phone" => $contact["phone"],
+            "dept_id" => $v_dept_id,
+        ];
+
+        $id = $contact["id"];
+
+        DB::beginTransaction();
+        try {
+            if($id == "0") {
+                $id = DB::table('PkContacts')->insertGetId($visitor);
+            } else {
+                DB::table('PkContacts')->where("id", $contact["id"])->update($visitor);
+            }
+
+            DB::table("VC_invite_visitor")
+            ->where('invite_id', '=', $invite_id)
+            ->insert([
+                "invite_id" => $invite_id,
+                "contact_id" => $id,
+                "pdpa_accept" => 1
+            ]);
+
+            DB::commit();
+            return ["status" => "T"];
+
+        } catch (Exception $e) {
+            DB::rollback();
+            return ["status" => "F", "err_message" => $e->getMessage()];
+        }
+    }
+
     public function UpsertContact(Request $request)
     {
         $chk = $this->CheckAdmin($request);
@@ -150,7 +207,12 @@ class InvitationController extends AppController
             ->where('DeptID', '=', $invitation->to_dept_id)
             ->first();
 
-        return ["status" => "T", "invitation" => $invitation, "visitors" => $visitors, "dept" => $dept];
+        $v_dept_id = $dept->DeptID;
+        if($dept->Level1 == 2) {
+            $v_dept_id = $dept->SupDepID;
+        }
+
+        return ["status" => "T", "invitation" => $invitation, "visitors" => $visitors, "dept" => $dept, "v_dept_id" => $v_dept_id];
     }
 
     public function EditVisitor(Request $request)

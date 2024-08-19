@@ -599,7 +599,8 @@ createApp({
 				return;
 			}
 
-			alert("Under construction");
+			//alert("Under construction");
+			this.event_modal.hide();
 			return;
 
 		},
@@ -695,7 +696,7 @@ createApp({
 					}
 
 					//No waiting until email sent
-					await axios.post("/admin/send_invite_email", {
+					axios.post("/admin/send_invite_email", {
 						invite_id: response.data.invite_id,
 						dept_name: dept_name,
 						title: response.data.title, 

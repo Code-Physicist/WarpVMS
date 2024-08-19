@@ -20,8 +20,8 @@ Create and edit tenants
         <div class="card-body">
           <div class="d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center justify-content-start">
-              <div class="card-title">Total {tenants.length} Tenants</div>
-              <button @click="show_create" class="btn btn-danger btn-sm mx-2"><span class="icon-add"></span> Create&nbsp;</button>
+              <button @click="show_create" class="btn btn-danger btn-sm mx-2"><span class="icon-add"></span></button>
+              New Tenant
             </div>
             <div class="d-flex align-items-center justify-content-end">
               <div class="card-title text-nowrap">Status</div>

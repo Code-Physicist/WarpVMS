@@ -21,7 +21,7 @@ Create and edit departments
           <div class="d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center justify-content-start">
               <button @click="show_create" class="btn btn-danger btn-sm mx-2"><span class="icon-add"></span></button>
-              Department
+              New Department
             </div>
             <div class="d-flex align-items-center justify-content-end">
               <div class="card-title text-nowrap">Status</div>
@@ -37,27 +37,41 @@ Create and edit departments
           <div class="table-responsive">
               <table class="table table-striped" style="width:100%" id="data-table">
                 <thead>
-                  <tr>
+                <tr>
+                    <th>ID</th>
                     <th>
-                        ID
-                    </th>
-                    <th>
+                      <div class="d-flex align-items-center">
+                        <span class="icon-business me-2 fs-4"></span>
                         Department
+                      </div>
                     </th>
                     <th>
+                      <div class="d-flex align-items-center">
+                        <span class="icon-stairs me-2 fs-4"></span>
                         Floors
+                      </div>
                     </th>
                     <th>
+                      <div class="d-flex align-items-center">
+                        <span class="icon-phone me-2 fs-4"></span>
                         Phone No.1
+                      </div>
                     </th>
                     <th>
+                      <div class="d-flex align-items-center">
+                        <span class="icon-phone me-2 fs-4"></span>
                         Phone No.2
+                      </div>
                     </th>
                     <th>
+                      <div class="d-flex align-items-center">
+                        <span class="icon-lightbulb me-2 fs-4"></span>
                         Status
+                      </div>
                     </th>
                     <th>
-                      <div class="d-flex justify-content-center">
+                      <div class="d-flex justify-content-center align-items-center">
+                        <span class="icon-settings me-2 fs-4"></span>
                         Actions
                       </div>
                     </th>
