@@ -272,7 +272,7 @@ class InvitationController extends AppController
             "end_date" => $request->end_date,
             "start_time" => $request->start_time,
             "end_time" => $request->end_time,
-            "email_time" => Carbon::now()->addMinutes(5),
+            "update_time" => Carbon::now(),
         ];
 
         $visitors = $request->visitors;
@@ -288,6 +288,39 @@ class InvitationController extends AppController
             }
             DB::commit();
             return ["status" => "T", "title" => $invite["title"], "agenda" => $invite["agenda"], "invite_id" => $invite_id, "visitors" => $visitors];
+        } catch (Exception $e) {
+            DB::rollback();
+            return ["status" => "F", "err_message" => $e->getMessage()];
+        }
+
+    }
+
+    public function EditInvitation(Request $request)
+    {
+        $chk = $this->CheckAdmin($request);
+        if(!$chk["is_ok"]) {
+            return ["status" => "I"];
+        }
+
+        $id = $request->id;
+        $invite = [
+            "to_dept_id" => $request->to_dept_id,
+            "title" => $request->title,
+            "agenda" => $request->agenda,
+            "start_date" => $request->start_date,
+            "end_date" => $request->end_date,
+            "start_time" => $request->start_time,
+            "end_time" => $request->end_time,
+            "update_time" => Carbon::now(),
+        ];
+
+        $visitors = $request->visitors;
+
+        DB::beginTransaction();
+        try {
+            DB::table('VC_invite')->where("id", $id)->update($invite);
+            DB::commit();
+            return ["status" => "T", "title" => $invite["title"], "agenda" => $invite["agenda"], "invite_id" => $id, "visitors" => $visitors];
         } catch (Exception $e) {
             DB::rollback();
             return ["status" => "F", "err_message" => $e->getMessage()];
@@ -334,24 +367,33 @@ class InvitationController extends AppController
     public function SendInviteEmail(Request $request)
     {
         $invite_id = $request->invite_id;
-        $title = $request->title;
-        $agenda = $request->agenda;
-        $dept_name = $request->dept_name;
-        $visitors = $request->visitors;
         $base_url = $request->base_url;
 
-        $url = "$base_url/visitors/invitation/$invite_id";
+        $invitation = DB::table("VC_invite")->where("id", $invite_id)->first();
+        $dept = DB::table("PkDepartments")
+            ->where("DeptID", $invitation->to_dept_id)
+            ->select('Fullname as full_name')
+            ->first();
+
+        $visitors = DB::table("VC_invite_visitor as iv")
+            ->where('iv.invite_id', '=', $invite_id)
+            ->leftJoin('PkContacts as c', 'c.id', '=', 'iv.contact_id')
+            ->select('c.email')->get();
+
+        $update_time = Carbon::parse($invitation->update_time);
+        $date_code = md5($update_time->format('YmdHis'));
+        $url = "$base_url/visitors/invitation/$invite_id$date_code";
 
         $data = array(
-            "dept_name" => $dept_name,
-            "title" => $title,
-            "agenda" => $agenda,
+            "dept_name" => $dept->full_name,
+            "title" => $invitation->title,
+            "agenda" => $invitation->agenda,
             "url" => $url
         );
 
         $emails = [];
         foreach ($visitors as $visitor) {
-            array_push($emails, $visitor["email"]);
+            array_push($emails, $visitor->email);
         }
 
         Mail::send("emails.visitor", $data, function ($message) use ($emails) {
@@ -359,12 +401,27 @@ class InvitationController extends AppController
                     ->subject("VMS Invitation");
             $message->from("VMS_Admin@gmail.com", "VMS Admin");
         });
-        return ["status" => "F"];
+        return ["status" => "T"];
     }
 
     public function VisitorInvitation(Request $request)
     {
-        return view("visitor", ["id" => $request->id]);
+        $code = $request->code;
+        $id = substr($code, 0, strlen($code) - 32);
+        $c = substr($code, strlen($id), strlen($code));
+
+        $invitation = DB::table("VC_invite")->where("id", $id)->first();
+        if(is_null($invitation)) {
+            return "id is null";
+        }
+
+        $update_time = Carbon::parse($invitation->update_time);
+        $date_code = md5($update_time->format('YmdHis'));
+        if($c !== $date_code) {
+            return "Invalid page";
+        }
+
+        return view("visitor", ["id" => $id]);
     }
 
     public function TestSendEmail(Request $request)

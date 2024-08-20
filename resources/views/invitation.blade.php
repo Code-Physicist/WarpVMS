@@ -285,6 +285,7 @@ createApp({
 		first_name_msg: "",
 		last_name_msg: "",
         invitation: {
+			id: 0,
 			to_dept_id: -1,
 			visitors: [],
 			title: "",
@@ -428,10 +429,8 @@ createApp({
 						//Need to add one day for end date to display correctly
 						let end_date2 = this.get_date_obj(invitations[i].end_date);
 						end_date2.setDate(end_date2.getDate() + 1);
-
 						this.calendar.addEvent(
                 			{
-                    			invite_id: inv.id,
 				    			title: inv.dept_name,
 				    			start: `${invitations[i].start_date}`,
 								end: `${this.get_date_str(end_date2)}`,
@@ -439,10 +438,14 @@ createApp({
 				    			borderColor: this.colors[c_index].borderColor,
 				    			textColor: this.colors[c_index].textColor,
 
+								invite_id: inv.id,
+								to_dept_id: inv.to_dept_id,
+								invite_title: inv.title,
+								invite_agenda: inv.agenda,
 								start_date: `${invitations[i].start_date}`,
 								end_date: `${invitations[i].end_date}`,
-								start_time: `${start_time}`,
-								end_time: `${end_time}`,
+								start_time: "00:00",
+								end_time: "23:55",
 								all_day: true
 			    			}
             			);
@@ -456,7 +459,6 @@ createApp({
 
 						this.calendar.addEvent(
                 			{
-                    			invite_id: inv.id,
 				    			title: inv.dept_name,
 				    			start: `${this.get_date_str(d)}T${start_time}`,
 								end: `${this.get_date_str(d)}T${end_time}`,
@@ -464,6 +466,10 @@ createApp({
 				    			borderColor: this.colors[c_index].borderColor,
 				    			textColor: this.colors[c_index].textColor,
 
+								invite_id: inv.id,
+								to_dept_id: inv.to_dept_id,
+								invite_title: inv.title,
+								invite_agenda: inv.agenda,
 								start_date: `${invitations[i].start_date}`,
 								end_date: `${invitations[i].end_date}`,
 								start_time: `${start_time.slice(0, -3)}`,
@@ -571,7 +577,7 @@ createApp({
             this.calendar.unselect();
             this.invite_modal.show();
         },
-		async show_event(arg) {
+		async show_event_org(arg) {
             this.event.invite_id = arg.event.extendedProps.invite_id;
 			this.event.title = arg.event.title;
 			this.event.start_date = this.format_date_str(arg.event.extendedProps.start_date);
@@ -588,6 +594,40 @@ createApp({
 				const response = await axios.post("/admin/get_contacts", {invite_id: this.event.invite_id});
 				this.event.visitors = response.data.data_list;
 				this.event_modal.show();
+			}
+			catch(error) {
+				console.log(error);
+			}
+		},
+		async show_event(arg) {
+			this.invitation.id = arg.event.extendedProps.invite_id;
+			this.invitation.to_dept_id = arg.event.extendedProps.to_dept_id;
+			this.invitation.title = arg.event.extendedProps.invite_title;
+			this.invitation.agenda = arg.event.extendedProps.invite_agenda;
+
+			$("#start_date").data('daterangepicker').setStartDate(new Date(arg.event.extendedProps.start_date));
+			$("#start_date").data('daterangepicker').setEndDate(new Date(arg.event.extendedProps.start_date));
+
+			$("#end_date").data('daterangepicker').setStartDate(new Date(arg.event.extendedProps.end_date));
+			$("#end_date").data('daterangepicker').setEndDate(new Date(arg.event.extendedProps.end_date));
+			
+			this.p_start_time = arg.event.extendedProps.start_time;
+			this.p_end_time = arg.event.extendedProps.end_time;
+			this.all_day = arg.event.extendedProps.all_day;
+			$("#interval").val(`${this.p_start_time} - ${this.p_end_time}`);
+			$("#interval").prop('disabled', arg.event.extendedProps.all_day);
+
+			try {
+				const response = await axios.post("/admin/get_contacts", {invite_id: this.invitation.id});
+				let contacts = response.data.data_list;
+				this.invitation.visitors.splice(0, this.invitation.visitors.length);
+				for(let i = 0; i < contacts.length; i++)
+				{
+					let contact = contacts[i];
+					this.invitation.visitors.push({id: contact.id, email: contact.email, name: `${contact.first_name} ${contact.last_name}`});
+				}
+					
+				this.invite_modal.show();
 			}
 			catch(error) {
 				console.log(error);
@@ -670,7 +710,8 @@ createApp({
 				}
 
 				try{
-					const response = await axios.post("/admin/create_invitation", this.invitation);
+					let url = (this.invitation.id == 0) ? "/admin/create_invitation" : "/admin/edit_invitation";
+					const response = await axios.post(url, this.invitation);
           			if(response.data.status === "I")
 					{
 						//Force log out
@@ -685,23 +726,9 @@ createApp({
 						return;
 					}
 
-					let dept_name = "";
-					for(let i = 0; i < this.depts.length; i++)
-					{
-						if(this.depts[i].id == this.invitation.to_dept_id)
-						{
-							dept_name = this.depts[i].full_name;
-							break;
-						}
-					}
-
 					//No waiting until email sent
 					axios.post("/admin/send_invite_email", {
 						invite_id: response.data.invite_id,
-						dept_name: dept_name,
-						title: response.data.title, 
-						agenda: response.data.agenda, 
-						visitors: response.data.visitors,
 						base_url: axios.defaults.baseURL
 					});
 

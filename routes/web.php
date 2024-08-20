@@ -67,9 +67,10 @@ Route::post('/admin/get_invitations', [InvitationController::class, 'GetInvitati
 Route::post('/admin/get_contacts', [InvitationController::class, 'GetContactsByInviteId']);
 Route::post('/admin/upsert_contact', [InvitationController::class, 'UpsertContact']);
 Route::post('/admin/create_invitation', [InvitationController::class, 'CreateInvitation']);
+Route::post('/admin/edit_invitation', [InvitationController::class, 'EditInvitation']);
 Route::post('/admin/send_invite_email', [InvitationController::class, 'SendInviteEmail']);
 Route::post('/admin/send_qr_code', [InvitationController::class, 'SendQRCode']);
-Route::get('/visitors/invitation/{id}', [InvitationController::class, 'VisitorInvitation']);
+Route::get('/visitors/invitation/{code}', [InvitationController::class, 'VisitorInvitation']);
 Route::post('/visitors/get_invitation', [InvitationController::class, 'GetInvitationById']);
 Route::post('/visitors/edit_visitor', [InvitationController::class, 'EditVisitor']);
 Route::get('/admin/test', [InvitationController::class, 'TestSendEmail']);
