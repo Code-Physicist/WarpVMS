@@ -392,10 +392,14 @@ createApp({
             this.get_invitation();
             this.edit_modal.hide();
           }
+          else {
+            alert(response.data.err_message);
+          }
         }
         catch(error)
         {
           console.log(error);
+          alert("Server error. Please try again later.");
         }
       },
       async get_invitation() {

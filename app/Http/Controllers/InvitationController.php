@@ -217,6 +217,29 @@ class InvitationController extends AppController
 
     public function EditVisitor(Request $request)
     {
+        try {
+            JWTAuth::setToken($request->cookie("WarpVisitor"));
+            $payload = JWTAuth::getPayload();
+            $code = $payload["code"];
+
+            $id = substr($code, 0, strlen($code) - 32);
+            $c = substr($code, strlen($id), strlen($code));
+
+            $invitation = DB::table("VC_invite")->where("id", $id)->first();
+            if(is_null($invitation)) {
+                return ["status" => "F", "err_message" => "Invalid Operation"];
+            }
+
+            $update_time = Carbon::parse($invitation->update_time);
+            $date_code = md5($update_time->format('YmdHis'));
+            if($c !== $date_code) {
+                return ["status" => "F", "err_message" => "Invalid Operation"];
+            }
+
+        } catch (Exception $e) {
+            return ["status" => "F", "err_message" => "Token Expired"];
+        }
+
         $invite_id = $request->invite_id;
         $contact = $request->contact;
 
@@ -319,6 +342,16 @@ class InvitationController extends AppController
         DB::beginTransaction();
         try {
             DB::table('VC_invite')->where("id", $id)->update($invite);
+
+            DB::table('VC_invite_visitor')->where("invite_id", $id)->delete();
+            foreach ($visitors as $visitor) {
+                DB::table('VC_invite_visitor')->insert([
+                    "invite_id" => $id,
+                    "contact_id" => $visitor["id"],
+                    "pdpa_accept" => 0
+                ]);
+            }
+
             DB::commit();
             return ["status" => "T", "title" => $invite["title"], "agenda" => $invite["agenda"], "invite_id" => $id, "visitors" => $visitors];
         } catch (Exception $e) {
@@ -382,7 +415,17 @@ class InvitationController extends AppController
 
         $update_time = Carbon::parse($invitation->update_time);
         $date_code = md5($update_time->format('YmdHis'));
-        $url = "$base_url/visitors/invitation/$invite_id$date_code";
+
+        $data = [
+            "iss" => "WarpVMS",
+            "code" => "$invite_id$date_code",
+            "exp" => Carbon::now()->addDays(90)->timestamp
+        ];
+
+        $factory = JWTFactory::customClaims($data);
+        $token = JWTAuth::encode($factory->make());
+
+        $url = "$base_url/visitors/invitation/$token";
 
         $data = array(
             "dept_name" => $dept->full_name,
@@ -406,13 +449,20 @@ class InvitationController extends AppController
 
     public function VisitorInvitation(Request $request)
     {
-        $code = $request->code;
-        $id = substr($code, 0, strlen($code) - 32);
-        $c = substr($code, strlen($id), strlen($code));
+        try {
+            JWTAuth::setToken($request->code);
+            $payload = JWTAuth::getPayload();
+            $code = $payload["code"];
 
-        $invitation = DB::table("VC_invite")->where("id", $id)->first();
-        if(is_null($invitation)) {
-            return "id is null";
+            $id = substr($code, 0, strlen($code) - 32);
+            $c = substr($code, strlen($id), strlen($code));
+
+            $invitation = DB::table("VC_invite")->where("id", $id)->first();
+            if(is_null($invitation)) {
+                return "ID is null";
+            }
+        } catch (Exception $e) {
+            return "Token expired";
         }
 
         $update_time = Carbon::parse($invitation->update_time);
@@ -421,12 +471,11 @@ class InvitationController extends AppController
             return "Invalid page";
         }
 
-        return view("visitor", ["id" => $id]);
+        return response(view("visitor", ["id" => $id]))->withCookie(Cookie("WarpVisitor", $request->code));
     }
 
     public function TestSendEmail(Request $request)
     {
-
         $code = "VMS" . str_pad("1", 8, "0", STR_PAD_LEFT);
         $qr_image = QrCode::format("png")->size(512)->generate($code);
         $data = array("qr_image" => $qr_image);
