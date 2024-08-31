@@ -30,11 +30,11 @@
   <div id="app" class="container">
       <div class="row justify-content-center">
         <div class="col-xl-4 col-lg-5 col-sm-6 col-12">
-        <form class="my-5">
+        <form class="my-5" v-cloak>
               <div class="bg-white rounded-3 p-4">
                 <div class="login-form x-login-form">
                   <a class="mb-4 d-flex align-items-center justify-content-between">
-                    <img src="{{ asset('images/BTSVISION_Logo_DarkBlue.svg') }}" class="img-fluid login-logo" alt="BTS Visionary Park" />
+                    <img src="{{ asset('images/BTSVISION_Logo_DarkBlue.svg') }}" class="img-fluid login-logo" alt="BTS Visionary Park"/>
                     <h3 v-show="true" class="h4-login-form my-0 pe-2" style="display:none;">{active_ui === 1? 'Login':'Reset'}</h3>
                   </a>
                   <div v-show="active_ui === 1" style="display:none;">

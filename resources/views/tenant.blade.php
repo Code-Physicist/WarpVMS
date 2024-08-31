@@ -26,7 +26,7 @@ Create and edit tenants
             <div class="d-flex align-items-center justify-content-end">
               <div class="card-title text-nowrap">Status</div>
               <div>&nbsp;&nbsp;</div>
-              <select @change="change_filter" v-model="filter.status" class="form-select">
+              <select @change="change_filter" v-model="filter.status" class="form-select form-select-sm">
                       <option value="2">All</option>
                       <option value="1">Active</option>
                       <option value="0">Disabled</option>

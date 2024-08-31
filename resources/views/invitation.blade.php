@@ -211,11 +211,8 @@ Invite visitors, update schedules and resend invitation emails
 					
 				</div>
                 <div class="modal-footer pe-4">
-                    <button v-show="admin_level_id > 3" @click="event_modal.hide()" type="button" class="btn btn-secondary">
-						Cancel
-                    </button>
-                    <button @click="resend()" type="button" class="btn btn-primary">
-						{ admin_level_id > 3? 'Resend Email':'Close'}
+                    <button @click="event_modal.hide()" type="button" class="btn btn-primary">
+						close
                     </button>
                 </div>
             </div>
@@ -511,7 +508,7 @@ createApp({
 			return time_array[0];
 		},
         show_create(arg) {
-			if(this.admin_level_id == "2" || this.admin_level_id == "3")
+			if(this.admin_level_id <= 3)
 			{	
 				this.calendar.unselect();
 				return;
@@ -577,7 +574,7 @@ createApp({
             this.calendar.unselect();
             this.invite_modal.show();
         },
-		async show_event_org(arg) {
+		async show_readonly_event(arg) {
             this.event.invite_id = arg.event.extendedProps.invite_id;
 			this.event.title = arg.event.title;
 			this.event.start_date = this.format_date_str(arg.event.extendedProps.start_date);
@@ -600,6 +597,11 @@ createApp({
 			}
 		},
 		async show_event(arg) {
+			if(this.admin_level_id <= 3) {
+				this.show_readonly_event(arg);
+				return;
+			}
+
 			this.invitation.id = arg.event.extendedProps.invite_id;
 			this.invitation.to_dept_id = arg.event.extendedProps.to_dept_id;
 			this.invitation.title = arg.event.extendedProps.invite_title;
@@ -632,17 +634,6 @@ createApp({
 			catch(error) {
 				console.log(error);
 			}
-		},
-		resend() {
-			if(this.admin_level_id <= 3) {
-				this.event_modal.hide();
-				return;
-			}
-
-			//alert("Under construction");
-			this.event_modal.hide();
-			return;
-
 		},
 		async get_invitation_depts() {
           const response = await axios.post("/admin/get_invitation_depts");
