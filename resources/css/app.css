@@ -74,6 +74,13 @@
     cursor: pointer;
 }
 
+.crop {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 640px;
+}
+
 [v-cloak] {
     display: none;
 }

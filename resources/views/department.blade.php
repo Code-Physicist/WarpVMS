@@ -13,9 +13,8 @@ Create and edit departments
 <link rel="stylesheet" href="{{ asset('css/dataTables.bs5-custom.css') }}" />
 @stop
 @section('content')
-<div id="app">
-  <div v-show="active_ui === 1" class="row" style="display:none;">
-    <div class="col-12">
+<div v-show="active_ui === 1" class="row" style="display:none;">
+  <div class="col-12">
       <div class="card mb-4">
         <div class="card-body">
           <div class="d-flex align-items-center justify-content-between">
@@ -159,16 +158,15 @@ Create and edit departments
                 </div>
 					    </div>
           </div>
-          <div class="modal-footer flex-nowrap p-0">
+      <div class="modal-footer flex-nowrap p-0">
             <button type="button" @click="submit_edb" class="btn text-primary fs-6 col-6 m-0 border-end">
               <strong>{ edb_status === 0 ? 'Disable' : 'Enable' }</strong>
             </button>
-            <button type="button" class="btn  fs-6 col-6 m-0" data-bs-dismiss="modal">
+        <button type="button" class="btn  fs-6 col-6 m-0" data-bs-dismiss="modal">
               Cancel
-            </button>
-          </div>
-        </div>
+        </button>
       </div>
+    </div>
   </div>
 </div>
 @stop

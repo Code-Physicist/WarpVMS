@@ -15,10 +15,10 @@ class AuthController extends AppController
     public function LoginPage(Request $request)
     {
         $check = $this->CheckAdmin($request);
-        if(!$check["is_ok"]) {
+        if (!$check["is_ok"]) {
             return response()->view("login");
         }
-        if($check["u_data"]["pw_change"]) {
+        if ($check["u_data"]["pw_change"]) {
             return redirect("/admin/pass_reset");
         }
 
@@ -36,16 +36,16 @@ class AuthController extends AppController
                   ->first();
 
         //L => Account Lock, I => Invalid User, T => Success
-        if(!$admin) {
+        if (!$admin) {
             return ["status" => "I"];
         }
 
-        if($admin->xtime > Carbon::now()) {
+        if ($admin->xtime > Carbon::now()) {
             return ["status" => "L"];
 
-        } elseif($admin->password1 !== $pass) {
+        } elseif ($admin->password1 !== $pass) {
             $xtimeflag = $admin->xtimeflag;
-            if($xtimeflag < 5) {
+            if ($xtimeflag < 5) {
                 DB::table('PkAdminweb')
                 ->where("adminname", $user)
                 ->update(["xtimeflag" => $xtimeflag + 1]);
@@ -69,7 +69,7 @@ class AuthController extends AppController
 
             //Get password reset status
             $pw_change = false;
-            if($admin->exptime < Carbon::now() || $admin->ChangeFlag === '1') {
+            if ($admin->exptime < Carbon::now() || $admin->ChangeFlag === '1') {
                 $pw_change = true;
             }
 
@@ -103,7 +103,7 @@ class AuthController extends AppController
                     ->where('adminname', '=', $user)
                     ->first();
 
-        if(!$admin) {
+        if (!$admin) {
             return ["status" => "I"];
         }
 
@@ -111,10 +111,10 @@ class AuthController extends AppController
                     ->where('adminname', '=', $user)
                     ->first();
 
-        if($acct) {
+        if ($acct) {
             $time_left = 60 - Carbon::now()->diffInSeconds($acct->create_time);
 
-            if($acct && $time_left > 0) {
+            if ($acct && $time_left > 0) {
                 return ["status" => "W", "time_left" => $time_left];
             }
 
@@ -163,11 +163,11 @@ class AuthController extends AppController
                 ->where('reset_code', '=', $rst_code)
                 ->first();
 
-        if(!$acct) {
+        if (!$acct) {
             return "Invalid request";
         }
 
-        if($acct->create_time < Carbon::now()->addMinutes(-20)) {
+        if ($acct->create_time < Carbon::now()->addMinutes(-20)) {
             return "Page Expired";
         }
 
@@ -181,7 +181,7 @@ class AuthController extends AppController
         $pass1 = $request->pass1;
         $pass2 = $request->pass2;
 
-        if($pass1 === "" || $pass2 === "" || $pass1 !== $pass2) {
+        if ($pass1 === "" || $pass2 === "" || $pass1 !== $pass2) {
             return ["status" => "M"];
         }
 
@@ -190,7 +190,7 @@ class AuthController extends AppController
                 ->where('reset_code', '=', $rst_code)
                 ->first();
 
-        if(!$acct || $acct->create_time < Carbon::now()->addMinutes(-20)) {
+        if (!$acct || $acct->create_time < Carbon::now()->addMinutes(-20)) {
             return ["status" => "I"];
         }
 
@@ -198,6 +198,49 @@ class AuthController extends AppController
 
         DB::table('PkAdminweb')
             ->where("adminname", $email)
+            ->update(
+                [
+                    "password1" => $pass1,
+                    "xtimeflag" => 0,
+                    "xtime" => Carbon::now()->addMinutes(-10),
+                    "exptime" => Carbon::now()->addDays(90)
+                ]
+            );
+
+        return ["status" => "T"];
+    }
+
+    public function ChangePasswordPage(Request $request)
+    {
+        $chk = $this->CheckAdmin($request);
+        if (!$chk["is_ok"]) {
+            return redirect("/admin/login");
+        }
+
+        //Refresh cookie
+        $cookie = $this->CreateVMSCookie($chk["u_data"]);
+        return response()->view("change", $chk["u_data"])->withCookie($cookie);
+    }
+
+    public function ChangePassword(Request $request)
+    {
+        $chk = $this->CheckAdmin($request);
+        if (!$chk["is_ok"]) {
+            return ["status" => "I"];
+        }
+
+        $admin_id = $chk["u_data"]["admin_id"];
+        $pass1 = $request->pass1;
+        $pass2 = $request->pass2;
+
+        if ($pass1 === "" || $pass2 === "" || $pass1 !== $pass2) {
+            return ["status" => "M"];
+        }
+
+        $pass1 = strtoupper(md5($pass1));
+
+        DB::table('PkAdminweb')
+            ->where("admin_ID", $admin_id)
             ->update(
                 [
                     "password1" => $pass1,

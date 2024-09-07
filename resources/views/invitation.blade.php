@@ -14,7 +14,6 @@ Invite visitors, update schedules and resend invitation emails
 <link rel="stylesheet" href="{{ asset('css/full-calendar.custom.css') }}" />
 @stop
 @section('content')
-<div id="app">
     <div class="row">
         <div class="col-12">
             <div class="card mb-4">
@@ -218,7 +217,6 @@ Invite visitors, update schedules and resend invitation emails
             </div>
         </div>
     </div>
-</div>
 @stop
 @section('script')
 <!-- For using Modal-->
@@ -230,6 +228,7 @@ const { createApp } = Vue;
 createApp({
     data() {
       return {
+		loader_modal_message: "Loading...",
 		admin_level_id: {{$admin_level_id}},
         m_active_ui: 1,
 		modal_titles: {
@@ -303,6 +302,7 @@ createApp({
       }
     },
     mounted() {
+		this.loader_modal = new bootstrap.Modal(this.$refs.loader_modal, { keyboard: false });
 		this.contact0 = { ...this.contact };
 		this.init_ui();
 		
@@ -406,6 +406,7 @@ createApp({
 		},
 		async get_invitations() {
 			try{
+				this.loader_modal.show();
 				this.calendar.removeAllEvents();
 				const response = await axios.post("/admin/get_invitations", {
                     start_date: this.cal_start_date,
@@ -481,6 +482,9 @@ createApp({
 			}
 			catch(error) {
 				console.log(error);
+			}
+			finally {
+				this.loader_modal.hide();
 			}
 		},
 		get_date_obj(date_str)

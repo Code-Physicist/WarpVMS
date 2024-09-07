@@ -33,6 +33,8 @@ Route::post('/admin/reset', [AuthController::class, 'Reset']);
 Route::post('/admin/send_reset_email', [AuthController::class, 'SendResetEmail']);
 Route::get('/admin/reset_passwrd', [AuthController::class, 'ResetPasswordPage']);
 Route::post('/admin/reset_passwrd', [AuthController::class, 'ResetPassword']);
+Route::get('/admin/change_passwrd', [AuthController::class, 'ChangePasswordPage']);
+Route::post('/admin/change_passwrd', [AuthController::class, 'ChangePassword']);
 Route::get('/admin/logout', [AuthController::class, 'Logout']);
 
 Route::post('/admin/get_pdpas', [PDPAController::class, 'GetPDPAs']);

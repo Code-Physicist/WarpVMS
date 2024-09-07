@@ -156,8 +156,8 @@
                   </div>
                 </a>
                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-sm shadow-sm gap-3">
-                  <a class="dropdown-item d-flex align-items-center py-2" href="profile.html"><i
-                      class="icon-gitlab fs-4 me-3"></i>User Profile</a>
+                  <a class="dropdown-item d-flex align-items-center py-2" href="{{url('/admin/change_passwrd')}}"><i
+                      class="icon-gitlab fs-4 me-3"></i>Change Password</a>
                   <a class="dropdown-item d-flex align-items-center py-2" href="{{url('/admin/logout')}}"><i
                       class="icon-log-out fs-4 me-3"></i>Logout</a>
                 </div>
@@ -184,9 +184,23 @@
                 </div>
               </div>
               <!-- Row end -->
-
-              @yield('content')
-
+              <div id="app">
+                @yield('content')
+                <div class="modal rounded-3" role="dialog" data-bs-backdrop="static" ref="loader_modal">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                  <div class="modal-content">
+                    <div class="modal-body px-4 pt-4 pb-4 text-center">
+                      <h5 class="my-3">
+                        <div class="spinner-border" role="status">
+                        <span class="sr-only"></span>
+                        </div>
+                      </h5>
+                      <h5>{loader_modal_message}</h5>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              </div>
             </div>
             <!-- Container ends -->
 

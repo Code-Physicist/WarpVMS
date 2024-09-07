@@ -9,7 +9,6 @@ Dashboard
 Information summary
 @stop
 @section('content')
-<div id="app">
 <div class="row">
                 <div class="col-sm-3">
                   <div class="card mb-4 border-0 bg-violet">
@@ -72,7 +71,6 @@ Information summary
                   </div>
                 </div>
               </div>
-</div>
 @stop
 @section('script')
 <script>

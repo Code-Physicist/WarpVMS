@@ -13,7 +13,6 @@ Create, Update or Activate PDPA
 <link rel="stylesheet" href="{{ asset('css/dataTables.bs5-custom.css') }}" />
 @stop
 @section('content')
-<div id="app">
   <div v-show="active_ui === 1" class="row" style="display:none;">
     <div class="col-12">
       <div class="card mb-4">
@@ -62,7 +61,7 @@ Create, Update or Activate PDPA
               <div class="row">
                 <div class="mb-3">
                   <label class="form-label">Consent</label>
-                  <textarea type="text" class="form-control" v-model.trim="pdpa.consent" rows="4" cols="50"></textarea>
+                  <textarea type="text" class="form-control" v-model.trim="pdpa.consent" rows="8" cols="50"></textarea>
                   <div v-if="consent_msg !== ''" class="ms-1 mt-1 text-danger">{consent_msg}</div>
                 </div>
               </div>
@@ -107,7 +106,6 @@ Create, Update or Activate PDPA
         </div>
       </div>
   </div>
-</div>
 @stop
 @section('script')
 <script src="{{ asset('js/dataTables.min.js') }}"></script>
@@ -177,7 +175,7 @@ window.app = Vue.createApp({
           },
           columns: [
             { data: "id", orderable: true},
-            { data: "consent", orderable: false},
+            { data: "consent_str", orderable: false},
             { data: "is_active", orderable: true},
             { data: "action", orderable: false},
           ],
@@ -274,6 +272,7 @@ window.app = Vue.createApp({
           //json.data[i].new_field = json.data[i].existing_field + " - modified";
           this.pdpas = json.aaData;
           let pdpa = this.pdpas[i];
+          pdpa.consent_str = `<div class="crop">${pdpa.consent}</div>`;
           let is_active = pdpa.is_active;
           if(pdpa.is_active == 1) pdpa.is_active = "<span class='badge bg-success'>Active</span>";
           else pdpa.is_active = "<span class='badge bg-secondary'>Disabled</span>";

@@ -13,7 +13,6 @@ Create and edit operators
 <link rel="stylesheet" href="{{ asset('css/dataTables.bs5-custom.css') }}" />
 @stop
 @section('content')
-<div id="app">
   <div v-show="active_ui === 1" class="row" style="display:none;">
     <div class="col-12">
       <div class="card mb-3">
@@ -196,7 +195,6 @@ Create and edit operators
         </div>
       </div>
   </div>
-</div>
 @stop
 @section('script')
 <script src="{{ asset('js/dataTables.min.js') }}"></script>

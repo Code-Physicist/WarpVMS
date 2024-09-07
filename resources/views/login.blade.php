@@ -35,7 +35,7 @@
                 <div class="login-form x-login-form">
                   <a class="mb-4 d-flex align-items-center justify-content-between">
                     <img src="{{ asset('images/BTSVISION_Logo_DarkBlue.svg') }}" class="img-fluid login-logo" alt="BTS Visionary Park"/>
-                    <h3 v-show="true" class="h4-login-form my-0 pe-2" style="display:none;">{active_ui === 1? 'Login':'Reset'}</h3>
+                    <h3 v-show="true" class="h4-login-form my-0 pe-2">{active_ui === 1? 'Login':'Reset'}</h3>
                   </a>
                   <div v-show="active_ui === 1" style="display:none;">
                   <div class="mb-3">
