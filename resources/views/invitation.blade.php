@@ -26,121 +26,86 @@ Invite visitors, update schedules and resend invitation emails
         </div>
     </div>
     <div class="modal fade" ref="invite_modal" data-bs-backdrop="static" data-bs-keyboard="false"
-                        tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
+                        tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" v-show="m_active_ui === 1">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="staticBackdropLabel">
-					    { modal_titles[m_active_ui] }
-                    </h5>
+                    <h5 class="modal-title">Invite Visitors</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-					<div v-show="m_active_ui === 1">
-						<div class="row">
-                			<div class="mb-3">
-                  				<label class="form-label">Visitors * <button type="button" @click="show_add_visitor()" class="btn btn-xs btn-primary">
-                         	 	<i class="icon-plus"></i>
-                        		</button></label>
-							<div class="bootstrap-tagsinput">
-								<span v-for="c in invitation.visitors" class="badge border border-info bg-info-subtle text-info tag">{c.name} ({c.email}) <span class="tag-close" @click="remove_visitor(c.id)"><i class="icon-cancel"></i></span></span>
+					<div class="row">
+						<div class="mb-3">
+							<label class="form-label">Visitors * <button type="button" @click="show_add_visitor()" class="btn btn-xs btn-primary">
+							<i class="icon-plus"></i>
+							</button></label>
+						<div class="bootstrap-tagsinput">
+							<span v-for="c in invitation.visitors" class="badge border border-info bg-info-subtle text-info tag">{c.name} ({c.email}) <span class="tag-close" @click="remove_visitor(c.id)"><i class="icon-cancel"></i></span></span>
+						</div>
+						<div v-if="visitor_msg !== ''" class="ms-1 mt-1 text-danger">{visitor_msg}</div>
+					</div>
+					</div>
+					<div class="row">
+						<div class="mb-3">
+							<label class="form-label">Department</label>
+							<!--input type="text" class="form-control" value="{{$dept_name}}" disabled-->
+							<select v-model="invitation.to_dept_id" class="form-select">
+								<option value="-1">Please select</option>
+								<option v-for="d in depts" :value="d.dept_id">
+									{d.full_name}
+								</option>
+								</select>
+								<div v-if="to_dept_msg !== ''" class="ms-1 mt-1 text-danger">{to_dept_msg}</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col">
+							<div class="mb-3">
+								<label class="form-label">Title</label>
+								<input type="text" class="form-control" v-model.trim="invitation.title">
 							</div>
-							<div v-if="visitor_msg !== ''" class="ms-1 mt-1 text-danger">{visitor_msg}</div>
-                		</div>
-              			</div>
-						<div class="row">
-                			<div class="mb-3">
-                  				<label class="form-label">Department</label>
-								<!--input type="text" class="form-control" value="{{$dept_name}}" disabled-->
-                  				<select v-model="invitation.to_dept_id" class="form-select">
-                      				<option value="-1">Please select</option>
-                      				<option v-for="d in depts" :value="d.dept_id">
-                        				{d.full_name}
-                      				</option>
-                 				 </select>
-								  <div v-if="to_dept_msg !== ''" class="ms-1 mt-1 text-danger">{to_dept_msg}</div>
-                			</div>
-              			</div>
-						<div class="row">
-							<div class="col">
-								<div class="mb-3">
-									<label class="form-label">Title</label>
-                        			<input type="text" class="form-control" v-model.trim="invitation.title">
-								</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col">
+							<div class="mb-3">
+								<label class="form-label">Agenda</label>
+								<textarea class="form-control" rows="4" v-model.trim="invitation.agenda"></textarea>
 							</div>
-                    	</div>
-						<div class="row">
-							<div class="col">
-								<div class="mb-3">
-									<label class="form-label">Agenda</label>
-                        			<textarea class="form-control" rows="4" v-model.trim="invitation.agenda"></textarea>
-								</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-sm-6">
+							<div class="mb-3">
+								<label class="form-label" for="abc">Start Date</label>
+								<input type="text" class="form-control" id="start_date">
 							</div>
-                    	</div>
-						<div class="row">
-							<div class="col-sm-6">
-								<div class="mb-3">
-									<label class="form-label" for="abc">Start Date</label>
-                        			<input type="text" class="form-control" id="start_date">
-								</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="mb-3">
+								<label class="form-label" for="abc">End Date</label>
+								<input type="text" class="form-control" id="end_date">
+								<div v-if="end_date_msg !== ''" class="ms-1 mt-1 text-danger">{end_date_msg}</div>
 							</div>
-							<div class="col-sm-6">
-								<div class="mb-3">
-									<label class="form-label" for="abc">End Date</label>
-                        			<input type="text" class="form-control" id="end_date">
-									<div v-if="end_date_msg !== ''" class="ms-1 mt-1 text-danger">{end_date_msg}</div>
-								</div>
-							</div>
-                    	</div>
-						<div class="row">
-							<div class="col">
-								<label class="form-label">Interval for 1 day</label>
-								<div class="row">
-									<div class="col-sm-6">
-										<div class="mb-3">
-											<input type="text" class="form-control" id="interval">
-										</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col">
+							<label class="form-label">Interval for 1 day</label>
+							<div class="row">
+								<div class="col-sm-6">
+									<div class="mb-3">
+										<input type="text" class="form-control" id="interval">
 									</div>
-									<div class="col-sm-6">
-										<div class="form-check mb-3">
-                        					<input class="form-check-input" type="checkbox" @change="check_change" v-model="all_day">
-                        					<label class="form-check-label">All day</label>
-                      					</div>
+								</div>
+								<div class="col-sm-6">
+									<div class="form-check mb-3">
+										<input class="form-check-input" type="checkbox" @change="check_change" v-model="all_day">
+										<label class="form-check-label">All day</label>
 									</div>
 								</div>
 							</div>
-                    	</div>
-					</div>
-					<div v-show="m_active_ui === 2">
-						<div class="row">
-                			<div class="mb-3">
-                  				<label class="form-label">Visitor Email *</label>
-                  				<input type="text" class="form-control" v-model.trim="contact.email">
-								<div v-if="email_msg !== ''" class="ms-1 mt-1 text-danger">{email_msg}</div>
-                			</div>
-              			</div>
-					</div>
-					<div v-show="m_active_ui === 3">
-						<div class="row">
-                			<div class="mb-3">
-                  				<label class="form-label">Visitor Email *</label>
-                  				<input type="text" class="form-control" v-model.trim="contact.email" disabled>
-                			</div>
-              			</div>
-						<div class="row">
-                			<div class="mb-3">
-                  				<label class="form-label">First Name *</label>
-                  				<input type="text" class="form-control" v-model.trim="contact.first_name">
-								<div v-if="first_name_msg !== ''" class="ms-1 mt-1 text-danger">{first_name_msg}</div>
-                			</div>
-              			</div>
-						<div class="row">
-                			<div class="mb-3">
-                  				<label class="form-label">Last Name *</label>
-                  				<input type="text" class="form-control" v-model.trim="contact.last_name">
-								<div v-if="last_name_msg !== ''" class="ms-1 mt-1 text-danger">{last_name_msg}</div>
-                			</div>
-              			</div>
+						</div>
 					</div>
 					<div v-show="invite_modal_message !== ''">
 						<div class="alert alert-primary d-flex align-items-center">
@@ -151,10 +116,109 @@ Invite visitors, update schedules and resend invitation emails
 				</div>
                 <div class="modal-footer">
                     <button @click="modal_cancel" type="button" class="btn btn-secondary">
-						{ modal_cancels[m_active_ui] }
+						Close
                     </button>
                     <button @click="modal_ok" type="button" class="btn btn-primary">
-						{ modal_oks[m_active_ui] }
+						Submit
+                    </button>
+                </div>
+            </div>
+			<div class="modal-content" v-show="m_active_ui === 2">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add a Visitor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+					<div class="row">
+						<div class="mb-3">
+							<label class="form-label">Visitor Email *</label>
+							<input type="text" class="form-control" v-model.trim="contact.email">
+							<div v-if="email_msg !== ''" class="ms-1 mt-1 text-danger">{email_msg}</div>
+						</div>
+					</div>
+					<div v-show="invite_modal_message !== ''">
+						<div class="alert alert-primary d-flex align-items-center">
+                        	<i class="icon-alert-triangle fs-2 me-2 lh-1"></i>
+                        	{ invite_modal_message }
+                    	</div>
+					</div>
+				</div>
+                <div class="modal-footer">
+                    <button @click="modal_cancel" type="button" class="btn btn-secondary">
+						Cancel
+                    </button>
+                    <button @click="modal_ok" type="button" class="btn btn-primary">
+						Search
+                    </button>
+                </div>
+            </div>
+			<div class="modal-content" v-show="m_active_ui === 3">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+						Save and Add Visitor
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+					<div class="row">
+						<div class="mb-3">
+							<label class="form-label">Visitor Email *</label>
+							<input type="text" class="form-control" v-model.trim="contact.email" disabled>
+						</div>
+					</div>
+					<div class="row">
+						<div class="mb-3">
+							<label class="form-label">First Name *</label>
+							<input type="text" class="form-control" v-model.trim="contact.first_name">
+							<div v-if="first_name_msg !== ''" class="ms-1 mt-1 text-danger">{first_name_msg}</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="mb-3">
+							<label class="form-label">Last Name *</label>
+							<input type="text" class="form-control" v-model.trim="contact.last_name">
+							<div v-if="last_name_msg !== ''" class="ms-1 mt-1 text-danger">{last_name_msg}</div>
+						</div>
+					</div>
+					<div v-show="invite_modal_message !== ''">
+						<div class="alert alert-primary d-flex align-items-center">
+                        	<i class="icon-alert-triangle fs-2 me-2 lh-1"></i>
+                        	{ invite_modal_message }
+                    	</div>
+					</div>
+				</div>
+                <div class="modal-footer">
+                    <button @click="modal_cancel" type="button" class="btn btn-secondary">
+						Cancel
+                    </button>
+                    <button @click="modal_ok" type="button" class="btn btn-primary">
+						OK
+                    </button>
+                </div>
+            </div>
+			<div class="modal-content" v-show="m_active_ui === 4">
+				<div class="modal-body px-4 pt-4 pb-4 text-center">
+                    <h5 class="my-3">
+                    	<div class="spinner-border" role="status">
+                    	<span class="sr-only"></span>
+                    	</div>
+                    	</h5>
+                    <h5>Submitting...</h5>
+                </div>
+            </div>
+			<div class="modal-content" v-show="m_active_ui === 5">
+				<div class="modal-header">
+                    <h5 class="modal-title">
+						Error Submitting
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body px-4 pt-4 pb-4 text-center">
+					<h5>{invite_modal_message}</h5>
+				</div>
+                <div class="modal-footer">
+                    <button @click="invite_modal.hide()" type="button" class="btn btn-primary">
+						OK
                     </button>
                 </div>
             </div>
@@ -228,24 +292,10 @@ const { createApp } = Vue;
 createApp({
     data() {
       return {
+		loader_modal: null,
 		loader_modal_message: "Loading...",
 		admin_level_id: {{$admin_level_id}},
         m_active_ui: 1,
-		modal_titles: {
-			1: "Invite Visitors",
-			2: "Add a Visitor",
-			3: "Save and Add Visitor"
-		},
-		modal_oks: {
-			1: "Submit",
-			2: "Search",
-			3: "OK"
-		},
-		modal_cancels: {
-			1: "Close",
-			2: "Cancel",
-			3: "Cancel"
-		},
 		p_start_time: "00:00",
 		p_end_time: "23:55",
         calendar: null,
@@ -404,9 +454,9 @@ createApp({
 			this.cal_view_type = info.view.type;
 			this.get_invitations();
 		},
-		async get_invitations() {
+		async get_invitations(show_loader=true) {
 			try{
-				this.loader_modal.show();
+				if(show_loader) this.loader_modal.show();
 				this.calendar.removeAllEvents();
 				const response = await axios.post("/admin/get_invitations", {
                     start_date: this.cal_start_date,
@@ -484,7 +534,7 @@ createApp({
 				console.log(error);
 			}
 			finally {
-				this.loader_modal.hide();
+				if(show_loader) this.loader_modal.hide();
 			}
 		},
 		get_date_obj(date_str)
@@ -704,6 +754,8 @@ createApp({
 					this.invitation.end_time = time_array[2];
 				}
 
+				this.m_active_ui = 4;
+				let step = 0;
 				try{
 					let url = (this.invitation.id == 0) ? "/admin/create_invitation" : "/admin/edit_invitation";
 					const response = await axios.post(url, this.invitation);
@@ -722,16 +774,17 @@ createApp({
 					}
 
 					//No waiting until email sent
-					axios.post("/admin/send_invite_email", {
+					await axios.post("/admin/send_invite_email", {
 						invite_id: response.data.invite_id,
 						base_url: axios.defaults.baseURL
 					});
 
 					//refresh calendar
-					this.get_invitations();
+					this.get_invitations(false);
 					this.invite_modal.hide();
 				}
 				catch(error) {
+					this.m_active_ui = 5;
 					console.log(error);
 					this.invite_modal_message = "Failed to create the inviation";
 				}

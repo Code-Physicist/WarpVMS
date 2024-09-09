@@ -15,7 +15,7 @@
 </head>
 <body style="background-color:#1a2752;">
   <div id="app">
-    <div class="container">
+    <div class="container" v-cloak>
       <div class="bg-white p-4 mt-4">
         <div class="row mb-2">
           <div class="col-12">
@@ -80,7 +80,7 @@
     </div>
     <div class="modal fade" ref="add_modal" data-bs-backdrop="static" data-bs-keyboard="false"
                         tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="staticBackdropLabel">
@@ -180,7 +180,7 @@
     </div>
 	<div class="modal fade" ref="edit_modal" data-bs-backdrop="static" data-bs-keyboard="false"
                         tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="staticBackdropLabel">
@@ -387,7 +387,7 @@ createApp({
           const response = await axios.post("/visitors/edit_visitor", {invite_id: this.invite_id, contact: this.contact});
           if(response.data.status === "T") {
             if(response.data.send_email) {
-              axios.post("/admin/send_qr_code", {invite_id: this.invite_id, email: this.contact.email});
+              axios.post("/admin/send_qr_code", {invite_id: this.invite_id, contact_id: this.contact.id, email: this.contact.email});
             }
             this.get_invitation();
             this.edit_modal.hide();

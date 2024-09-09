@@ -11,6 +11,7 @@
     "/js/dataTables.bootstrap.min.js": "/js/dataTables.bootstrap.min.js",
     "/js/full-calendar.min.js": "/js/full-calendar.min.js",
     "/js/selectable-calendar.js": "/js/selectable-calendar.js",
+    "/js/apexcharts.min.js": "/js/apexcharts.min.js",
     "/css/main.min.css": "/css/main.min.css",
     "/css/daterange.css": "/css/daterange.css",
     "/css/dataTables.bs5.css": "/css/dataTables.bs5.css",

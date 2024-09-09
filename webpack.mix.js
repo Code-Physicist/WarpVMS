@@ -36,6 +36,7 @@ mix.copy(
     "resources/js/selectable-calendar.js",
     "public/js/selectable-calendar.js"
 );
+mix.copy("resources/js/apexcharts.min.js", "public/js/apexcharts.min.js");
 
 //Copy CSS files
 mix.copy("resources/css/main.min.css", "public/css/main.min.css");

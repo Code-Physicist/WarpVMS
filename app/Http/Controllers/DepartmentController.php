@@ -16,10 +16,10 @@ class DepartmentController extends AppController
     public function DepartmentPage(Request $request)
     {
         $chk = $this->CheckAdmin($request);
-        if(!$chk["is_ok"]) {
+        if (!$chk["is_ok"]) {
             return redirect("/admin/login");
         }
-        if($chk["u_data"]["pw_change"]) {
+        if ($chk["u_data"]["pw_change"]) {
             return redirect("/admin/pass_change");
         }
 
@@ -31,16 +31,16 @@ class DepartmentController extends AppController
     public function CreateDepartment(Request $request)
     {
         $chk = $this->CheckAdmin($request);
-        if(!$chk["is_ok"]) {
+        if (!$chk["is_ok"]) {
             return ["status" => "I"];
         }
 
         $dept_level = $chk["u_data"]["dept_level"];
         $new_dept_level = "";
 
-        if($dept_level == "0") {
+        if ($dept_level == "0") {
             $new_dept_level = "1";
-        } elseif($dept_level == "1") {
+        } elseif ($dept_level == "1") {
             $new_dept_level = "2";
         } else {
             return ["status" => "error"];
@@ -67,7 +67,7 @@ class DepartmentController extends AppController
     public function UpdateDepartment(Request $request)
     {
         $chk = $this->CheckAdmin($request);
-        if(!$chk["is_ok"]) {
+        if (!$chk["is_ok"]) {
             return ["status" => "I"];
         }
 
@@ -91,7 +91,7 @@ class DepartmentController extends AppController
     public function UpdateDepartment2(Request $request)
     {
         $chk = $this->CheckAdmin($request);
-        if(!$chk["is_ok"]) {
+        if (!$chk["is_ok"]) {
             return ["status" => "I"];
         }
 
@@ -104,7 +104,7 @@ class DepartmentController extends AppController
     public function GetDepartments(Request $request)
     {
         $chk = $this->CheckAdmin($request);
-        if(!$chk["is_ok"]) {
+        if (!$chk["is_ok"]) {
             throw ValidationException::withMessages(['I']);
         }
 
@@ -125,7 +125,7 @@ class DepartmentController extends AppController
         $orderColumnName = $columns[$orderColumnIndex]['data']; // Get column name from index
 
         $query = DB::table("PkDepartments As d1");
-        if($status != "2") {
+        if ($status != "2") {
             $query->where('d1.IsActive', '=', $status);
         }
         $query->where('d1.SupDepID', '=', $dept_id);
@@ -133,7 +133,7 @@ class DepartmentController extends AppController
         $count = $query->count();
         $f_count = $count;
 
-        if($search != "") {
+        if ($search != "") {
             $query->where('d1.DeptName', 'like', '%'. $search .'%');
             $f_count = $query->count();
         }
@@ -165,45 +165,6 @@ class DepartmentController extends AppController
 
         //Return response and refresh cookie
         return $this->MakeResponse($response, $chk);
-    }
-
-    public function GetDepartments_org(Request $request)
-    {
-        $chk = $this->CheckAdmin($request);
-        if(!$chk["is_ok"]) {
-            return ["status" => "I"];
-        }
-
-        $admin_level_id = $chk["u_data"]["admin_level_id"];
-        $dept_id = $chk["u_data"]["dept_id"];
-
-        //0 = disable, 1 = enable, 2 = all
-        $status = $request->status;
-
-        $query = DB::table("PkDepartments As d1");
-        if($status != "2") {
-            $query->where('d1.IsActive', '=', $status);
-        }
-        $query->where('d1.SupDepID', '=', $dept_id);
-
-        $query->leftJoin('PkDepartments as d2', 'd2.DeptID', '=', 'd1.SupDepID')
-        ->select(
-            'd1.DeptID as id',
-            'd1.DeptName as dept_name',
-            'd1.Fullname as full_name',
-            'd1.Floor as floor',
-            'd1.Tel1 as phone1',
-            'd1.Tel2 as phone2',
-            'd1.IsActive as is_active',
-            'd2.DeptID as sup_dept_id',
-            'd2.DeptName as sup_dept_name'
-        )
-        ->orderByDesc('d1.DeptID');
-
-        $depts = $query->get();
-
-        //Return response and refresh cookie
-        return $this->MakeResponse(["status" => "T", "data_list" => $depts], $chk);
     }
 
 }

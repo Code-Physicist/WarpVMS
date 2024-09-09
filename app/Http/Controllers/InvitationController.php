@@ -16,10 +16,10 @@ class InvitationController extends AppController
     public function InvitationPage(Request $request)
     {
         $check = $this->CheckAdmin($request);
-        if(!$check["is_ok"]) {
+        if (!$check["is_ok"]) {
             return redirect("/admin/login");
         }
-        if($check["u_data"]["pw_change"]) {
+        if ($check["u_data"]["pw_change"]) {
             return redirect("/admin/pass_change");
         }
 
@@ -31,7 +31,7 @@ class InvitationController extends AppController
     public function GetInvitationDepts(Request $request)
     {
         $chk = $this->CheckAdmin($request);
-        if(!$chk["is_ok"]) {
+        if (!$chk["is_ok"]) {
             return ["status" => "I"];
         }
 
@@ -56,7 +56,7 @@ class InvitationController extends AppController
     public function GetContactByEmail(Request $request)
     {
         $chk = $this->CheckAdmin($request);
-        if(!$chk["is_ok"]) {
+        if (!$chk["is_ok"]) {
             return ["status" => "I"];
         }
 
@@ -65,7 +65,7 @@ class InvitationController extends AppController
         $sup_dept_id = $chk["u_data"]["sup_dept_id"];
         $dept_id = $chk["u_data"]["dept_id"];
 
-        if($dept_level > 1) {
+        if ($dept_level > 1) {
             $dept_id = $sup_dept_id;
         }
 
@@ -112,7 +112,7 @@ class InvitationController extends AppController
 
         DB::beginTransaction();
         try {
-            if($id == "0") {
+            if ($id == "0") {
                 $id = DB::table('PkContacts')->insertGetId($visitor);
             } else {
                 DB::table('PkContacts')->where("id", $contact["id"])->update($visitor);
@@ -138,7 +138,7 @@ class InvitationController extends AppController
     public function UpsertContact(Request $request)
     {
         $chk = $this->CheckAdmin($request);
-        if(!$chk["is_ok"]) {
+        if (!$chk["is_ok"]) {
             return ["status" => "I"];
         }
 
@@ -151,8 +151,8 @@ class InvitationController extends AppController
             "phone" => $request->phone,
         ];
 
-        if($id == "0") {
-            if($chk["u_data"]["dept_level"] > 1) {
+        if ($id == "0") {
+            if ($chk["u_data"]["dept_level"] > 1) {
                 $contact["dept_id"] = $chk["u_data"]["sup_dept_id"];
             } else {
                 $contact["dept_id"] = $chk["u_data"]["dept_id"];
@@ -169,7 +169,7 @@ class InvitationController extends AppController
     public function GetInvitations(Request $request)
     {
         $chk = $this->CheckAdmin($request);
-        if(!$chk["is_ok"]) {
+        if (!$chk["is_ok"]) {
             return ["status" => "I"];
         }
 
@@ -208,7 +208,7 @@ class InvitationController extends AppController
             ->first();
 
         $v_dept_id = $dept->DeptID;
-        if($dept->Level1 == 2) {
+        if ($dept->Level1 == 2) {
             $v_dept_id = $dept->SupDepID;
         }
 
@@ -226,13 +226,13 @@ class InvitationController extends AppController
             $c = substr($code, strlen($id), strlen($code));
 
             $invitation = DB::table("VC_invite")->where("id", $id)->first();
-            if(is_null($invitation)) {
+            if (is_null($invitation)) {
                 return ["status" => "F", "err_message" => "Invalid Operation"];
             }
 
             $update_time = Carbon::parse($invitation->update_time);
             $date_code = md5($update_time->format('YmdHis'));
-            if($c !== $date_code) {
+            if ($c !== $date_code) {
                 return ["status" => "F", "err_message" => "Invalid Operation"];
             }
 
@@ -249,7 +249,7 @@ class InvitationController extends AppController
             ->first();
 
         $send_email = false;
-        if($invite_visitor->pdpa_accept == 0) {
+        if ($invite_visitor->pdpa_accept == 0) {
             $send_email = true;
         }
 
@@ -283,7 +283,7 @@ class InvitationController extends AppController
     public function CreateInvitation(Request $request)
     {
         $chk = $this->CheckAdmin($request);
-        if(!$chk["is_ok"]) {
+        if (!$chk["is_ok"]) {
             return ["status" => "I"];
         }
 
@@ -306,7 +306,8 @@ class InvitationController extends AppController
                 DB::table('VC_invite_visitor')->insert([
                     "invite_id" => $invite_id,
                     "contact_id" => $visitor["id"],
-                    "pdpa_accept" => 0
+                    "pdpa_accept" => 0,
+                    "arrived" => 0
                 ]);
             }
             DB::commit();
@@ -321,7 +322,7 @@ class InvitationController extends AppController
     public function EditInvitation(Request $request)
     {
         $chk = $this->CheckAdmin($request);
-        if(!$chk["is_ok"]) {
+        if (!$chk["is_ok"]) {
             return ["status" => "I"];
         }
 
@@ -348,7 +349,8 @@ class InvitationController extends AppController
                 DB::table('VC_invite_visitor')->insert([
                     "invite_id" => $id,
                     "contact_id" => $visitor["id"],
-                    "pdpa_accept" => 0
+                    "pdpa_accept" => 0,
+                    "arrived" => 0
                 ]);
             }
 
@@ -364,7 +366,7 @@ class InvitationController extends AppController
     public function GetContactsByInviteId(Request $request)
     {
         $chk = $this->CheckAdmin($request);
-        if(!$chk["is_ok"]) {
+        if (!$chk["is_ok"]) {
             return ["status" => "I"];
         }
 
@@ -380,10 +382,13 @@ class InvitationController extends AppController
 
     public function SendQRCode(Request $request)
     {
+        $contact_id = $request->contact_id;
         $email = $request->email;
         $invite_id = $request->invite_id;
 
-        $code = "VMS" . str_pad(strval($invite_id), 8, "0", STR_PAD_LEFT);
+        error_log($contact_id);
+
+        $code = "VMS" . str_pad(strval($invite_id), 8, "0", STR_PAD_LEFT) . "_" .$contact_id;
         $qr_image = QrCode::format("png")->size(512)->generate($code);
         $data = array("qr_image" => $qr_image);
 
@@ -458,7 +463,7 @@ class InvitationController extends AppController
             $c = substr($code, strlen($id), strlen($code));
 
             $invitation = DB::table("VC_invite")->where("id", $id)->first();
-            if(is_null($invitation)) {
+            if (is_null($invitation)) {
                 return "ID is null";
             }
         } catch (Exception $e) {
@@ -467,7 +472,7 @@ class InvitationController extends AppController
 
         $update_time = Carbon::parse($invitation->update_time);
         $date_code = md5($update_time->format('YmdHis'));
-        if($c !== $date_code) {
+        if ($c !== $date_code) {
             return "Invalid page";
         }
 

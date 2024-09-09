@@ -88,16 +88,18 @@
                     </a>
                   </li>
               @endif
-              @if(Request::is('admin/tenants'))
-              <li class="active current-page">
-              @else
-              <li>
+              @if( $dept_level == 0)
+                @if(Request::is('admin/tenants'))
+                <li class="active current-page">
+                @else
+                <li>
+                @endif
+                  <a href="{{url('/admin/tenants')}}">
+                    <i class="icon-layers"></i>
+                    <span class="menu-text">Tenants</span>
+                  </a>
+                </li>
               @endif
-                <a href="{{url('/admin/tenants')}}">
-                  <i class="icon-layers"></i>
-                  <span class="menu-text">Tenants</span>
-                </a>
-              </li>
               @if(Request::is('admin/operators'))
               <li class="active current-page">
               @else

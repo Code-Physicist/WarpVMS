@@ -37,6 +37,9 @@ Route::get('/admin/change_passwrd', [AuthController::class, 'ChangePasswordPage'
 Route::post('/admin/change_passwrd', [AuthController::class, 'ChangePassword']);
 Route::get('/admin/logout', [AuthController::class, 'Logout']);
 
+Route::post('/dashboard/get_totals', [DashboardController::class, 'GetTotals']);
+Route::post('/dashboard/get_v_stats', [DashboardController::class, 'GetVStats']);
+
 Route::post('/admin/get_pdpas', [PDPAController::class, 'GetPDPAs']);
 Route::post('/admin/create_pdpa', [PDPAController::class, 'CreatePDPA']);
 Route::post('/admin/update_pdpa', [PDPAController::class, 'UpdatePDPA']);
