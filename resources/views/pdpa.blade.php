@@ -153,7 +153,7 @@ window.app = Vue.createApp({
           processing: true,
           serverSide: true,
           ajax: {
-            url: "/admin/get_pdpas",
+            url: axios.defaults.baseURL + "/admin/get_pdpas",
             type: "POST",
             "headers": {
               "X-CSRF-TOKEN": csrfToken

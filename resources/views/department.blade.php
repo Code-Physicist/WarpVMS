@@ -356,7 +356,7 @@ window.app = Vue.createApp({
           serverSide: true,
           searchDelay: 500,
           ajax: {
-            url: "/admin/get_departments",
+            url: axios.defaults.baseURL + "/admin/get_departments",
             type: "POST",
             "headers": {
               "X-CSRF-TOKEN": csrfToken

@@ -9,7 +9,7 @@
 
     <title>@yield('title')</title>
 
-    <link rel="shortcut icon" href="{{ asset('images/favicon.svg') }}" />
+    <!--link rel="shortcut icon" href="{{ asset('images/favicon.svg') }}" /-->
 
     <!-- Icomoon Font Icons css -->
     <link rel="stylesheet" href="{{ asset('fonts/icomoon/style.css') }}" />

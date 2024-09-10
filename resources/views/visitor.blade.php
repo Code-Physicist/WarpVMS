@@ -6,7 +6,7 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <meta name="api-base-url" content="{{ url('') }}" />
   <title>Visitor Invitation</title>
-  <link rel="shortcut icon" href="{{ asset('images/favicon.svg') }}" />
+  <!--link rel="shortcut icon" href="{{ asset('images/favicon.svg') }}" /-->
   <link rel="stylesheet" href="{{ asset('fonts/icomoon/style.css') }}" />
   <link rel="stylesheet" href="{{ asset('css/main.min.css') }}" />
   <link rel="stylesheet" href="{{ asset('css/app.css') }}" />
