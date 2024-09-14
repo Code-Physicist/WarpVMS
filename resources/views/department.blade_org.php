@@ -135,7 +135,7 @@ Create and edit departments
                 </div>
 					    </div>
               <div class="my-3 d-flex align-items-end justify-content-center">
-                <button type="button" @click="active_ui = 1" class="btn btn-outline-secondary mx-2" :disabled="loading_states['form1']">Cancel</button> <button type="button" @click="submit_form('form1');" class="btn btn-danger mx-2" :disabled="loading_states['form1']">Submit</button>
+                <button type="button" @click="active_ui = 1" class="btn btn-outline-secondary mx-2">Cancel</button> <button type="button" @click="submit" class="btn btn-danger mx-2">Submit</button>
               </div>
             </div>
           </div>
@@ -178,6 +178,7 @@ Create and edit departments
 function show_edit(id) {
   app.show_edit(id);
 }
+
 function show_edb(id, status) {
   app.show_edb(id, status);
 }
@@ -185,9 +186,6 @@ function show_edb(id, status) {
 window.app = Vue.createApp({
     data() {
       return {
-        loading_states: {
-          form1: false
-        },
         active_ui: 1,
         filter: {
           status: 2
@@ -195,13 +193,13 @@ window.app = Vue.createApp({
         dept_table: null,
         depts:[],
         dept:{
-          id: -1,
-          dept_name: "",
-          full_name: "",
-          floor: "",
-          phone1: "",
-          phone2: "",
-          sup_dept_id: {{$dept_id}},
+            id: -1,
+            dept_name: "",
+            full_name: "",
+            floor: "",
+            phone1: "",
+            phone2: "",
+            sup_dept_id: {{$dept_id}},
         },
         dept0: null,
         dept_form_message: "",
@@ -222,80 +220,6 @@ window.app = Vue.createApp({
       this.edb_modal = new bootstrap.Modal(this.$refs.edb_modal, { keyboard: false });
     },
     methods: {
-      get_api_endpoint(form_id) {
-        switch (form_id) {
-          case 'form1':
-            return (this.dept.id === -1) ? "/admin/create_department" : "/admin/update_department";;
-        }
-      },
-      validate_input(form_id) {
-        switch (form_id) {
-          case 'form1':
-            this.dept_name_msg = "";
-            this.full_name_msg = "";
-            this.phone1_msg = "";
-
-            let is_valid = true;
-            if (this.dept.dept_name === "") {
-              this.dept_name_msg = "Short Name is blank";
-              is_valid = false;
-            }
-            if (this.dept.full_name === "") {
-              this.full_name_msg = "Full Name is blank";
-              is_valid = false;
-            }
-            if (this.dept.phone1 === "") {
-              this.phone1_msg = "Phone No.1 is blank";
-              is_valid = false;
-            }
-            return is_valid;
-        }
-      },
-      get_form_data(form_id) {
-        switch (form_id) {
-          case 'form1':
-            return this.dept;
-        }
-      },
-      process_response_data(form_id, data) {
-        switch (form_id) {
-          case 'form1':
-            //Make sure not to change datatable configurations
-            this.dept_table.ajax.reload(null, false);
-            this.active_ui = 1;
-            return;
-        }
-      },
-      handle_response_error(form_id, error) {
-        response = error.response;
-        switch (form_id) {
-          case 'form1':
-            if(response) {
-              if(response.data.status === "I")
-              {
-                this.dept_form_message = "Token expired. You will be logged out soon...";
-                setTimeout(function() {window.location.href = "{{url('/admin/logout')}}";}, 3000);
-              }
-            }
-            else {
-              console.log("An unknown error occurred. Please try again.")
-            }
-            return;
-        }
-      },
-      async submit_form(form_id) {
-        if (!this.validate_input(form_id)) return;       
-        this.loading_states[form_id] = true;
-        try {
-          const response = await axios.post(this.get_api_endpoint(form_id), this.get_form_data(form_id));
-          this.process_response_data(form_id, response.data);
-        } catch (error) {
-          this.handle_response_error(form_id, error);
-        }
-        finally {
-          this.loading_states[form_id] = false;
-        }
-      },
       show_create() {
         this.dept_name_msg = "";
         this.full_name_msg = "";
@@ -321,6 +245,53 @@ window.app = Vue.createApp({
 
         MyApp.copy_vals(dept, this.dept);
         this.active_ui = 2;
+      },
+      async submit() {
+        this.dept_name_msg = "";
+        this.full_name_msg = "";
+        this.phone1_msg = "";
+
+        let is_valid = true;
+        if (this.dept.dept_name === "") {
+          this.dept_name_msg = "Short Name is blank";
+          is_valid = false;
+        }
+        if (this.dept.full_name === "") {
+          this.full_name_msg = "Full Name is blank";
+          is_valid = false;
+        }
+        if (this.dept.phone1 === "") {
+          this.phone1_msg = "Phone No.1 is blank";
+          is_valid = false;
+        }
+
+        if(!is_valid) return;
+
+        let url = (this.dept.id === -1) ? "/admin/create_department" : "/admin/update_department";
+        try {
+          const response = await axios.post(url, this.dept);
+          if(response.data.status === "T")
+          {
+            //Make sure not to change datatable configurations
+            this.dept_table.ajax.reload(null, false);
+            this.active_ui = 1;
+          }
+          else if(response.data.status === "I")
+          {
+            //Force log out
+            this.dept_form_message = "Token expired. You will be logged out soon...";
+            setTimeout(function() {window.location.href = "{{url('/admin/logout')}}";}, 3000);
+          }
+          else
+          {
+            this.dept_form_message = "Invalid Data Submission";
+          }
+        }
+        catch(error) {
+          console.log(error);
+          this.dept_form_message = "Server error. Please try again later";
+        }
+
       },
       show_edb(id, status) {
         let dept = null;

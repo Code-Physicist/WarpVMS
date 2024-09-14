@@ -32,36 +32,40 @@ class DepartmentController extends AppController
     {
         $chk = $this->CheckAdmin($request);
         if (!$chk["is_ok"]) {
-            return ["status" => "I"];
+            return response(["status" => "I"], 401);
         }
 
-        $dept_level = $chk["u_data"]["dept_level"];
-        $new_dept_level = "";
+        try {
+            $dept_level = $chk["u_data"]["dept_level"];
+            $new_dept_level = "";
 
-        if ($dept_level == "0") {
-            $new_dept_level = "1";
-        } elseif ($dept_level == "1") {
-            $new_dept_level = "2";
-        } else {
-            return ["status" => "error"];
+            if ($dept_level == "0") {
+                $new_dept_level = "1";
+            } elseif ($dept_level == "1") {
+                $new_dept_level = "2";
+            } else {
+                return response(["status" => "error"], 403);
+            }
+
+            $max_dept_id = DB::table('PkDepartments')->max("DeptID");
+            $dept = [
+                    "DeptID" => $max_dept_id + 1,
+                    "SupDepID" => $request->sup_dept_id,
+                    "Fullname" => $request->full_name,
+                    "DeptName" => $request->dept_name,
+                    "Zdesc" => $request->dept_name,
+                    "Floor" => $request->floor,
+                    "Tel1" => $request->phone1,
+                    "Tel2" => $request->phone2,
+                    "Level1" => $new_dept_level,
+                    "IsActive" => "1",
+            ];
+
+            DB::table('PkDepartments')->insert($dept);
+            return ["status" => "T"];
+        } catch (Exception $e) {
+            return response(["status" => "F", "error" => $e->getMessage()], 422);
         }
-
-        $max_dept_id = DB::table('PkDepartments')->max("DeptID");
-        $dept = [
-                "DeptID" => $max_dept_id + 1,
-                "SupDepID" => $request->sup_dept_id,
-                "Fullname" => $request->full_name,
-                "DeptName" => $request->dept_name,
-                "Zdesc" => $request->dept_name,
-                "Floor" => $request->floor,
-                "Tel1" => $request->phone1,
-                "Tel2" => $request->phone2,
-                "Level1" => $new_dept_level,
-                "IsActive" => "1",
-        ];
-
-        DB::table('PkDepartments')->insert($dept);
-        return ["status" => "T"];
     }
 
     public function UpdateDepartment(Request $request)
