@@ -379,6 +379,9 @@ window.app = Vue.createApp({
               console.log('AJAX Error: ', error); // Log error to console
             
               // Optional: Handle specific errors
+              if (xhr.status === 401) {
+                window.location.href = "{{url('/admin/logout')}}";
+              }
               if (xhr.status === 404) {
                 alert('Server not found (404).');
               } else if (xhr.status === 500) {

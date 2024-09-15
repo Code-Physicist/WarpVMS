@@ -109,7 +109,7 @@ class DepartmentController extends AppController
     {
         $chk = $this->CheckAdmin($request);
         if (!$chk["is_ok"]) {
-            throw ValidationException::withMessages(['I']);
+            return response(["status" => "I"], 401);
         }
 
         $admin_level_id = $chk["u_data"]["admin_level_id"];
