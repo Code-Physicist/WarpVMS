@@ -17,7 +17,7 @@ class AppController extends Controller
     public function CreateVMSCookie($u_data)
     {
         $u_data["iss"] = "WarpVMS";
-        $u_data["exp"] = Carbon::now()->addHours(1)->timestamp;
+        $u_data["exp"] = Carbon::now()->addHours(4)->timestamp;
 
         $factory = JWTFactory::customClaims($u_data);
         $token = JWTAuth::encode($factory->make());

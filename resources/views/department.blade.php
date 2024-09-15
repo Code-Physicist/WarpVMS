@@ -217,7 +217,6 @@ window.app = Vue.createApp({
     },
     mounted() {
       this.dept0 = { ...this.dept };
-      //this.get_depts();
       this.init_data_table();
       this.edb_modal = new bootstrap.Modal(this.$refs.edb_modal, { keyboard: false });
     },
@@ -360,20 +359,6 @@ window.app = Vue.createApp({
           this.edb_modal_message = "Server error. Please try again later.";
         }
       },
-      async get_depts() {
-        try {
-          $('#data-table').DataTable().destroy();
-          this.depts = [];
-          const response = await axios.post("/admin/get_departments", this.filter);
-          this.depts = response.data.data_list;
-          Vue.nextTick(() => {
-              $('#data-table').DataTable();
-          });
-        }
-        catch(error) {
-          console.log(error);
-        }
-      },
       init_data_table () {
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
@@ -407,9 +392,9 @@ window.app = Vue.createApp({
           columns: [
             { data: "id", orderable: true},
             { data: "full_name", orderable: true},
-            { data: "floor", orderable: false},
-            { data: "phone1", orderable: false},
-            { data: "phone2", orderable: false},
+            { data: "floor_str", orderable: false},
+            { data: "phone1_str", orderable: false},
+            { data: "phone2_str", orderable: false},
             { data: "status", orderable: false},
             { data: "action", orderable: false},
           ]
@@ -432,9 +417,9 @@ window.app = Vue.createApp({
           if(dept.is_active == 1) dept.status = "<span class='badge bg-success'>Active</span>";
           else dept.status = "<span class='badge bg-secondary'>Disabled</span>";
           
-          dept.floor = this.display_val(dept.floor);
-          dept.phone1 = this.display_val(dept.phone1);
-          dept.phone2 = this.display_val(dept.phone2);
+          dept.floor_str = this.display_val(dept.floor);
+          dept.phone1_str = this.display_val(dept.phone1);
+          dept.phone2_str = this.display_val(dept.phone2);
           dept.action = "<div class='d-flex justify-content-center align-items-center'>";
           dept.action += "<a class='cursor-pointer' data-bs-toggle='dropdown'><h5 class='mb-0'><i class='icon-more-vertical'></i></h5></a>";
           dept.action += "<ul class='dropdown-menu shadow-sm dropdown-menu-mini'>";

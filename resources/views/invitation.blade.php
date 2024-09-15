@@ -360,7 +360,7 @@ createApp({
         var calendarEl = this.$refs.my_calendar;
         var calendar = new FullCalendar.Calendar(calendarEl, {
 		headerToolbar: {
-			left: "prev,next today",
+			left: "prevYear,prev,next,nextYear today",
 			center: "title",
 			right: "dayGridMonth,timeGridWeek,timeGridDay",
 		},
@@ -686,7 +686,17 @@ createApp({
 				this.invite_modal.show();
 			}
 			catch(error) {
-				console.log(error);
+				response = error.response;				
+				if(response) {
+              		if(response.data.status === "I")
+              		{
+                		window.location.href = "{{url('/admin/logout')}}";
+              		}
+            	}
+            	else {
+					console.log(error);
+              		alert("An unknown error occurred. Please try again.");
+            	}
 			}
 		},
 		async get_invitation_depts() {

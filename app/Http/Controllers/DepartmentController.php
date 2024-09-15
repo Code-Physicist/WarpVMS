@@ -137,13 +137,17 @@ class DepartmentController extends AppController
         $count = $query->count();
         $f_count = $count;
 
+        $query->leftJoin('PkDepartments as d2', 'd2.DeptID', '=', 'd1.SupDepID');
         if ($search != "") {
-            $query->where('d1.DeptName', 'like', '%'. $search .'%');
+            $query->where(function ($q) use ($search) {
+                $q->where('d1.DeptName', 'like', '%'. $search .'%');
+                $q->orWhere('d1.Tel1', 'like', '%'. $search .'%');
+                $q->orWhere('d1.Tel2', 'like', '%'. $search .'%');
+            });
             $f_count = $query->count();
         }
 
-        $query->leftJoin('PkDepartments as d2', 'd2.DeptID', '=', 'd1.SupDepID')
-        ->select(
+        $query->select(
             'd1.DeptID as id',
             'd1.DeptName as dept_name',
             'd1.Fullname as full_name',

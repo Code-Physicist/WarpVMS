@@ -147,6 +147,10 @@
                 if(response.data.status == "T") {
                   window.location.href = "{{url('/admin/dashboard')}}";
                 }
+                else if (response.data.status === "D")
+                {
+                  this.login_form_message = "User is disabled";
+                }
                 else {
                   this.login_form_message = "Invalid Username or Password";
                 }

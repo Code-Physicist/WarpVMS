@@ -367,17 +367,20 @@ class InvitationController extends AppController
     {
         $chk = $this->CheckAdmin($request);
         if (!$chk["is_ok"]) {
-            return ["status" => "I"];
+            return response(["status" => "I"], 401);
         }
 
-        $invite_id = $request->invite_id;
+        try {
+            $invite_id = $request->invite_id;
+            $contacts = DB::table("VC_invite_visitor as iv")
+                ->where('iv.invite_id', '=', $invite_id)
+                ->leftJoin('PkContacts as c', 'c.id', '=', 'iv.contact_id')
+                ->select('c.*')->get();
 
-        $contacts = DB::table("VC_invite_visitor as iv")
-            ->where('iv.invite_id', '=', $invite_id)
-            ->leftJoin('PkContacts as c', 'c.id', '=', 'iv.contact_id')
-            ->select('c.*')->get();
-
-        return ["status" => "T", "data_list" => $contacts];
+            return ["status" => "T", "data_list" => $contacts];
+        } catch (Exception $e) {
+            return response(["status" => "F", "error" => $e->getMessage()], 422);
+        }
     }
 
     public function SendQRCode(Request $request)

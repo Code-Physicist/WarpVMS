@@ -35,9 +35,13 @@ class AuthController extends AppController
                   ->where('adminname', '=', $user)
                   ->first();
 
-        //L => Account Lock, I => Invalid User, T => Success
+        //L => Account Lock, I => Invalid User, D => Disabled, T => Success
         if (!$admin) {
             return ["status" => "I"];
+        }
+
+        if ($admin->active == 0) {
+            return ["status" => "D"];
         }
 
         if ($admin->xtime > Carbon::now()) {
