@@ -34,7 +34,7 @@ Create and edit tenants
           </div>
           <hr/>
           <div class="table-responsive">
-              <table class="table table-striped" id="data-table">
+              <table class="table table-striped" style="width:100%" id="data-table">
                 <thead>
                   <tr>
                     <th>#</th>
@@ -71,26 +71,6 @@ Create and edit tenants
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(tenant, index) in tenants">
-                    <td>{index+1}.</td>
-                    <td>{tenant.name}</td>
-                    <td>{tenant.email}</td>
-                    <td>{tenant.full_name}</td>
-                    <td class="text-center">
-                        <span v-if="tenant.is_active === '1'" class="badge bg-success">Active</span>
-                        <span v-else class="badge bg-secondary">Disabled</span>
-                    </td>
-                    <td>
-                      <div class="d-flex justify-content-center align-items-center">
-                        <a class="cursor-pointer" data-bs-toggle="dropdown"><h5><span class="icon-more-vertical"></span></h5></a>
-                        <ul class="dropdown-menu shadow-sm dropdown-menu-mini">
-                          <li><a class="dropdown-item cursor-pointer" @click="show_edit(tenant)"><span class="icon-edit fs-5"></span> Edit</a></li>
-                          <li v-if="tenant.is_active === '1'"><a class="dropdown-item cursor-pointer" @click="show_edb(tenant, 0)"><span class="icon-x-square fs-5"></span> Disable</a></li>
-                          <li v-else><a class="dropdown-item cursor-pointer" @click="show_edb(tenant, 1)"><span class="icon-check-square fs-5"></span> Enable</a></li>
-                        </ul>
-                      </div>
-                    </td>
-                  </tr>
                 </tbody>
               </table>
             </div> 
@@ -179,8 +159,15 @@ Create and edit tenants
 <script src="{{ asset('js/dataTables.min.js') }}"></script>
 <script src="{{ asset('js/dataTables.bootstrap.min.js') }}"></script>
 <script>
-const { createApp } = Vue;
-createApp({
+
+function show_edit(id) {
+  app.show_edit(id);
+}
+function show_edb(id, status) {
+  app.show_edb(id, status);
+}
+
+window.app = Vue.createApp({
     data() {
       return {
         active_ui: 1,
@@ -188,6 +175,7 @@ createApp({
         filter: {
           status: 2
         },
+        tenant_table: null,
         tenants:[],
         tenant:{
             id: 0,
@@ -216,11 +204,55 @@ createApp({
       async init_ui() {
         try {
           await this.get_lv1_depts();
-          await this.get_tenants();
+          this.init_data_table();
         }
         catch(error) {
           console.log(error);
         }
+      },
+      init_data_table () {
+        var csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+        this.tenant_table = $("#data-table").DataTable({
+          processing: true,
+          serverSide: true,
+          searchDelay: 500,
+          ajax: {
+            url: axios.defaults.baseURL + "/admin/get_tenants",
+            type: "POST",
+            "headers": {
+              "X-CSRF-TOKEN": csrfToken
+            },
+            data: this.get_status,
+            dataSrc: this.post_process,
+            error: function(xhr, error, thrown) {
+              // Handle errors here
+              console.log('AJAX Error: ', error); // Log error to console
+            
+              // Optional: Handle specific errors
+              if (xhr.status === 401) {
+                window.location.href = "{{url('/admin/logout')}}";
+              }
+              if (xhr.status === 404) {
+                alert('Server not found (404).');
+              } else if (xhr.status === 500) {
+                alert('Server error (500).');
+              }
+              // You can add more specific error handling here
+            }
+          },
+          lengthMenu: [[10, 25],[10, 25]],
+          searching: true,
+          columns: [
+            { data: "id", orderable: true},
+            { data: "name", orderable: true},
+            { data: "email", orderable: true},
+            { data: "full_name", orderable: true},
+            { data: "status", orderable: false},
+            { data: "action", orderable: false}
+          ]
+        });
+
       },
       clear_form_message() {
         this.tenant_form_message = "";
@@ -233,10 +265,34 @@ createApp({
         MyApp.copy_vals(this.tenant0, this.tenant);
         this.active_ui = 2;
       },
-      show_edit(tenant) {
+      show_edit(id) {
+        let tenant = null;
+        for(let i = 0; i < this.tenants.length; i++)
+        {
+          if(this.tenants[i].id == id)
+          {
+            tenant = this.tenants[i];
+            break;
+          }
+        }
         this.clear_form_message();
         MyApp.copy_vals(tenant, this.tenant);
         this.active_ui = 2;
+      },
+      show_edb(id, status) {
+        let tenant = null;
+        for(let i = 0; i < this.tenants.length; i++)
+        {
+          if(this.tenants[i].id == id)
+          {
+            tenant = this.tenants[i];
+            break;
+          }
+        }
+        this.edb_tenant_id = tenant.id;
+        this.edb_tenant_name = tenant.name;
+        this.edb_status = status;
+        this.edb_modal.show();
       },
       async submit() {
         this.clear_form_message();
@@ -274,7 +330,7 @@ createApp({
             //Not wait until email sent finished
             axios.post("/admin/send_admin_email", {admin: admin, admin_url: admin_url});
 
-            this.get_tenants();
+            this.tenant_table.ajax.reload(null, false);
             this.active_ui = 1;
           }
           else if(response.data.status === "I")
@@ -293,12 +349,6 @@ createApp({
           this.tenant_form_message = "Server error. Please try again later";
         }
       },
-      show_edb(tenant, status) {
-        this.edb_tenant_id = tenant.id;
-        this.edb_tenant_name = tenant.name;
-        this.edb_status = status;
-        this.edb_modal.show();
-      },
       async submit_edb() {
         try {
           const response = await axios.post("/admin/update_tenant_edb", {id:this.edb_tenant_id, status:this.edb_status});
@@ -311,7 +361,8 @@ createApp({
           else
           {
             this.edb_modal.hide();
-            this.get_tenants();
+            //Make sure not to change datatable configurations
+            this.tenant_table.ajax.reload(null, false);
             this.active_ui = 1;
           }
         }
@@ -324,17 +375,33 @@ createApp({
         const response = await axios.post("/admin/get_lv1_depts");
         this.lv1_depts = response.data.data_list;
       },
-      async get_tenants() {
-        $('#data-table').DataTable().destroy();
-        this.tenants = [];
-        const response = await axios.post("/admin/get_tenants", this.filter);
-        this.tenants = response.data.data_list;
-        Vue.nextTick(() => {
-          $('#data-table').DataTable();
-        });
+      get_status(d) {
+        d.status = this.filter.status;
+      },
+      post_process(json) {
+        this.tenants = json.aaData;
+        // Modify the json data here before DataTable uses it
+        for (var i = 0; i < this.tenants.length; i++) {
+          let tenant = this.tenants[i];
+          if(tenant.is_active == 1) tenant.status = "<div class='text-center'><span class='badge bg-success'>Active</span></div>";
+          else tenant.status = "<div class='text-center'><span class='badge bg-secondary'>Disabled</span></div>";
+          
+          tenant.action = "<div class='d-flex justify-content-center align-items-center'>";
+          tenant.action += "<a class='cursor-pointer' data-bs-toggle='dropdown'><h5 class='mb-0'><i class='icon-more-vertical'></i></h5></a>";
+          tenant.action += "<ul class='dropdown-menu shadow-sm dropdown-menu-mini'>";
+          tenant.action += `<li><a class='dropdown-item cursor-pointer' onclick='show_edit(${tenant.id})'><span class='icon-edit fs-5'></span> Edit</a></li>`;
+          if(tenant.is_active == 1)
+            tenant.action += `<a class="dropdown-item cursor-pointer" onclick="show_edb(${tenant.id}, 0)"><span class="icon-x-square fs-5"></span> Disable</a></li>`;
+          else
+            tenant.action += `<a class="dropdown-item cursor-pointer" onclick="show_edb(${tenant.id}, 1)"><span class="icon-check-square fs-5"></span> Enable</a></li>`;
+
+          tenant.action += "</ul>";
+          tenant.action += "</div>";
+        }
+        return json.aaData;
       },
       change_filter() {
-        this.get_tenants();
+        this.tenant_table.ajax.reload();
       }
     },
     delimiters: ["{","}"]

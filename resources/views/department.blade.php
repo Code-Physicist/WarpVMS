@@ -390,7 +390,7 @@ window.app = Vue.createApp({
               // You can add more specific error handling here
             }
           },
-          lengthMenu: [[5, 10, 25],[5, 10, 25]],
+          lengthMenu: [[10, 25],[10, 25]],
           searching: true,
           columns: [
             { data: "id", orderable: true},
@@ -411,14 +411,12 @@ window.app = Vue.createApp({
         d.status = this.filter.status;
       },
       post_process(json) {
+        this.depts = json.aaData;
         // Modify the json data here before DataTable uses it
-        for (var i = 0; i < json.aaData.length; i++) {
-          // Example: add a new field or modify an existing one
-          //json.data[i].new_field = json.data[i].existing_field + " - modified";
-          this.depts = json.aaData;
+        for (var i = 0; i < this.depts.length; i++) {
           let dept = this.depts[i];
-          if(dept.is_active == 1) dept.status = "<span class='badge bg-success'>Active</span>";
-          else dept.status = "<span class='badge bg-secondary'>Disabled</span>";
+          if(dept.is_active == 1) dept.status = "<div class='text-center'><span class='badge bg-success'>Active</span></div>";
+          else dept.status = "<div class='text-center'><span class='badge bg-secondary'>Disabled</span></div>";
           
           dept.floor_str = this.display_val(dept.floor);
           dept.phone1_str = this.display_val(dept.phone1);
@@ -434,12 +432,6 @@ window.app = Vue.createApp({
 
           dept.action += "</ul>";
           dept.action += "</div>";
-                        
-          //<ul class='dropdown-menu shadow-sm dropdown-menu-mini'>
-          //  <li><a class='dropdown-item cursor-pointer' @click='show_edit(dept)'><span class='icon-edit fs-5'></span> Edit</a></li>
-          //  <li v-if='dept.is_active === '1'''><a class="dropdown-item cursor-pointer" @click="show_edb(dept, 0)"><span class="icon-x-square fs-5"></span> Disable</a></li>
-          //  <li v-else><a class="dropdown-item cursor-pointer" @click="show_edb(dept, 1)"><span class="icon-check-square fs-5"></span> Enable</a></li>
-          //</ul>
         }
         return json.aaData;
       },

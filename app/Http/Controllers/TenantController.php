@@ -27,7 +27,7 @@ class TenantController extends AppController
         return response()->view("tenant", $check["u_data"])->withCookie($cookie);
     }
 
-    public function GetTenants(Request $request)
+    public function GetTenants2(Request $request)
     {
         $chk = $this->CheckAdmin($request);
         if (!$chk["is_ok"]) {
@@ -57,17 +57,19 @@ class TenantController extends AppController
         return $this->MakeResponse(["result" => "T", "data_list" => $tenants], $chk);
     }
 
-    public function GetTenants2(Request $request)
+    public function GetTenants(Request $request)
     {
         $chk = $this->CheckAdmin($request);
         if (!$chk["is_ok"]) {
-            throw ValidationException::withMessages(['I']);
+            return response(["status" => "I"], 401);
         }
 
         //0 = disable, 1 = enable, 2 = all
         $status = $request->status;
+
         //0 = all, otherwise DeptID
         $dept_id = $request->dept_id;
+
         $draw = $request->draw;
         $start = $request->start;
         $length = $request->length;
@@ -93,9 +95,14 @@ class TenantController extends AppController
 
         $query->leftJoin('PkDepartments as d', 'd.DeptID', '=', 'a.Ternsubcode');
         if ($search != "") {
-            $query->where('a.name', 'like', '%'. $search .'%');
+            $query->where(function ($q) use ($search) {
+                $q->where('a.name', 'like', '%'. $search .'%');
+                $q->orWhere('a.adminname', 'like', '%'. $search .'%');
+                $q->orWhere('d.Fullname', 'like', '%'. $search .'%');
+            });
             $f_count = $query->count();
         }
+
         $query->select(
             'a.admin_ID as id',
             'a.adminname as email',

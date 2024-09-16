@@ -78,16 +78,16 @@ class DepartmentController extends AppController
         $dept_id = $request->id;
 
         DB::table('PkDepartments')->where("DeptID", $dept_id)
-                ->update(
-                    [
-                        "Fullname" => $request->full_name,
-                        "DeptName" => $request->dept_name,
-                        "Zdesc" => $request->dept_name,
-                        "Floor" => $request->floor,
-                        "Tel1" => $request->phone1,
-                        "Tel2" => $request->phone2
-                    ]
-                );
+        ->update(
+            [
+                "Fullname" => $request->full_name,
+                "DeptName" => $request->dept_name,
+                "Zdesc" => $request->dept_name,
+                "Floor" => $request->floor,
+                "Tel1" => $request->phone1,
+                "Tel2" => $request->phone2
+            ]
+        );
         return ["status" => "T"];
 
     }

@@ -34,7 +34,7 @@ Create and edit operators
           </div>
           <hr/>
           <div class="table-responsive">
-              <table class="table table-striped" id="data-table">
+              <table class="table table-striped" style="width:100%" id="data-table">
                 <thead>
                   <tr>
                     <th>#</th>
@@ -51,7 +51,7 @@ Create and edit operators
                       </div>
                     </th>
                     <th>
-                      <div class="d-flex justify-content-center align-items-center">
+                      <div class="d-flex align-items-center">
                         <span class="icon-published_with_changes me-2 fs-4"></span>
                         Type
                       </div>
@@ -77,27 +77,6 @@ Create and edit operators
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(operator, index) in operators">
-                    <td>{index+1}.</td>
-                    <td>{operator.name}</td>
-                    <td>{operator.email}</td>
-                    <td class="text-center">{admin_type_dict[operator.admin_level_id]}</td>
-                    <td>{operator.full_name}</td>
-                    <td class="text-center">
-                        <span v-if="operator.is_active === '1'" class="badge bg-success">Active</span>
-                        <span v-else class="badge bg-secondary">Disabled</span>
-                    </td>
-                    <td>
-                      <div class="d-flex justify-content-center align-items-center">
-                        <a class="cursor-pointer" data-bs-toggle="dropdown"><h5><span class="icon-more-vertical"></span></h5></a>
-                        <ul class="dropdown-menu shadow-sm dropdown-menu-mini">
-                          <li><a class="dropdown-item cursor-pointer" @click="show_edit(operator)"><span class="icon-edit fs-5"></span> Edit</a></li>
-                          <li v-if="operator.is_active === '1'"><a class="dropdown-item cursor-pointer" @click="show_edb(operator, 0)"><span class="icon-x-square fs-5"></span> Disable</a></li>
-                          <li v-else><a class="dropdown-item cursor-pointer" @click="show_edb(operator, 1)"><span class="icon-check-square fs-5"></span> Enable</a></li>
-                        </ul>
-                      </div>
-                    </td>
-                  </tr>
                 </tbody>
               </table>
             </div> 
@@ -200,8 +179,15 @@ Create and edit operators
 <script src="{{ asset('js/dataTables.min.js') }}"></script>
 <script src="{{ asset('js/dataTables.bootstrap.min.js') }}"></script>
 <script>
-const { createApp } = Vue;
-createApp({
+
+function show_edit(id) {
+  app.show_edit(id);
+}
+function show_edb(id, status) {
+  app.show_edb(id, status);
+}
+
+window.app = Vue.createApp({
     data() {
       return {
         active_ui: 1,
@@ -217,6 +203,7 @@ createApp({
         filter: {
           status: 2
         },
+        operator_table: null,
         operators:[],
         operator:{
           id: 0,
@@ -258,11 +245,86 @@ createApp({
       async init_ui() {
         try {
           await this.get_depts();
-          await this.get_operators();
+          this.init_data_table();
         }
         catch(error) {
           console.log(error);
         }
+      },
+      init_data_table () {
+        var csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+        this.operator_table = $("#data-table").DataTable({
+          processing: true,
+          serverSide: true,
+          searchDelay: 500,
+          ajax: {
+            url: axios.defaults.baseURL + "/admin/get_operators",
+            type: "POST",
+            "headers": {
+              "X-CSRF-TOKEN": csrfToken
+            },
+            data: this.get_status,
+            dataSrc: this.post_process,
+            error: function(xhr, error, thrown) {
+              // Handle errors here
+              console.log('AJAX Error: ', error); // Log error to console
+            
+              // Optional: Handle specific errors
+              if (xhr.status === 401) {
+                window.location.href = "{{url('/admin/logout')}}";
+              }
+              if (xhr.status === 404) {
+                alert('Server not found (404).');
+              } else if (xhr.status === 500) {
+                alert('Server error (500).');
+              }
+              // You can add more specific error handling here
+            }
+          },
+          lengthMenu: [[10, 25],[10, 25]],
+          searching: true,
+          columns: [
+            { data: "id", orderable: true},
+            { data: "name", orderable: true},
+            { data: "email", orderable: true},
+            { data: "type", orderable: false},
+            { data: "full_name", orderable: true},
+            { data: "status", orderable: false},
+            { data: "action", orderable: false}
+          ]
+        });
+
+      },
+      get_status(d) {
+        d.status = this.filter.status;
+      },
+      post_process(json) {
+        this.operators = json.aaData;
+        // Modify the json data here before DataTable uses it
+        for (var i = 0; i < this.operators.length; i++) {
+          let operator = this.operators[i];
+
+          operator.type = `<div>${this.admin_type_dict[operator.admin_level_id]}</div>`;
+          if(operator.is_active == 1) operator.status = "<div class='text-center'><span class='badge bg-success'>Active</span></div>";
+          else operator.status = "<div class='text-center'><span class='badge bg-secondary'>Disabled</span></div>";
+          
+          operator.action = "<div class='d-flex justify-content-center align-items-center'>";
+          operator.action += "<a class='cursor-pointer' data-bs-toggle='dropdown'><h5 class='mb-0'><i class='icon-more-vertical'></i></h5></a>";
+          operator.action += "<ul class='dropdown-menu shadow-sm dropdown-menu-mini'>";
+          operator.action += `<li><a class='dropdown-item cursor-pointer' onclick='show_edit(${operator.id})'><span class='icon-edit fs-5'></span> Edit</a></li>`;
+          if(operator.is_active == 1)
+            operator.action += `<a class="dropdown-item cursor-pointer" onclick="show_edb(${operator.id}, 0)"><span class="icon-x-square fs-5"></span> Disable</a></li>`;
+          else
+            operator.action += `<a class="dropdown-item cursor-pointer" onclick="show_edb(${operator.id}, 1)"><span class="icon-check-square fs-5"></span> Enable</a></li>`;
+
+          operator.action += "</ul>";
+          operator.action += "</div>";
+        }
+        return json.aaData;
+      },
+      change_filter() {
+        this.operator_table.ajax.reload();
       },
       clear_form_message() {
         this.operator_form_message = "";
@@ -276,10 +338,34 @@ createApp({
         MyApp.copy_vals(this.operator0, this.operator);
         this.active_ui = 2;
       },
-      show_edit(operator) {
+      show_edit(id) {
+        let operator = null;
+        for(let i = 0; i < this.operators.length; i++)
+        {
+          if(this.operators[i].id == id)
+          {
+            operator = this.operators[i];
+            break;
+          }
+        }
         this.clear_form_message();
         MyApp.copy_vals(operator, this.operator);
         this.active_ui = 2;
+      },
+      show_edb(id, status) {
+        let operator = null;
+        for(let i = 0; i < this.operators.length; i++)
+        {
+          if(this.operators[i].id == id)
+          {
+            operator = this.operators[i];
+            break;
+          }
+        }
+        this.edb_operator_id = operator.id;
+        this.edb_operator_name = operator.name;
+        this.edb_status = status;
+        this.edb_modal.show();
       },
       async submit() {
         this.clear_form_message();
@@ -328,7 +414,7 @@ createApp({
             //Not wait until email sent finished
             axios.post("/admin/send_admin_email", {admin: admin, admin_url: admin_url});
             
-            this.get_operators();
+            this.operator_table.ajax.reload(null, false);
             this.active_ui = 1;
           }
           else if(response.data.status === "I")
@@ -347,12 +433,6 @@ createApp({
           this.operator_form_message = "Server error. Please try again later";
         }
       },
-      show_edb(operator, status) {
-        this.edb_operator_id = operator.id;
-        this.edb_operator_name = operator.name;
-        this.edb_status = status;
-        this.edb_modal.show();
-      },
       async submit_edb() {
         try {
           const response = await axios.post("/admin/update_operator_edb", {id:this.edb_operator_id, status:this.edb_status});
@@ -365,7 +445,8 @@ createApp({
           else
           {
             this.edb_modal.hide();
-            this.get_operators();
+            //Make sure not to change datatable configurations
+            this.operator_table.ajax.reload(null, false);
             this.active_ui = 1;
           }
         }
@@ -377,18 +458,6 @@ createApp({
       async get_depts() {
         const response = await axios.post("/admin/get_operator_depts");
         this.depts = response.data.data_list;
-      },
-      async get_operators() {
-        $('#data-table').DataTable().destroy();
-        this.operators = [];
-        const response = await axios.post("/admin/get_operators", this.filter);
-        this.operators = response.data.data_list;
-        Vue.nextTick(() => {
-          $('#data-table').DataTable();
-        });
-      },
-      change_filter() {
-        this.get_operators();
       }
     },
     delimiters: ["{","}"]
