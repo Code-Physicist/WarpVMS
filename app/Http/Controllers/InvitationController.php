@@ -389,11 +389,35 @@ class InvitationController extends AppController
         $email = $request->email;
         $invite_id = $request->invite_id;
 
-        error_log($contact_id);
-
         $code = "VMS" . str_pad(strval($invite_id), 8, "0", STR_PAD_LEFT) . "_" .$contact_id;
         $qr_image = QrCode::format("png")->size(512)->generate($code);
-        $data = array("qr_image" => $qr_image);
+
+        $invitation = DB::table("VC_invite")->where("id", $invite_id)->first();
+        $dept = DB::table("PkDepartments")
+            ->where("DeptID", $invitation->to_dept_id)
+            ->select('Fullname as full_name')
+            ->first();
+
+        $start_date_array = explode("-", $invitation->start_date);
+        $end_date_array = explode("-", $invitation->end_date);
+
+        $data = [
+            "dept_name" => $dept->full_name,
+            "title" => $invitation->title,
+            "agenda" => $invitation->agenda,
+            "date_inv" => "$start_date_array[2]/$start_date_array[1]/$start_date_array[0] - $end_date_array[2]/$end_date_array[1]/$end_date_array[0]",
+            "qr_image" => $qr_image
+        ];
+
+        $start_time_array = explode(":", $invitation->start_time);
+        $end_time_array = explode(":", $invitation->end_time);
+        $start_time = "$start_time_array[0]:$start_time_array[1]";
+        $end_time = "$end_time_array[0]:$end_time_array[1]";
+        if ($start_time === "00:00" && $end_time === "23:55") {
+            $data["time_inv"] = "All day";
+        } else {
+            $data["time_inv"] = "$start_time - $end_time";
+        }
 
         $emails = [$email];
 
@@ -433,14 +457,27 @@ class InvitationController extends AppController
         $factory = JWTFactory::customClaims($data);
         $token = JWTAuth::encode($factory->make());
 
+        $start_date_array = explode("-", $invitation->start_date);
+        $end_date_array = explode("-", $invitation->end_date);
+        $start_time_array = explode(":", $invitation->start_time);
+        $end_time_array = explode(":", $invitation->end_time);
         $url = "$base_url/visitors/invitation/$token";
 
         $data = array(
             "dept_name" => $dept->full_name,
             "title" => $invitation->title,
             "agenda" => $invitation->agenda,
+            "date_inv" => "$start_date_array[2]/$start_date_array[1]/$start_date_array[0] - $end_date_array[2]/$end_date_array[1]/$end_date_array[0]",
             "url" => $url
         );
+
+        $start_time = "$start_time_array[0]:$start_time_array[1]";
+        $end_time = "$end_time_array[0]:$end_time_array[1]";
+        if ($start_time === "00:00" && $end_time === "23:55") {
+            $data["time_inv"] = "All day";
+        } else {
+            $data["time_inv"] = "$start_time - $end_time";
+        }
 
         $emails = [];
         foreach ($visitors as $visitor) {

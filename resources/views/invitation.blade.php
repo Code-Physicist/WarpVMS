@@ -91,7 +91,7 @@ Invite visitors, update schedules and resend invitation emails
 					</div>
 					<div class="row">
 						<div class="col">
-							<label class="form-label">Interval for 1 day</label>
+							<label class="form-label">Meeting time</label>
 							<div class="row">
 								<div class="col-sm-6">
 									<div class="mb-3">
@@ -245,7 +245,7 @@ Invite visitors, update schedules and resend invitation emails
 					</div>
 					<div class="row mb-4">
 						<div class="col-5 text-end">
-							<strong>Time Interval:</strong>
+							<strong>Meeting Time:</strong>
 						</div>
 						<div class="col-7 text-start">
 							{event.interval}
@@ -682,7 +682,8 @@ createApp({
 					let contact = contacts[i];
 					this.invitation.visitors.push({id: contact.id, email: contact.email, name: `${contact.first_name} ${contact.last_name}`});
 				}
-					
+				this.m_active_ui = 1;
+				this.invite_modal_message = "";
 				this.invite_modal.show();
 			}
 			catch(error) {
