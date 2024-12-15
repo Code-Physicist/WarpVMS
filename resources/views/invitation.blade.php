@@ -766,7 +766,6 @@ createApp({
 				}
 
 				this.m_active_ui = 4;
-				let step = 0;
 				try{
 					let url = (this.invitation.id == 0) ? "/admin/create_invitation" : "/admin/edit_invitation";
 					const response = await axios.post(url, this.invitation);
@@ -785,14 +784,23 @@ createApp({
 					}
 
 					//No waiting until email sent
-					await axios.post("/admin/send_invite_email", {
-						invite_id: response.data.invite_id,
-						base_url: axios.defaults.baseURL
-					});
-
-					//refresh calendar
-					this.get_invitations(false);
-					this.invite_modal.hide();
+					try {
+						await axios.post("/admin/send_invite_email", {
+							invite_id: response.data.invite_id,
+							base_url: axios.defaults.baseURL
+						});
+						this.invite_modal.hide();
+					}
+					catch(error) {
+						this.m_active_ui = 5;
+						console.log(error);
+						this.invite_modal_message = "Failed to send the inviation email";
+					}
+					finally
+					{
+						this.get_invitations(false);
+					}
+					
 				}
 				catch(error) {
 					this.m_active_ui = 5;

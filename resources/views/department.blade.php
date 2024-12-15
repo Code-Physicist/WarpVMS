@@ -224,7 +224,7 @@ window.app = Vue.createApp({
       get_api_endpoint(form_id) {
         switch (form_id) {
           case 'form1':
-            return (this.dept.id === -1) ? "/admin/create_department" : "/admin/update_department";;
+            return (this.dept.id === -1) ? "/admin/create_department" : "/admin/update_department";
         }
       },
       validate_input(form_id) {
