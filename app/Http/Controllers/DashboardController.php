@@ -19,7 +19,7 @@ class DashboardController extends AppController
             return redirect("/admin/login");
         }
         if ($check["u_data"]["pw_change"]) {
-            return redirect("/admin/pass_change");
+            return redirect("/admin/change_passwrd");
         }
 
         //Refresh VMS cookie
