@@ -280,6 +280,58 @@ class InvitationController extends AppController
         }
     }
 
+    public function GetToken()
+    {
+        $api = "http://171.100.141.54:8095/parking/v2/login";
+        $body = [
+            "USERID" => config('parking.user'),
+            "PASSWORD" => config('parking.password')
+        ];
+
+        $ch = curl_init($api);
+
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST           => true,
+            CURLOPT_HTTPHEADER     => [
+                "Content-Type: application/json"
+            ],
+            CURLOPT_POSTFIELDS     => json_encode($body),
+            CURLOPT_TIMEOUT        => 10
+        ]);
+
+        $response = curl_exec($ch);
+
+        if ($response === false) {
+            $error = curl_error($ch);
+            curl_close($ch);
+            throw new Exception("cURL error: " . $error);
+        }
+
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode !== 200) {
+            throw new Exception("HTTP error: " . $httpCode);
+        }
+
+        $json = json_decode($response, true);
+
+        if (!$json) {
+            throw new Exception("Invalid JSON response");
+        }
+
+        if ($json["returncode"] !== "0000") {
+            throw new Exception("API error: " . $json["returnmessage"]);
+        }
+
+        return [
+            "token"       => $json["Token"],
+            "level"       => $json["Level"],
+            "expire_time" => $json["ExpireTime"]
+        ];
+    }
+
     public function CreateInvitation(Request $request)
     {
         $chk = $this->CheckAdmin($request);
